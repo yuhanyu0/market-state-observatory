@@ -4,6 +4,13 @@ import csv
 import hashlib
 from pathlib import Path
 
+BINARY_SUFFIXES = {".ico", ".jpeg", ".jpg", ".pdf", ".png", ".zip"}
+
+
+def canonical_content(path: Path) -> bytes:
+    content = path.read_bytes()
+    return content if path.suffix.lower() in BINARY_SUFFIXES else content.replace(b"\r\n", b"\n")
+
 
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
@@ -20,7 +27,7 @@ def main() -> None:
             if not path.is_file():
                 findings.append(f"missing: {row['relative_path']}")
                 continue
-            content = path.read_bytes()
+            content = canonical_content(path)
             if hashlib.sha256(content).hexdigest() != row["sha256"]:
                 findings.append(f"hash mismatch: {row['relative_path']}")
             if len(content) != int(row["file_size"]):

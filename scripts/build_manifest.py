@@ -11,6 +11,12 @@ EXCLUDED_PARTS = {
 }
 EXCLUDED_NAMES = {"PROJECT_MANIFEST.csv", "PROJECT_MANIFEST.sha256"}
 EXCLUDED_SUFFIXES = {".tsbuildinfo"}
+BINARY_SUFFIXES = {".ico", ".jpeg", ".jpg", ".pdf", ".png", ".zip"}
+
+
+def canonical_content(path: Path) -> bytes:
+    content = path.read_bytes()
+    return content if path.suffix.lower() in BINARY_SUFFIXES else content.replace(b"\r\n", b"\n")
 
 
 def main() -> None:
@@ -25,11 +31,11 @@ def main() -> None:
         ):
             continue
         relative = path.relative_to(root).as_posix()
-        content = path.read_bytes()
+        content = canonical_content(path)
         rows.append((relative, hashlib.sha256(content).hexdigest(), len(content)))
     manifest = root / "PROJECT_MANIFEST.csv"
     with manifest.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.writer(handle)
+        writer = csv.writer(handle, lineterminator="\n")
         writer.writerow(["relative_path", "sha256", "file_size"])
         writer.writerows(rows)
     digest = hashlib.sha256(manifest.read_bytes()).hexdigest()

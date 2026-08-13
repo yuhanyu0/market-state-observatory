@@ -4,47 +4,65 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SITE = ROOT / "site"
+WEB = ROOT / "web"
+PUBLIC_DATA = ROOT / "public" / "data"
 
 
-def test_all_required_pages_exist() -> None:
-    required = {"index.html", "observatory.html", "themes.html", "certificates.html", "experiments.html", "architecture.html", "methodology.html", "validation.html", "research.html", "roadmap.html", "glossary.html", "status.html", "about.html", "404.html"}
-    assert required <= {path.name for path in SITE.glob("*.html")}
+def test_all_required_product_routes_exist() -> None:
+    app = (WEB / "src" / "App.tsx").read_text(encoding="utf-8")
+    routes = {
+        "today",
+        "themes",
+        "evidence",
+        "certificates",
+        "experiments",
+        "data-quality",
+        "methodology",
+        "research",
+        "status",
+    }
+    assert all(f'["{route}"' in app for route in routes)
 
 
-def test_site_has_no_mojibake() -> None:
-    bad = ("\u00e2", "\u00c3", "\u00c2")
-    for path in SITE.rglob("*"):
-        if path.is_file() and path.suffix in {".html", ".js", ".css", ".json"}:
-            text = path.read_text(encoding="utf-8")
-            assert not any(token in text for token in bad), path
+def test_product_sources_have_no_mojibake() -> None:
+    bad = ("\u00c2", "\u00c3", "\u00e2\u20ac")
+    roots = (WEB, PUBLIC_DATA)
+    for root in roots:
+        for path in root.rglob("*"):
+            if path.is_file() and path.suffix in {".html", ".tsx", ".ts", ".css", ".json"}:
+                text = path.read_text(encoding="utf-8")
+                assert not any(token in text for token in bad), path
 
 
-def test_home_has_full_bleed_evidence_canvas() -> None:
-    home = (SITE / "index.html").read_text(encoding="utf-8")
-    assert 'id="evidence-canvas"' in home
-    assert "Market State Observatory" in home
+def test_today_has_evidence_canvas() -> None:
+    app = (WEB / "src" / "App.tsx").read_text(encoding="utf-8")
+    graph = (WEB / "src" / "components" / "EvidenceGraph.tsx").read_text(encoding="utf-8")
+    assert "<EvidenceGraph />" in app
+    assert "Market State Observatory" in app
+    assert "<canvas" in graph
 
 
-def test_site_exposes_research_states_not_live_advice() -> None:
-    text = "\n".join(path.read_text(encoding="utf-8") for path in SITE.glob("*.html"))
-    assert "MODEL_SHADOW_ONLY" in text
-    assert "Real orders" in text
-    assert "live trading enabled" not in text.lower()
+def test_product_exposes_research_states_not_live_advice() -> None:
+    app = (WEB / "src" / "App.tsx").read_text(encoding="utf-8")
+    status = json.loads((PUBLIC_DATA / "status.json").read_text(encoding="utf-8"))
+    assert "NO BUY / SELL OUTPUT" in app
+    assert status["model_shadow_started"] is False
+    assert status["paper_positions"] == 0
+    assert status["real_orders"] == 0
 
 
-def test_site_json_is_parseable() -> None:
-    for path in (SITE / "data").rglob("*.json"):
+def test_public_json_is_parseable() -> None:
+    for path in PUBLIC_DATA.rglob("*.json"):
         json.loads(path.read_text(encoding="utf-8"))
 
 
-def test_synthetic_certificate_index_has_eight_entries() -> None:
-    index = json.loads((SITE / "data" / "synthetic_index.json").read_text(encoding="utf-8"))
-    assert len(index) == 8
+def test_synthetic_certificate_corpus_has_eight_entries() -> None:
+    certificates = list((PUBLIC_DATA / "synthetic_certificates").glob("*.json"))
+    assert len(certificates) == 8
 
 
 def test_theme_certificates_use_v040_contract() -> None:
     from market_state_observatory.validation import validate_payload
 
-    for path in (SITE / "data" / "certificates").glob("*.json"):
+    for path in (PUBLIC_DATA / "certificates").glob("*.json"):
         validate_payload(json.loads(path.read_text(encoding="utf-8")), "state_certificate", ROOT)
