@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.2 - 2026-08-13
+
+- Fixed Windows PowerShell 5.1 process launching by replacing `ArgumentList` and
+  `Environment` dependencies with a shared `ProcessStartInfo.Arguments` quoting
+  helper and `EnvironmentVariables` API.
+- Forced credential smoke tests and runtime launchers to use the integrity-checked
+  frozen `release_python`, isolated mode, release working directory, and frozen
+  wheel import path.
+- Added Windows argument round-trip, credential safety, output, exit-code,
+  cleanup, no-log, and dual-edition PowerShell compatibility tests.
+- Extended production release identity with launcher/helper hashes, minimum
+  Windows PowerShell version, tested shells, and release interpreter path class.
+
 ## 0.4.1 - 2026-08-13
 
 - Replaced per-message WebSocket files with a bounded latest-state cache and

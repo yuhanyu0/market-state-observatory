@@ -5,86 +5,76 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'lib\process_compat.ps1')
+
 $runtimeRoot = Join-Path $env:LOCALAPPDATA 'MarketStateObservatoryRuntime'
 $configPath = Join-Path $runtimeRoot 'runtime_paths.json'
 if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) { throw 'Runtime is not initialized.' }
 $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
-foreach ($field in @('release_root', 'release_python', 'release_version', 'release_experiment_lane')) {
-    if (-not $config.$field) { throw "Frozen production release field is missing: $field" }
-}
-$releaseManifest = Join-Path $config.release_root 'release_manifest.json'
-if (-not (Test-Path -LiteralPath $releaseManifest -PathType Leaf)) { throw 'Frozen release manifest is missing.' }
+$runtime = Resolve-MsoRuntimePython -Config $config -RuntimeRoot $runtimeRoot
 
-function Send-MsoAlert {
-    param([string]$Kind, [string]$Title, [string]$Message)
-    & $config.release_python -m market_state_observatory.runtime.notifications `
-        --kind $Kind --title $Title --message $Message 2>$null | Out-Null
-}
-
-function Invoke-SanitizedPython {
+function Invoke-ReleasePython {
     param([string[]]$Arguments, [switch]$WithCredential)
     $credential = $null
     $plainKeyId = $null
     $plainSecret = $null
-    if ($WithCredential) {
-        $credentialPath = Join-Path $runtimeRoot 'secrets\alpaca.credential.xml'
-        if (-not (Test-Path -LiteralPath $credentialPath -PathType Leaf)) { throw 'Alpaca DPAPI credential is missing.' }
-        $credential = Import-Clixml -LiteralPath $credentialPath
-        $plainKeyId = $credential.UserName
-        $plainSecret = $credential.GetNetworkCredential().Password
+    $environment = @{
+        MSO_RUNTIME_ROOT = $runtimeRoot
+        MSO_RELEASE_ROOT = $runtime.ReleaseRoot
+        MSO_SOURCE_ROOT = $config.repository_root
     }
-    $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
-    $startInfo.FileName = $config.release_python
-    $startInfo.WorkingDirectory = $config.release_root
-    $startInfo.UseShellExecute = $false
-    $startInfo.RedirectStandardOutput = $true
-    $startInfo.RedirectStandardError = $true
-    $startInfo.CreateNoWindow = $true
-    $startInfo.Environment['MSO_RUNTIME_ROOT'] = $runtimeRoot
-    $startInfo.Environment['MSO_RELEASE_ROOT'] = $config.release_root
-    $startInfo.Environment['MSO_SOURCE_ROOT'] = $config.repository_root
-    if ($WithCredential) {
-        $startInfo.Environment['APCA_API_KEY_ID'] = $plainKeyId
-        $startInfo.Environment['APCA_API_SECRET_KEY'] = $plainSecret
-        $startInfo.Environment['ALPACA_DATA_FEED'] = 'sip'
-    }
-    $quotedArguments = $Arguments | ForEach-Object { '"' + $_.Replace('"', '\"') + '"' }
-    $startInfo.Arguments = $quotedArguments -join ' '
     try {
-        $process = [System.Diagnostics.Process]::new()
-        $process.StartInfo = $startInfo
-        [void]$process.Start()
-        $stdout = $process.StandardOutput.ReadToEnd()
-        $stderr = $process.StandardError.ReadToEnd()
-        $process.WaitForExit()
-        if ($WithCredential -and (
-            $stdout.Contains($plainKeyId) -or $stdout.Contains($plainSecret) -or
-            $stderr.Contains($plainKeyId) -or $stderr.Contains($plainSecret)
-        )) { throw 'Child output rejected because credential material was detected.' }
-        return [pscustomobject]@{ ExitCode = $process.ExitCode; Stdout = $stdout; Stderr = $stderr }
+        if ($WithCredential) {
+            $credentialPath = Join-Path $runtimeRoot 'secrets\alpaca.credential.xml'
+            if (-not (Test-Path -LiteralPath $credentialPath -PathType Leaf)) {
+                throw 'Alpaca DPAPI credential is missing.'
+            }
+            $credential = Import-Clixml -LiteralPath $credentialPath
+            $plainKeyId = $credential.UserName
+            $plainSecret = $credential.GetNetworkCredential().Password
+            $environment.APCA_API_KEY_ID = $plainKeyId
+            $environment.APCA_API_SECRET_KEY = $plainSecret
+            $environment.ALPACA_DATA_FEED = 'sip'
+        }
+        $isolatedArguments = @('-I') + $Arguments
+        $result = Invoke-MsoChildProcess -FileName $runtime.Python `
+            -WorkingDirectory $runtime.ReleaseRoot -ArgumentList $isolatedArguments `
+            -ChildEnvironment $environment -RemoveEnvironment @('PYTHONPATH', 'PYTHONHOME')
+        if ($WithCredential) {
+            Assert-MsoCredentialSafeOutput -Stdout $result.Stdout -Stderr $result.Stderr `
+                -KeyId $plainKeyId -Secret $plainSecret
+        }
+        return $result
     }
     finally {
-        $startInfo.Environment.Remove('APCA_API_KEY_ID')
-        $startInfo.Environment.Remove('APCA_API_SECRET_KEY')
-        $credential = $null; $plainKeyId = $null; $plainSecret = $null
+        $credential = $null
+        $plainKeyId = $null
+        $plainSecret = $null
         [GC]::Collect()
     }
 }
 
-$integrity = Invoke-SanitizedPython -Arguments @(
-    '-m', 'market_state_observatory.runtime.release_identity', '--verify-release'
-)
-if ($integrity.ExitCode -ne 0) { throw 'Frozen release integrity verification failed.' }
-if ($integrity.Stdout) { Write-Output $integrity.Stdout.TrimEnd() }
+function Send-MsoAlert {
+    param([string]$Kind, [string]$Title, [string]$Message)
+    $alert = Invoke-ReleasePython -Arguments @(
+        '-m', 'market_state_observatory.runtime.notifications',
+        '--kind', $Kind, '--title', $Title, '--message', $Message
+    )
+    if ($alert.ExitCode -ne 0) { return }
+}
 
+Write-Output $runtime.IntegrityOutput
+Write-Output "MSO_CHILD_PYTHON=$($runtime.Python)"
+Write-Output "MSO_MODULE_PATH=$($runtime.ModulePath)"
 $arguments = @('-m', 'market_state_observatory.runtime.daily_daemon', '--mode', $Mode)
 if ($DryRun) { $arguments += '--dry-run' }
 try {
-    $result = Invoke-SanitizedPython -Arguments $arguments -WithCredential:(-not $DryRun)
+    $result = Invoke-ReleasePython -Arguments $arguments -WithCredential:(-not $DryRun)
 }
 catch {
     $kind = if ($_.Exception.Message -match 'credential') { 'credential_invalid' } else { 'task_not_started' }
-    Send-MsoAlert -Kind $kind -Title 'MSO runtime blocked' -Message 'The frozen data runtime did not start. Review the private operator console.'
+    Send-MsoAlert -Kind $kind -Title 'MSO runtime blocked' `
+        -Message 'The frozen data runtime did not start. Review the private operator console.'
     throw
 }
 $stamp = [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss')
@@ -93,25 +83,31 @@ $logPath = Join-Path $runtimeRoot "logs\release-runtime-$stamp.log"
 if ($result.Stdout) { Write-Output $result.Stdout.TrimEnd() }
 if ($result.Stderr) { Write-Error $result.Stderr.TrimEnd() -ErrorAction Continue }
 if ($result.ExitCode -ne 0) {
-    Send-MsoAlert -Kind 'quality_failed' -Title 'MSO runtime failed' -Message 'The runtime exited nonzero. No public state was updated.'
+    Send-MsoAlert -Kind 'quality_failed' -Title 'MSO runtime failed' `
+        -Message 'The runtime exited nonzero. No public state was updated.'
 }
 if ($result.ExitCode -ne 0 -or $DryRun -or $Mode -ne 'formal') { exit $result.ExitCode }
 
-$etNow = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId([DateTime]::UtcNow, 'Eastern Standard Time')
+$etNow = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId(
+    [DateTime]::UtcNow,
+    'Eastern Standard Time'
+)
 $dayRoot = Join-Path $runtimeRoot "data_shadow\$($config.release_experiment_lane)\$($etNow.ToString('yyyy-MM-dd'))"
-$quality = Get-ChildItem -LiteralPath $dayRoot -Filter 'DATA_QUALITY.json' -File -Recurse -ErrorAction SilentlyContinue |
-    Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
+$quality = Get-ChildItem -LiteralPath $dayRoot -Filter 'DATA_QUALITY.json' -File -Recurse `
+    -ErrorAction SilentlyContinue | Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
 if (-not $quality) { throw 'Publication blocked: immutable quality artifact is missing.' }
-$publish = Invoke-SanitizedPython -Arguments @(
+$publish = Invoke-ReleasePython -Arguments @(
     '-m', 'market_state_observatory.publication.runtime_publisher',
     '--repository', $config.repository_root,
     '--quality', $quality.FullName,
     '--push'
 )
-@($publish.Stdout, $publish.Stderr) | Set-Content -LiteralPath (Join-Path $runtimeRoot "logs\publication-$stamp.log") -Encoding UTF8
+@($publish.Stdout, $publish.Stderr) | Set-Content -LiteralPath `
+    (Join-Path $runtimeRoot "logs\publication-$stamp.log") -Encoding UTF8
 if ($publish.Stdout) { Write-Output $publish.Stdout.TrimEnd() }
 if ($publish.Stderr) { Write-Error $publish.Stderr.TrimEnd() -ErrorAction Continue }
 if ($publish.ExitCode -ne 0) {
-    Send-MsoAlert -Kind 'publication_failed' -Title 'MSO publication failed' -Message 'Fail-closed publication rejected or could not publish the run.'
+    Send-MsoAlert -Kind 'publication_failed' -Title 'MSO publication failed' `
+        -Message 'Fail-closed publication rejected or could not publish the run.'
 }
 exit $publish.ExitCode

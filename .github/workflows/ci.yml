@@ -70,4 +70,14 @@ jobs:
             if ($errors.Count) { $failed = $true; $errors | Write-Error }
           }
           if ($failed) { exit 1 }
+      - name: Windows PowerShell 5.1 compatibility tests
+        shell: powershell
+        run: |
+          $python = (python -c "import sys; print(sys.executable)").Trim()
+          .\tests\powershell\process_compat_tests.ps1 -PythonExecutable $python
+      - name: PowerShell 7 compatibility tests
+        shell: pwsh
+        run: |
+          $python = (python -c "import sys; print(sys.executable)").Trim()
+          .\tests\powershell\process_compat_tests.ps1 -PythonExecutable $python
       - run: python -m market_state_observatory.runtime.daily_daemon --mode formal --dry-run

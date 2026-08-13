@@ -67,6 +67,12 @@ def load_release_manifest(*, required: bool) -> dict[str, Any] | None:
         "membership_sha256",
         "config_sha256",
         "experiment_lane",
+        "powershell_launcher_version",
+        "powershell_launcher_sha256",
+        "process_compat_helper_sha256",
+        "minimum_windows_powershell_version",
+        "tested_shells",
+        "release_python_path_class",
     }
     missing = required_fields - payload.keys()
     if missing:
@@ -78,6 +84,8 @@ def load_release_manifest(*, required: bool) -> dict[str, Any] | None:
         "universe_sha256": root / "frozen" / "runtime_universe_v1.json",
         "membership_sha256": root / "frozen" / "membership_snapshot_v1.json",
         "config_sha256": root / "config" / "runtime_release_config.json",
+        "powershell_launcher_sha256": root / "runtime_release_launcher.ps1",
+        "process_compat_helper_sha256": root / "lib" / "process_compat.ps1",
     }
     for field, path in checks.items():
         if not path.exists():
@@ -121,7 +129,12 @@ def runtime_identity(
 
 
 def build_release_manifest(
-    *, release: Path, repository: Path, git_sha: str, release_version: str
+    *,
+    release: Path,
+    repository: Path,
+    git_sha: str,
+    release_version: str,
+    tested_shells: list[str],
 ) -> dict[str, Any]:
     wheels = list((release / "wheel").glob("*.whl"))
     if len(wheels) != 1:
@@ -142,6 +155,15 @@ def build_release_manifest(
         "universe_sha256": universe_hash,
         "membership_sha256": sha256_file(release / "frozen" / "membership_snapshot_v1.json"),
         "config_sha256": sha256_file(release / "config" / "runtime_release_config.json"),
+        "powershell_launcher_version": "0.4.2",
+        "powershell_launcher_sha256": sha256_file(release / "runtime_release_launcher.ps1"),
+        "process_compat_helper_sha256": sha256_file(release / "lib" / "process_compat.ps1"),
+        "minimum_windows_powershell_version": "5.1",
+        "tested_shells": tested_shells,
+        "tested_powershell_editions": sorted(
+            {"Desktop" if shell.startswith("Desktop ") else "Core" for shell in tested_shells}
+        ),
+        "release_python_path_class": "release_root_venv",
         "experiment_lane": (
             f"data-shadow-v{release_version}-{wheel_hash[:8]}-{universe_hash[:8]}"
         ),
@@ -160,6 +182,7 @@ def main() -> None:
     parser.add_argument("--git-sha")
     parser.add_argument("--release-version")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--tested-shell", action="append", default=[])
     args = parser.parse_args()
     if args.verify_release:
         manifest = load_release_manifest(required=True)
@@ -167,7 +190,15 @@ def main() -> None:
         print(f"RELEASE_INTEGRITY=PASS lane={manifest['experiment_lane']}")
         return
     if not all(
-        (args.build_manifest, args.release, args.repository, args.git_sha, args.release_version, args.output)
+        (
+            args.build_manifest,
+            args.release,
+            args.repository,
+            args.git_sha,
+            args.release_version,
+            args.output,
+            args.tested_shell,
+        )
     ):
         parser.error("All manifest-build arguments are required")
     payload = build_release_manifest(
@@ -175,6 +206,7 @@ def main() -> None:
         repository=args.repository,
         git_sha=args.git_sha,
         release_version=args.release_version,
+        tested_shells=args.tested_shell,
     )
     args.output.write_bytes(canonical_json(payload))
 

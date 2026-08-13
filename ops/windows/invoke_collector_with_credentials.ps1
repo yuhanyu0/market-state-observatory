@@ -5,50 +5,44 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'lib\process_compat.ps1')
+
 $runtimeRoot = Join-Path $env:LOCALAPPDATA 'MarketStateObservatoryRuntime'
 $configPath = Join-Path $runtimeRoot 'runtime_paths.json'
 $credentialPath = Join-Path $runtimeRoot 'secrets\alpaca.credential.xml'
-if (-not (Test-Path -LiteralPath $configPath)) { throw 'Runtime configuration is missing.' }
-if (-not (Test-Path -LiteralPath $credentialPath)) { throw 'Alpaca DPAPI credential is missing.' }
+if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) { throw 'Runtime configuration is missing.' }
+if (-not (Test-Path -LiteralPath $credentialPath -PathType Leaf)) { throw 'Alpaca DPAPI credential is missing.' }
 $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
+$runtime = Resolve-MsoRuntimePython -Config $config -RuntimeRoot $runtimeRoot
 $credential = Import-Clixml -LiteralPath $credentialPath
 $plainKeyId = $credential.UserName
 $plainSecret = $credential.GetNetworkCredential().Password
-$startInfo = [System.Diagnostics.ProcessStartInfo]::new()
-$startInfo.FileName = $config.python_executable
-$startInfo.UseShellExecute = $false
-$startInfo.RedirectStandardOutput = $true
-$startInfo.RedirectStandardError = $true
-$startInfo.CreateNoWindow = $true
-$startInfo.WorkingDirectory = $config.repository_root
-$startInfo.Environment['APCA_API_KEY_ID'] = $plainKeyId
-$startInfo.Environment['APCA_API_SECRET_KEY'] = $plainSecret
-$startInfo.Environment['ALPACA_DATA_FEED'] = 'sip'
-$startInfo.Environment['MSO_RUNTIME_ROOT'] = $runtimeRoot
-foreach ($argument in $CollectorArguments) { [void]$startInfo.ArgumentList.Add($argument) }
-
 try {
-    $process = [System.Diagnostics.Process]::new()
-    $process.StartInfo = $startInfo
-    [void]$process.Start()
-    $stdout = $process.StandardOutput.ReadToEnd()
-    $stderr = $process.StandardError.ReadToEnd()
-    $process.WaitForExit()
-    if ($stdout.Contains($plainKeyId) -or $stdout.Contains($plainSecret) -or $stderr.Contains($plainKeyId) -or $stderr.Contains($plainSecret)) {
-        throw 'Collector output rejected because credential material was detected.'
+    $environment = @{
+        APCA_API_KEY_ID = $plainKeyId
+        APCA_API_SECRET_KEY = $plainSecret
+        ALPACA_DATA_FEED = 'sip'
+        MSO_RUNTIME_ROOT = $runtimeRoot
+        MSO_RELEASE_ROOT = $runtime.ReleaseRoot
     }
+    $arguments = @('-I') + $CollectorArguments
+    $result = Invoke-MsoChildProcess -FileName $runtime.Python -WorkingDirectory $runtime.ReleaseRoot `
+        -ArgumentList $arguments -ChildEnvironment $environment `
+        -RemoveEnvironment @('PYTHONPATH', 'PYTHONHOME')
+    Assert-MsoCredentialSafeOutput -Stdout $result.Stdout -Stderr $result.Stderr `
+        -KeyId $plainKeyId -Secret $plainSecret
     if (-not $NoLog) {
         $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
         $logPath = Join-Path $runtimeRoot "logs\collector-$stamp.log"
-        @($stdout, $stderr) | Set-Content -LiteralPath $logPath -Encoding UTF8
+        @($result.Stdout, $result.Stderr) | Set-Content -LiteralPath $logPath -Encoding UTF8
     }
-    if ($stdout) { Write-Output $stdout.TrimEnd() }
-    if ($stderr) { Write-Error $stderr.TrimEnd() -ErrorAction Continue }
-    exit $process.ExitCode
+    Write-Output "MSO_CHILD_PYTHON=$($runtime.Python)"
+    Write-Output "MSO_MODULE_PATH=$($runtime.ModulePath)"
+    if ($result.Stdout) { Write-Output $result.Stdout.TrimEnd() }
+    if ($result.Stderr) { Write-Error $result.Stderr.TrimEnd() -ErrorAction Continue }
+    exit $result.ExitCode
 }
 finally {
-    $startInfo.Environment.Remove('APCA_API_KEY_ID')
-    $startInfo.Environment.Remove('APCA_API_SECRET_KEY')
     $credential = $null
     $plainKeyId = $null
     $plainSecret = $null

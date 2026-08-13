@@ -5,6 +5,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'lib\process_compat.ps1')
 $runtimeRoot = Join-Path $env:LOCALAPPDATA 'MarketStateObservatoryRuntime'
 $children = @(
     'secrets', 'raw', 'observations', 'data_shadow', 'model_shadow', 'logs', 'locks',
@@ -12,15 +13,15 @@ $children = @(
 )
 $resolvedRepository = (Resolve-Path -LiteralPath $RepositoryRoot).Path
 if ([string]::IsNullOrWhiteSpace($PythonExecutable)) {
-    $command = Get-Command python -ErrorAction SilentlyContinue
     $adjacent = Join-Path (Split-Path -Parent $resolvedRepository) 'Python313\python.exe'
-    if ($command) { $PythonExecutable = $command.Source }
-    elseif (Test-Path -LiteralPath $adjacent) { $PythonExecutable = $adjacent }
-    else { throw 'Python executable not found. Pass -PythonExecutable with an absolute path.' }
+    if (Test-Path -LiteralPath $adjacent) { $PythonExecutable = $adjacent }
+    else {
+        $pythonCommand = Get-Command python -ErrorAction SilentlyContinue
+        if ($pythonCommand) { $PythonExecutable = $pythonCommand.Source }
+        else { throw 'Python executable not found. Pass -PythonExecutable with an absolute path.' }
+    }
 }
-$pythonCommand = Get-Command $PythonExecutable -ErrorAction SilentlyContinue
-if ($pythonCommand) { $PythonExecutable = $pythonCommand.Source }
-$PythonExecutable = (Resolve-Path -LiteralPath $PythonExecutable).Path
+$PythonExecutable = Resolve-MsoBootstrapPython -Candidate $PythonExecutable
 
 if ($PSCmdlet.ShouldProcess($runtimeRoot, 'Initialize private Market State Observatory runtime')) {
     New-Item -ItemType Directory -Path $runtimeRoot -Force | Out-Null
@@ -30,6 +31,7 @@ if ($PSCmdlet.ShouldProcess($runtimeRoot, 'Initialize private Market State Obser
     $config = [ordered]@{
         runtime_root = $runtimeRoot
         repository_root = $resolvedRepository
+        bootstrap_python = $PythonExecutable
         python_executable = $PythonExecutable
         mode = 'DATA_CAPTURE_ONLY'
         timezone = 'America/New_York'

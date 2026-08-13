@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import subprocess
+import tomllib
 import zipfile
 from pathlib import Path
 
@@ -37,9 +38,10 @@ def sha256(path: Path) -> str:
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
     output = root / "release-artifacts"
+    version = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
     files = tracked_files(root)
-    source = output / "market-state-observatory-v0.4.1-source.zip"
-    bootstrap = output / "market-state-observatory-v0.4.1-windows-bootstrap.zip"
+    source = output / f"market-state-observatory-v{version}-source.zip"
+    bootstrap = output / f"market-state-observatory-v{version}-windows-bootstrap.zip"
     write_zip(source, root, files)
     bootstrap_files = [
         path for path in files
