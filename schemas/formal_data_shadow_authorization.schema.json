@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/formal_data_shadow_authorization.schema.json",
+  "title": "FormalDataShadowAuthorization",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "status", "release_version", "release_git_sha",
+    "release_wheel_sha256", "experiment_lane", "universe_sha256",
+    "membership_sha256", "schema_sha256", "quality_policy_sha256",
+    "soak_result_sha256", "authorized_at_utc", "minimum_scheduler_rehearsal_sessions",
+    "counts_toward_model_shadow", "paper_positions_allowed", "real_orders_allowed"
+  ],
+  "properties": {
+    "schema_version": {"const": "mso-formal-data-shadow-authorization-v1"},
+    "status": {"const": "GO"},
+    "release_version": {"type": "string"},
+    "release_git_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "release_wheel_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "experiment_lane": {"type": "string"},
+    "universe_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "membership_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "schema_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "quality_policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "soak_result_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "authorized_at_utc": {"type": "string", "format": "date-time"},
+    "minimum_scheduler_rehearsal_sessions": {"type": "integer", "minimum": 3},
+    "counts_toward_model_shadow": {"const": false},
+    "paper_positions_allowed": {"const": false},
+    "real_orders_allowed": {"const": false}
+  }
+}

@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo
 
 from .alpaca_adapter import AlpacaSIPAdapter
 from .alpaca_stream import AlpacaStreamArchive
+from .formal_promotion import REHEARSAL_TASK_NAME, verify_authorization
 from .label_ledger import register_source_snapshot, settle_horizon
 from .market_calendar import is_trading_day, session_schedule
 from .notifications import emit_local_alert
@@ -209,6 +210,10 @@ def create_run(
     run_id = f"{day.isoformat()}-{uuid.uuid4().hex[:12]}"
     run_directory = _run_parent(paths, mode, str(identity["experiment_lane"]), day) / run_id
     status = "FORMAL_DATA_SHADOW" if mode == "formal" else "DATA_CAPTURE_REHEARSAL"
+    scheduler_task_name = os.environ.get("MSO_SCHEDULER_TASK_NAME")
+    expected_task = "MSO-Daily-Formal" if mode == "formal" else REHEARSAL_TASK_NAME
+    if scheduler_task_name and scheduler_task_name != expected_task:
+        raise RuntimeError("Scheduled task name does not match runtime mode")
     run = {
         "schema_version": "mso-private-runtime-run-v2",
         "run_id": run_id,
@@ -216,6 +221,7 @@ def create_run(
         "created_at_utc": datetime.now(UTC).isoformat(),
         "status": status,
         "mode": mode,
+        "scheduler_task_name": scheduler_task_name,
         "timezone": "America/New_York",
         "feed": "sip",
         "membership_snapshot_frozen": True,
@@ -223,6 +229,7 @@ def create_run(
         "counts_toward_20_day_gate": mode == "formal",
         "counts_toward_model_shadow": False,
         "counts_toward_live_decision": False,
+        "publication_as_formal": mode == "formal",
         "paper_positions_allowed": False,
         "real_orders_allowed": False,
     }
@@ -300,6 +307,8 @@ async def run_session(mode: str, dry_run: bool = False) -> int:
         return 0
 
     membership = membership_payload(universe)
+    if mode == "formal":
+        verify_authorization(paths.root)
     identity = runtime_identity(
         repository=project_root(),
         universe_path=universe_file,

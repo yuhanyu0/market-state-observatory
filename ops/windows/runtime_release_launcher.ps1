@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('rehearsal', 'formal')][string]$Mode = 'formal',
-    [switch]$DryRun
+    [ValidateSet('rehearsal', 'formal')][string]$Mode = 'rehearsal',
+    [switch]$DryRun,
+    [ValidateSet('MSO-Daily-Rehearsal', 'MSO-Daily-Formal')][string]$ScheduledTaskName
 )
 
 $ErrorActionPreference = 'Stop'
@@ -23,6 +24,7 @@ function Invoke-ReleasePython {
         MSO_RELEASE_ROOT = $runtime.ReleaseRoot
         MSO_SOURCE_ROOT = $config.repository_root
     }
+    if ($ScheduledTaskName) { $environment.MSO_SCHEDULER_TASK_NAME = $ScheduledTaskName }
     try {
         if ($WithCredential) {
             $credentialPath = Join-Path $runtimeRoot 'secrets\alpaca.credential.xml'

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/soak_test_results.schema.json",
+  "title": "SoakTestResults",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version", "status", "release_version", "release_git_sha",
+    "release_wheel_sha256", "experiment_lane", "universe_sha256",
+    "membership_sha256", "schema_sha256", "quality_policy_sha256",
+    "scheduler_version", "credential_leak_scan_pass",
+    "private_public_boundary_pass", "settlement_idempotence_pass",
+    "publication_rehearsal_isolation_pass", "scheduler_version_frozen",
+    "paper_positions", "real_orders", "sessions"
+  ],
+  "properties": {
+    "schema_version": {"const": "mso-soak-test-results-v1"},
+    "status": {"const": "PASS"},
+    "release_version": {"type": "string"},
+    "release_git_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "release_wheel_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "experiment_lane": {"type": "string"},
+    "universe_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "membership_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "schema_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "quality_policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "scheduler_version": {"type": "string"},
+    "credential_leak_scan_pass": {"const": true},
+    "private_public_boundary_pass": {"const": true},
+    "settlement_idempotence_pass": {"const": true},
+    "publication_rehearsal_isolation_pass": {"const": true},
+    "scheduler_version_frozen": {"const": true},
+    "paper_positions": {"const": 0},
+    "real_orders": {"const": 0},
+    "sessions": {"type": "array", "minItems": 3, "items": {"type": "object"}}
+  }
+}

@@ -149,7 +149,11 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
         and future_timestamps == 0
         and backfill_count == 0
     )
-    formal_mode = run.get("status") == "FORMAL_DATA_SHADOW" and run.get("mode") == "formal"
+    formal_mode = (
+        run.get("status") == "FORMAL_DATA_SHADOW"
+        and run.get("mode") == "formal"
+        and run.get("publication_as_formal") is True
+    )
     process_success = True
     publication_eligible = bool(
         formal_mode
@@ -168,9 +172,12 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
         "process_success": process_success,
         "production_release": bool(run.get("production_release")),
         "experiment_lane": run.get("experiment_lane"),
-        "counts_toward_20_day_gate": bool(run["counts_toward_20_day_gate"] and quality_pass),
+        "counts_toward_20_day_gate": bool(
+            formal_mode and run["counts_toward_20_day_gate"] and quality_pass
+        ),
         "counts_toward_model_shadow": False,
         "counts_toward_live_decision": False,
+        "publication_as_formal": bool(formal_mode),
         "planned_observations": planned,
         "captured_observations": captured,
         "capture_rate": success_rate,
@@ -179,6 +186,7 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
         "backfill_count": backfill_count,
         "websocket_reconnect_count": int(stream_health.get("reconnect_count", 0)),
         "stream_message_count": int(stream_health.get("message_count", 0)),
+        "stream_message_drop_count": int(stream_health.get("dropped_message_count", 0)),
         "stream_chunk_count": int(stream_health.get("chunk_count", 0)),
         "stream_disk_budget_bytes": int(stream_health.get("disk_budget_bytes", 0)),
         "stream_disk_budget_used_bytes": int(stream_health.get("disk_budget_used_bytes", 0)),

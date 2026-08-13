@@ -40,18 +40,22 @@ try {
     Copy-Item (Join-Path $repository 'schemas\*.json') (Join-Path $staging 'schemas')
     Copy-Item (Join-Path $PSScriptRoot 'runtime_release_launcher.ps1') (Join-Path $staging 'runtime_release_launcher.ps1')
     Copy-Item (Join-Path $PSScriptRoot 'lib\process_compat.ps1') (Join-Path $staging 'lib\process_compat.ps1')
+    Copy-Item (Join-Path $PSScriptRoot 'lib\scheduler_safety.ps1') (Join-Path $staging 'lib\scheduler_safety.ps1')
     $universe = Get-Content (Join-Path $staging 'frozen\runtime_universe_v1.json') -Raw | ConvertFrom-Json
     [ordered]@{
         schema_version = 'mso-frozen-membership-v1'; source = 'runtime_universe_v1'
         effective_start = $universe.frozen_at_utc; themes = $universe.themes
     } | ConvertTo-Json -Depth 12 | Set-Content (Join-Path $staging 'frozen\membership_snapshot_v1.json') -Encoding utf8
     [ordered]@{
-        schema_version = 'mso-runtime-release-config-v2'; queue_size = 10000
+        schema_version = 'mso-runtime-release-config-v3'; queue_size = 10000
         stream_disk_budget_bytes = 2147483648; full_stream_debug = $false
         cross_section_skew_limit_seconds = 5; paper_positions_allowed = $false
         real_orders_allowed = $false
         minimum_windows_powershell_version = '5.1'
-        process_compat_version = '0.4.2'
+        process_compat_version = '0.4.3'
+        scheduler_default_mode = 'rehearsal'
+        formal_promotion_required = $true
+        minimum_scheduler_rehearsal_sessions = 3
     } | ConvertTo-Json | Set-Content (Join-Path $staging 'config\runtime_release_config.json') -Encoding utf8
     $testedShells = @("$($PSVersionTable.PSEdition) $($PSVersionTable.PSVersion.ToString())")
     $pwsh = Get-Command pwsh -ErrorAction SilentlyContinue

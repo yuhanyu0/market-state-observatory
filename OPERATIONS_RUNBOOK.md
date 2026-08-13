@@ -14,8 +14,8 @@ From the project root in non-elevated PowerShell:
 .\ops\windows\setup_alpaca_credentials.ps1
 .\ops\windows\setup_github_auth.ps1
 .\ops\windows\build_runtime_release.ps1
-.\ops\windows\install_scheduled_tasks.ps1 -WhatIf
-.\ops\windows\install_scheduled_tasks.ps1 -Install
+.\ops\windows\install_scheduled_tasks.ps1 -Mode rehearsal -Install -WhatIf
+.\ops\windows\install_scheduled_tasks.ps1 -Mode rehearsal -Install
 ```
 
 The Alpaca command initializes the private runtime when needed, prompts for the
@@ -26,9 +26,13 @@ a wheel, dedicated venv, dependency lock, schemas, universe, membership, and
 runtime config. The scheduler executes only the frozen release launcher and first
 performs an offline dry-run.
 
+The scheduler defaults to rehearsal. Formal installation is rejected until the
+frozen release has at least three complete scheduler-driven rehearsal sessions
+and `promote_to_formal_data_shadow.ps1` has created a release-bound GO artifact.
+
 ## Daily runtime
 
-`MSO-Daily-Runtime` starts at 09:20 ET on weekdays. The Python runtime still
+`MSO-Daily-Rehearsal` starts at 09:20 ET on weekdays. The Python runtime still
 checks the exchange calendar, early closes, system clock skew, and single
 instance lock. It captures 09:30, 10:00 settlement, 12:00, 15:30, 15:45, and the
 session-close diagnostic. At open, 10:00, and 15:45 it links the corresponding
@@ -40,14 +44,23 @@ Manual rehearsal:
 .\ops\windows\run_full_day_rehearsal.ps1
 ```
 
-Manual formal Data Shadow, only after setup and an accepted rehearsal:
+Formal promotion, only after a reviewed `SOAK_TEST_RESULTS.json` proves the
+three-session operational gate:
+
+```powershell
+.\ops\windows\promote_to_formal_data_shadow.ps1
+.\ops\windows\install_scheduled_tasks.ps1 -Mode formal -Install -WhatIf
+.\ops\windows\install_scheduled_tasks.ps1 -Mode formal -Install
+```
+
+Manual formal Data Shadow also requires that same authorization:
 
 ```powershell
 .\ops\windows\run_formal_data_shadow.ps1
 ```
 
 No command may be run after an observation point to reconstruct that point.
-A successful scheduled formal run automatically publishes the derived quality
+A successful authorized scheduled formal run automatically publishes the derived quality
 snapshot after session close. Rehearsals, failed collection runs, and formal
 runs without an immutable quality artifact do not publish.
 

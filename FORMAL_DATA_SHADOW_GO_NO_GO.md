@@ -2,9 +2,10 @@
 
 ## Decision: NO-GO
 
-The v0.4.1 P0 implementation and synthetic/load acceptance tests pass, but the
-frozen production runtime has not yet completed a supervised full-day rehearsal
-through Windows Task Scheduler. Formal Data Shadow must remain stopped.
+The v0.4.3 scheduler safety implementation and synthetic/load acceptance tests
+pass, but the frozen production runtime has not completed three supervised
+full-day rehearsals through `MSO-Daily-Rehearsal`. Formal Data Shadow must remain
+stopped.
 
 ## Passed
 
@@ -20,11 +21,13 @@ through Windows Task Scheduler. Formal Data Shadow must remain stopped.
 
 ## Blocking Conditions
 
-1. Build and install the immutable v0.4.1 wheel/venv from the final clean commit.
-2. Complete the full-day rehearsal and failure-injection checklist in
+1. Build the immutable v0.4.3 wheel/venv and install only the rehearsal task.
+2. Complete three scheduler-driven full-day rehearsals and the failure-injection checklist in
    `SOAK_TEST_PLAN.md`.
 3. Review Scheduler start, WebSocket continuity, fixed-point completeness, disk
    budget, crash recovery, private operator state, and fail-closed publication.
+4. Generate and independently review `SOAK_TEST_RESULTS.json`, then use the
+   no-override promotion command to create the release-bound GO artifact.
 
 Passing those operational checks permits a separate GO review. It does not start
 Model Shadow, produce an investment action, or authorize any position or order.

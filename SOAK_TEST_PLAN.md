@@ -2,8 +2,8 @@
 
 ## Purpose
 
-Prove the frozen v0.4.1 data-only runtime over a complete XNYS session before any
-Formal Data Shadow day can be considered.
+Prove the frozen v0.4.3 data-only runtime over at least three complete,
+scheduler-driven XNYS sessions before any Formal Data Shadow day can be considered.
 
 ## Preconditions
 
@@ -11,8 +11,8 @@ Formal Data Shadow day can be considered.
    `ops/windows/build_runtime_release.ps1`.
 2. Verify wheel, dependency, collector, schema, universe, membership, and config
    hashes from `release_manifest.json`.
-3. Run the frozen formal dry-run and scheduled-task smoke test.
-4. Keep the session in rehearsal mode; positions and orders remain zero.
+3. Install only `MSO-Daily-Rehearsal` and run its registered-action smoke test.
+4. Keep every session in rehearsal mode; positions and orders remain zero.
 
 ## Full-Day Rehearsal
 
@@ -39,7 +39,9 @@ public state. Preserve every failed run; do not repair it by backfill.
 
 ## Exit Criteria
 
-All fixed observations captured, quality reproducible, secret and schema scans
-passing, no overwritten artifacts, no private public-data fields, no positions or
-orders, and a reviewed operator record. A single failed criterion keeps the
-system at NO-GO.
+At least three distinct trading dates must have all fixed observations captured,
+quality reproducible, zero future timestamps, backfills, message drops,
+positions, and orders, passing secret/boundary/settlement/publication-isolation
+checks, and a frozen scheduler version. A reviewed `SOAK_TEST_RESULTS.json` must
+reference and hash every immutable rehearsal run and quality file. A single
+failed criterion keeps the system at NO-GO.

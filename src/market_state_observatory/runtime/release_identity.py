@@ -66,10 +66,12 @@ def load_release_manifest(*, required: bool) -> dict[str, Any] | None:
         "universe_sha256",
         "membership_sha256",
         "config_sha256",
+        "quality_policy_sha256",
         "experiment_lane",
         "powershell_launcher_version",
         "powershell_launcher_sha256",
         "process_compat_helper_sha256",
+        "scheduler_safety_helper_sha256",
         "minimum_windows_powershell_version",
         "tested_shells",
         "release_python_path_class",
@@ -84,8 +86,10 @@ def load_release_manifest(*, required: bool) -> dict[str, Any] | None:
         "universe_sha256": root / "frozen" / "runtime_universe_v1.json",
         "membership_sha256": root / "frozen" / "membership_snapshot_v1.json",
         "config_sha256": root / "config" / "runtime_release_config.json",
+        "quality_policy_sha256": root / "config" / "publication_policy.yml",
         "powershell_launcher_sha256": root / "runtime_release_launcher.ps1",
         "process_compat_helper_sha256": root / "lib" / "process_compat.ps1",
+        "scheduler_safety_helper_sha256": root / "lib" / "scheduler_safety.ps1",
     }
     for field, path in checks.items():
         if not path.exists():
@@ -155,9 +159,13 @@ def build_release_manifest(
         "universe_sha256": universe_hash,
         "membership_sha256": sha256_file(release / "frozen" / "membership_snapshot_v1.json"),
         "config_sha256": sha256_file(release / "config" / "runtime_release_config.json"),
-        "powershell_launcher_version": "0.4.2",
+        "quality_policy_sha256": sha256_file(release / "config" / "publication_policy.yml"),
+        "powershell_launcher_version": "0.4.3",
         "powershell_launcher_sha256": sha256_file(release / "runtime_release_launcher.ps1"),
         "process_compat_helper_sha256": sha256_file(release / "lib" / "process_compat.ps1"),
+        "scheduler_safety_helper_sha256": sha256_file(
+            release / "lib" / "scheduler_safety.ps1"
+        ),
         "minimum_windows_powershell_version": "5.1",
         "tested_shells": tested_shells,
         "tested_powershell_editions": sorted(

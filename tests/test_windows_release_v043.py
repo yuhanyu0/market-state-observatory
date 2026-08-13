@@ -20,19 +20,21 @@ def _write(path: Path, value: str) -> None:
 def _release_fixture(tmp_path: Path) -> tuple[Path, Path]:
     release = tmp_path / "release"
     repository = tmp_path / "repository"
-    _write(release / "wheel" / "market_state_observatory-0.4.2.whl", "wheel")
+    _write(release / "wheel" / "market_state_observatory-0.4.3.whl", "wheel")
     _write(release / "dependency.lock", "dependency==1\n")
     _write(release / "schemas" / "public.json", "{}")
     _write(release / "frozen" / "runtime_universe_v1.json", "{}")
     _write(release / "frozen" / "membership_snapshot_v1.json", "{}")
     _write(release / "config" / "runtime_release_config.json", "{}")
-    _write(release / "runtime_release_launcher.ps1", "# launcher 0.4.2\n")
+    _write(release / "config" / "publication_policy.yml", "forbidden_fields: []\n")
+    _write(release / "runtime_release_launcher.ps1", "# launcher 0.4.3\n")
     _write(release / "lib" / "process_compat.ps1", "# compatibility helper\n")
+    _write(release / "lib" / "scheduler_safety.ps1", "# scheduler helper\n")
     _write(repository / "src" / "market_state_observatory" / "runtime" / "module.py", "x = 1\n")
     return release, repository
 
 
-def test_v042_release_manifest_locks_powershell_launcher_and_helper(
+def test_v043_release_manifest_locks_scheduler_launcher_policy_and_helper(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     release, repository = _release_fixture(tmp_path)
@@ -40,7 +42,7 @@ def test_v042_release_manifest_locks_powershell_launcher_and_helper(
         release=release,
         repository=repository,
         git_sha="a" * 40,
-        release_version="0.4.2",
+        release_version="0.4.3",
         tested_shells=["Desktop 5.1.26100.9168", "Core 7.4.6"],
     )
     (release / "release_manifest.json").write_text(json.dumps(payload), encoding="utf-8")
@@ -49,13 +51,15 @@ def test_v042_release_manifest_locks_powershell_launcher_and_helper(
     loaded = load_release_manifest(required=True)
 
     assert loaded is not None
-    assert loaded["powershell_launcher_version"] == "0.4.2"
+    assert loaded["powershell_launcher_version"] == "0.4.3"
     assert loaded["minimum_windows_powershell_version"] == "5.1"
     assert loaded["tested_powershell_editions"] == ["Core", "Desktop"]
     assert loaded["release_python_path_class"] == "release_root_venv"
+    assert loaded["quality_policy_sha256"]
+    assert loaded["scheduler_safety_helper_sha256"]
 
 
-def test_v042_release_manifest_rejects_modified_process_helper(
+def test_v043_release_manifest_rejects_modified_process_helper(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     release, repository = _release_fixture(tmp_path)
@@ -63,7 +67,7 @@ def test_v042_release_manifest_rejects_modified_process_helper(
         release=release,
         repository=repository,
         git_sha="b" * 40,
-        release_version="0.4.2",
+        release_version="0.4.3",
         tested_shells=["Desktop 5.1.26100.9168"],
     )
     (release / "release_manifest.json").write_text(json.dumps(payload), encoding="utf-8")

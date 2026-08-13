@@ -20,6 +20,7 @@ RUNTIME_CHILDREN = (
     "alerts",
     "releases",
     "operator",
+    "promotion",
 )
 
 
@@ -43,6 +44,7 @@ class RuntimePaths:
     alerts: Path
     releases: Path
     operator: Path
+    promotion: Path
 
     def as_public_status(self) -> dict[str, str]:
         return {"runtime_root": str(self.root), "status": "PRIVATE_RUNTIME_RESOLVED"}

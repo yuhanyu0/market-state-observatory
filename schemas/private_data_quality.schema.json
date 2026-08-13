@@ -8,6 +8,8 @@
     "schema_version", "run_id", "trading_date", "run_mode", "process_success",
     "production_release", "data_quality_pass", "publication_eligible",
     "schema_validation_pass", "secret_scan_pass", "forbidden_path_scan_pass",
+    "counts_toward_20_day_gate", "counts_toward_model_shadow",
+    "publication_as_formal", "stream_message_drop_count",
     "paper_positions", "real_orders", "themes"
   ],
   "properties": {
@@ -19,6 +21,10 @@
     "production_release": {"type": "boolean"},
     "data_quality_pass": {"type": "boolean"},
     "publication_eligible": {"type": "boolean"},
+    "counts_toward_20_day_gate": {"type": "boolean"},
+    "counts_toward_model_shadow": {"const": false},
+    "publication_as_formal": {"type": "boolean"},
+    "stream_message_drop_count": {"type": "integer", "minimum": 0},
     "schema_validation_pass": {"type": "boolean"},
     "secret_scan_pass": {"type": "boolean"},
     "forbidden_path_scan_pass": {"type": "boolean"},

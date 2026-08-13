@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.3 - 2026-08-13
+
+- Changed the scheduler default from formal to rehearsal and split rehearsal and
+  formal into distinct task names that cannot both be active.
+- Added a fail-closed Formal Data Shadow promotion artifact tied to the frozen
+  release and at least three complete scheduler-driven rehearsal sessions.
+- Added runtime and quality-layer defenses preventing rehearsals from entering
+  the 20-day gate and preventing Formal Data Shadow from entering Model Shadow.
+- Upgraded task status, registered-action smoke testing, PowerShell compatibility
+  coverage, and frozen release identity for scheduler safety.
+
 ## 0.4.2 - 2026-08-13
 
 - Fixed Windows PowerShell 5.1 process launching by replacing `ArgumentList` and

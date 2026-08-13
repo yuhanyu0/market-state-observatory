@@ -75,15 +75,17 @@ normally `http://127.0.0.1:5173/`.
 .\ops\windows\setup_alpaca_credentials.ps1
 .\ops\windows\setup_github_auth.ps1
 .\ops\windows\build_runtime_release.ps1
-.\ops\windows\install_scheduled_tasks.ps1 -Install
+.\ops\windows\install_scheduled_tasks.ps1 -Mode rehearsal -Install
 ```
 
 The first command initializes the external runtime and stores Alpaca credentials
 with current-user Windows DPAPI. The second never displays a GitHub token. The
 third builds a versioned wheel, dedicated virtual environment, dependency lock,
-and immutable experiment lane. The fourth installs `MSO-Daily-Runtime` against
-that frozen release and first runs an offline dry-run. A
-successful formal day then publishes only derived, redacted state to
+and immutable experiment lane. The fourth installs `MSO-Daily-Rehearsal`
+against that frozen release and first runs an offline dry-run. Formal scheduler
+installation is fail-closed until three complete scheduler-driven rehearsals
+produce a release-bound GO promotion artifact. An authorized successful formal
+day then publishes only derived, redacted state to
 `public-data`; rehearsal and failed-quality runs never publish.
 
 Private operator state is available only on loopback:

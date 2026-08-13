@@ -1,6 +1,6 @@
 Set-StrictMode -Version 2.0
 
-$script:MsoProcessCompatVersion = '0.4.2'
+$script:MsoProcessCompatVersion = '0.4.3'
 
 function ConvertTo-WindowsCommandLineArgument {
     [CmdletBinding()]
@@ -79,6 +79,7 @@ function New-MsoProcessStartInfo {
         [Parameter(Mandatory = $true)][string]$FileName,
         [Parameter(Mandatory = $true)][string]$WorkingDirectory,
         [AllowEmptyCollection()][string[]]$ArgumentList = @(),
+        [AllowNull()][string]$RawArguments,
         [hashtable]$ChildEnvironment = @{},
         [string[]]$RemoveEnvironment = @()
     )
@@ -89,7 +90,11 @@ function New-MsoProcessStartInfo {
     $startInfo.RedirectStandardOutput = $true
     $startInfo.RedirectStandardError = $true
     $startInfo.CreateNoWindow = $true
-    $startInfo.Arguments = ConvertTo-WindowsCommandLine -ArgumentList $ArgumentList
+    $startInfo.Arguments = if ($PSBoundParameters.ContainsKey('RawArguments')) {
+        $RawArguments
+    } else {
+        ConvertTo-WindowsCommandLine -ArgumentList $ArgumentList
+    }
     foreach ($name in $RemoveEnvironment) {
         Remove-MsoChildEnvironmentVariable -StartInfo $startInfo -Name $name
     }
@@ -105,12 +110,21 @@ function Invoke-MsoChildProcess {
         [Parameter(Mandatory = $true)][string]$FileName,
         [Parameter(Mandatory = $true)][string]$WorkingDirectory,
         [AllowEmptyCollection()][string[]]$ArgumentList = @(),
+        [AllowNull()][string]$RawArguments,
         [hashtable]$ChildEnvironment = @{},
         [string[]]$RemoveEnvironment = @()
     )
-    $startInfo = New-MsoProcessStartInfo -FileName $FileName -WorkingDirectory $WorkingDirectory `
-        -ArgumentList $ArgumentList -ChildEnvironment $ChildEnvironment `
-        -RemoveEnvironment $RemoveEnvironment
+    $startInfoParameters = @{
+        FileName = $FileName
+        WorkingDirectory = $WorkingDirectory
+        ArgumentList = $ArgumentList
+        ChildEnvironment = $ChildEnvironment
+        RemoveEnvironment = $RemoveEnvironment
+    }
+    if ($PSBoundParameters.ContainsKey('RawArguments')) {
+        $startInfoParameters.RawArguments = $RawArguments
+    }
+    $startInfo = New-MsoProcessStartInfo @startInfoParameters
     try {
         $process = New-Object System.Diagnostics.Process
         $process.StartInfo = $startInfo
