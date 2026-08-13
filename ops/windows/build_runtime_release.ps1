@@ -28,7 +28,9 @@ try {
     New-Item -ItemType Directory -Path $staging,(Join-Path $staging 'wheel'),(Join-Path $staging 'config'),(Join-Path $staging 'schemas'),(Join-Path $staging 'frozen') | Out-Null
     & $PythonExecutable -m build --wheel --outdir (Join-Path $staging 'wheel') $repository
     if ($LASTEXITCODE -ne 0) { throw 'Wheel build failed.' }
-    $wheel = Get-ChildItem (Join-Path $staging 'wheel') -Filter *.whl -File | Select-Object -Single
+    $wheels = @(Get-ChildItem (Join-Path $staging 'wheel') -Filter *.whl -File)
+    if ($wheels.Count -ne 1) { throw "Expected one wheel, found $($wheels.Count)." }
+    $wheel = $wheels[0]
     & $PythonExecutable -m venv (Join-Path $staging 'venv')
     $releasePython = Join-Path $staging 'venv\Scripts\python.exe'
     & $releasePython -m pip install --disable-pip-version-check $wheel.FullName
