@@ -154,12 +154,18 @@ def build_release_manifest(
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--build-manifest", action="store_true")
+    parser.add_argument("--verify-release", action="store_true")
     parser.add_argument("--release", type=Path)
     parser.add_argument("--repository", type=Path)
     parser.add_argument("--git-sha")
     parser.add_argument("--release-version")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
+    if args.verify_release:
+        manifest = load_release_manifest(required=True)
+        assert manifest is not None
+        print(f"RELEASE_INTEGRITY=PASS lane={manifest['experiment_lane']}")
+        return
     if not all(
         (args.build_manifest, args.release, args.repository, args.git_sha, args.release_version, args.output)
     ):

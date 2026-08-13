@@ -71,6 +71,12 @@ function Invoke-SanitizedPython {
     }
 }
 
+$integrity = Invoke-SanitizedPython -Arguments @(
+    '-m', 'market_state_observatory.runtime.release_identity', '--verify-release'
+)
+if ($integrity.ExitCode -ne 0) { throw 'Frozen release integrity verification failed.' }
+if ($integrity.Stdout) { Write-Output $integrity.Stdout.TrimEnd() }
+
 $arguments = @('-m', 'market_state_observatory.runtime.daily_daemon', '--mode', $Mode)
 if ($DryRun) { $arguments += '--dry-run' }
 try {
