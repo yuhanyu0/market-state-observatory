@@ -66,6 +66,6 @@ jobs:
         with:
           path: dist/web
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
       - name: Report deployed URL
         run: echo "${{ steps.deployment.outputs.page_url }}"
