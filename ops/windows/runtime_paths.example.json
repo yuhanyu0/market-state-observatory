@@ -1,0 +1,7 @@
+{
+  "runtime_root": "%LOCALAPPDATA%\\MarketStateObservatoryRuntime",
+  "repository_root": "C:\\absolute\\path\\to\\market-state-observatory",
+  "python_executable": "C:\\absolute\\path\\to\\python.exe",
+  "mode": "DATA_CAPTURE_ONLY",
+  "timezone": "America/New_York"
+}

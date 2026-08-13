@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/state_certificate.schema.json",
+  "title": "State Certificate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["certificate_id", "theme_id", "as_of_utc", "evidence_grade", "facts", "direction", "transmission", "episode", "structural_attention", "fragility", "observer_agreement", "observer_conflicts", "uncertainty", "invalidation", "next_probe", "eligible_playbooks", "vehicle_eligibility", "decision_status"],
+  "properties": {
+    "certificate_id": {"type": "string", "minLength": 1},
+    "theme_id": {"type": "string", "minLength": 1},
+    "as_of_utc": {"type": "string", "format": "date-time"},
+    "evidence_grade": {"enum": ["synthetic_demo", "historical_reconstructed", "prospective_point_in_time", "public_rehearsal"]},
+    "facts": {"type": "array", "items": {"type": "object", "required": ["kind", "text"], "properties": {"kind": {"type": "string"}, "text": {"type": "string"}}, "additionalProperties": true}},
+    "direction": {"$ref": "#/$defs/observerState"},
+    "transmission": {"$ref": "#/$defs/observerState"},
+    "episode": {"$ref": "#/$defs/observerState"},
+    "structural_attention": {"$ref": "#/$defs/observerState"},
+    "fragility": {"$ref": "#/$defs/observerState"},
+    "observer_agreement": {"type": "object", "required": ["score", "estimated_observers", "conflict_count", "state"], "properties": {"score": {"type": "number", "minimum": 0, "maximum": 1}, "estimated_observers": {"type": "integer", "minimum": 0}, "conflict_count": {"type": "integer", "minimum": 0}, "state": {"type": "string"}}, "additionalProperties": false},
+    "observer_conflicts": {"type": "array", "items": {"$ref": "#/$defs/conflict"}},
+    "uncertainty": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "invalidation": {"type": "array", "items": {"type": "string"}},
+    "next_probe": {"type": ["object", "null"]},
+    "eligible_playbooks": {"type": "array", "items": {"enum": ["A_transition_breakout", "B_retest_continuation", "D_wait_unresolved", "F_overextended_no_chase", "NoScript"]}, "minItems": 1},
+    "vehicle_eligibility": {"type": "object", "required": ["Theme_ETF", "Theme_Basket", "Torque_Overlay"], "properties": {"Theme_ETF": {"type": "boolean"}, "Theme_Basket": {"type": "boolean"}, "Torque_Overlay": {"type": "boolean"}}, "additionalProperties": false},
+    "decision_status": {"enum": ["DATA_BLOCKED_NO_DECISION", "WAIT", "MODEL_SHADOW_ONLY", "PAPER_ELIGIBLE"]}
+  },
+  "$defs": {
+    "observerState": {"type": "object", "additionalProperties": false, "required": ["state", "eligible", "data_ready", "model_estimated", "decision_eligible", "uncertainty", "evidence_refs", "metrics", "invalidation"], "properties": {"state": {"type": "string"}, "eligible": {"type": "boolean"}, "data_ready": {"type": "boolean"}, "model_estimated": {"type": "boolean"}, "decision_eligible": {"type": "boolean"}, "uncertainty": {"type": ["number", "null"], "minimum": 0, "maximum": 1}, "evidence_refs": {"type": "array", "items": {"type": "string"}}, "metrics": {"type": "object"}, "invalidation": {"type": ["string", "null"]}}},
+    "conflict": {"type": "object", "additionalProperties": false, "required": ["theme_id", "left", "right", "kind", "explanation", "severity", "discriminating_probe"], "properties": {"theme_id": {"type": "string"}, "left": {"type": "string"}, "right": {"type": "string"}, "kind": {"type": "string"}, "explanation": {"type": "string"}, "severity": {"enum": ["low", "medium", "high"]}, "discriminating_probe": {"type": ["string", "null"]}}}
+  }
+}

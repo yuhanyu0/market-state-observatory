@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.cache/
+.tmp/
+.pytest-tmp/
+.pytest-runtime-cache/
+.coverage
+htmlcov/
+.venv/
+dist/
+build/
+*.egg-info/
+*.tsbuildinfo
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.*
+secrets/
+credentials/
+private/
+raw/
+broker/
+provider_payloads/
+*.pem
+*.key
+
+# Private evidence / provider payloads
+data/private/
+data/raw/
+data/provider_payloads/
+data_shadow/
+model_shadow/
+shadow/runs/
+orders/
+positions/
+broker/
+provider_payloads/
+
+# Generated public site staging
+.public-build/
+site/
+node_modules/
+web/node_modules/
+web/dist/
+playwright-report/
+test-results/
+
+# Runtime is always external, even if a caller misconfigures a relative path.
+MarketStateObservatoryRuntime/
+/runtime/

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/observer_conflict.schema.json",
+  "title": "Observer Conflict",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["theme_id", "left", "right", "kind", "explanation", "severity", "discriminating_probe"],
+  "properties": {
+    "theme_id": {"type": "string"}, "left": {"type": "string"}, "right": {"type": "string"}, "kind": {"type": "string"}, "explanation": {"type": "string"}, "severity": {"enum": ["low", "medium", "high"]}, "discriminating_probe": {"type": ["string", "null"]}
+  }
+}

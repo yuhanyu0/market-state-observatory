@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/public_data_quality.schema.json",
+  "title": "PublicDataQuality",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "published_at_utc", "trading_date", "runtime_phase",
+    "data_quality_pass", "capture_rate", "future_timestamp_count",
+    "backfill_count", "websocket_reconnect_count", "counts_toward_20_day_gate",
+    "counts_toward_model_shadow", "counts_toward_live_decision", "themes",
+    "paper_positions", "real_orders", "evidence_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "mso-public-data-quality-v1"},
+    "published_at_utc": {"type": "string", "format": "date-time"},
+    "trading_date": {"type": "string", "format": "date"},
+    "runtime_phase": {"enum": ["DATA_SHADOW", "DATA_CAPTURE_REHEARSAL"]},
+    "data_quality_pass": {"type": "boolean"},
+    "capture_rate": {"type": "number", "minimum": 0, "maximum": 1},
+    "quote_age_seconds_max": {"type": ["number", "null"]},
+    "future_timestamp_count": {"const": 0},
+    "backfill_count": {"const": 0},
+    "websocket_reconnect_count": {"type": "integer", "minimum": 0},
+    "counts_toward_20_day_gate": {"type": "boolean"},
+    "counts_toward_model_shadow": {"const": false},
+    "counts_toward_live_decision": {"const": false},
+    "paper_positions": {"const": 0},
+    "real_orders": {"const": 0},
+    "evidence_boundary": {"type": "string", "minLength": 1},
+    "themes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "theme_id", "theme_etf", "data_ready", "model_estimated",
+          "decision_eligible", "direction_ready", "transmission_ready",
+          "episode_ready", "constituent_coverage", "blocking_reasons"
+        ],
+        "properties": {
+          "theme_id": {"type": "string"},
+          "theme_etf": {"type": "string"},
+          "data_ready": {"type": "boolean"},
+          "model_estimated": {"const": false},
+          "decision_eligible": {"const": false},
+          "direction_ready": {"type": "boolean"},
+          "transmission_ready": {"type": "boolean"},
+          "episode_ready": {"const": false},
+          "constituent_coverage": {"type": "number", "minimum": 0, "maximum": 1},
+          "blocking_reasons": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}

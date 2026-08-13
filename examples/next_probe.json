@@ -1,0 +1,16 @@
+{
+  "probe_id": "semiconductors-direction-selection",
+  "theme_id": "semiconductors",
+  "acquire": "Next point-in-time relative-strength, VWAP, breadth, and close confirmation.",
+  "distinguishes": [
+    "positive signed release",
+    "attention without signed release"
+  ],
+  "deadline_utc": "2026-08-10T19:45:00Z",
+  "expected_information_value": "high",
+  "acquisition_cost": "one scheduled market-data capture",
+  "latency": "next frozen observation",
+  "reason": "Structural attention is rising without signed confirmation.",
+  "status": "proposed",
+  "question": "Has structural attention selected a signed direction?"
+}

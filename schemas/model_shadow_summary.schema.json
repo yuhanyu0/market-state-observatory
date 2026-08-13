@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/model_shadow_summary.schema.json",
+  "title": "Model Shadow Summary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["as_of_utc", "status", "observations", "data_ready", "model_estimated", "decision_eligible", "paper_only", "real_orders"],
+  "properties": {
+    "as_of_utc": {"type": "string", "format": "date-time"}, "status": {"enum": ["NOT_STARTED", "RUNNING", "COMPLETE"]}, "observations": {"type": "integer", "minimum": 0}, "data_ready": {"type": "boolean"}, "model_estimated": {"type": "boolean"}, "decision_eligible": {"type": "boolean"}, "paper_only": {"const": true}, "real_orders": {"const": 0}
+  }
+}

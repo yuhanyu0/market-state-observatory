@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+title: Market State Observatory
+message: "If you use this project, cite the repository and the specific release or commit."
+type: software
+authors:
+  - family-names: Yu
+    given-names: Hanyu
+repository-code: "https://github.com/yuhanyu0/market-state-observatory"
+license: "LicenseRef-Pending"
+version: 0.2.0
+date-released: 2026-08-10

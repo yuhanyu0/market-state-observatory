@@ -1,0 +1,71 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main, public-data]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout stable product source
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Overlay public-data branch when available
+        shell: bash
+        run: |
+          if git fetch origin public-data:refs/remotes/origin/public-data --depth=1; then
+            rm -rf public/data
+            mkdir -p public/data
+            git archive origin/public-data data | tar -x -C public
+          else
+            echo "public-data branch not present; using audited main fallback data"
+          fi
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: pip install -e .[dev]
+      - run: npm ci
+      - name: Validate public schemas and firewall
+        run: |
+          python scripts/validate_repo.py
+          python scripts/check_secret_patterns.py
+          python scripts/audit_publication.py
+      - name: Reject actions and private artifacts
+        shell: bash
+        run: |
+          ! grep -R -E '"real_order_created"[[:space:]]*:[[:space:]]*true' public
+          ! grep -R -E '"paper_positions"[[:space:]]*:[[:space:]]*[1-9]' public
+          ! find public -type d | grep -E '/(raw|private|secrets|data_shadow|model_shadow|orders|positions)(/|$)'
+      - run: pytest
+      - run: npm test
+      - run: npm run build
+      - run: python scripts/check_site_links.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/web
+      - id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Report deployed URL
+        run: echo "${{ steps.deployment.outputs.page_url }}"

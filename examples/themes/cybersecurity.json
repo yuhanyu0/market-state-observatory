@@ -1,0 +1,13 @@
+{
+  "theme_id": "cybersecurity",
+  "display_name": "Cybersecurity",
+  "tracker_etf": "CIBR",
+  "benchmark": "SPY",
+  "constituents": [
+    "CRWD",
+    "PANW",
+    "FTNT",
+    "CSCO"
+  ],
+  "status": "data_rehearsal"
+}

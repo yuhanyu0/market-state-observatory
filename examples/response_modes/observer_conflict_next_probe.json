@@ -1,0 +1,7 @@
+{
+  "mode": "broad_negative_propagation",
+  "direction": "negative",
+  "transmission": "negative_coherence",
+  "episode": "mature",
+  "semantic_theme_required": false
+}

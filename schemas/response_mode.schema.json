@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/response_mode.schema.json",
+  "title": "ResponseMode",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "response_mode_id",
+    "as_of_utc",
+    "semantic_labels",
+    "support",
+    "direction",
+    "propagation",
+    "status"
+  ],
+  "properties": {
+    "response_mode_id": {
+      "type": "string"
+    },
+    "as_of_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "semantic_labels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "support": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "ticker",
+          "weight"
+        ],
+        "properties": {
+          "ticker": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "direction": {
+      "type": "string"
+    },
+    "propagation": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "uncertainty": {
+      "type": [
+        "number",
+        "null"
+      ]
+    }
+  }
+}

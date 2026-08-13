@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/publication_status.schema.json",
+  "title": "PublicationStatus",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "updated_at",
+    "mode",
+    "live_trading_enabled",
+    "formal_data_shadow_started",
+    "model_shadow_started",
+    "paper_positions",
+    "real_orders",
+    "data_ready",
+    "model_estimated",
+    "decision_eligible"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "live_trading_enabled": {
+      "const": false
+    },
+    "formal_data_shadow_started": {
+      "type": "boolean"
+    },
+    "model_shadow_started": {
+      "type": "boolean"
+    },
+    "paper_positions": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "real_orders": {
+      "const": 0
+    },
+    "data_ready": {
+      "type": "boolean"
+    },
+    "model_estimated": {
+      "type": "boolean"
+    },
+    "decision_eligible": {
+      "type": "boolean"
+    }
+  }
+}

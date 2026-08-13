@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/observation.schema.json",
+  "title": "Point-in-time Observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["observation_id", "dataset_type", "ticker", "event_time_utc", "observed_at_utc", "data_max_timestamp", "provider", "collector_request_id", "raw_response_sha256", "backfilled", "data_ready", "model_estimated", "decision_eligible", "values"],
+  "properties": {
+    "observation_id": {"type": "string", "minLength": 1},
+    "dataset_type": {"type": "string", "minLength": 1},
+    "ticker": {"type": "string", "minLength": 1},
+    "theme_id": {"type": ["string", "null"]},
+    "event_time_utc": {"type": "string", "format": "date-time"},
+    "observed_at_utc": {"type": "string", "format": "date-time"},
+    "data_max_timestamp": {"type": "string", "format": "date-time"},
+    "provider": {"type": "string", "minLength": 1},
+    "collector_request_id": {"type": "string", "minLength": 1},
+    "provider_request_id": {"type": ["string", "null"]},
+    "raw_response_sha256": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"},
+    "backfilled": {"const": false},
+    "data_ready": {"type": "boolean"},
+    "model_estimated": {"type": "boolean"},
+    "decision_eligible": {"type": "boolean"},
+    "values": {"type": "object"}
+  }
+}

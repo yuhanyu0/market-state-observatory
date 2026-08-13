@@ -1,0 +1,12 @@
+{
+  "theme_id": "solar_energy",
+  "display_name": "Solar Energy",
+  "tracker_etf": "TAN",
+  "benchmark": "SPY",
+  "constituents": [
+    "FSLR",
+    "ENPH",
+    "RUN"
+  ],
+  "status": "data_rehearsal"
+}

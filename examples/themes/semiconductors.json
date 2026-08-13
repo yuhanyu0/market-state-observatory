@@ -1,0 +1,13 @@
+{
+  "theme_id": "semiconductors",
+  "display_name": "Semiconductors",
+  "tracker_etf": "SMH",
+  "benchmark": "SPY",
+  "constituents": [
+    "NVDA",
+    "AMD",
+    "AVGO",
+    "TSM"
+  ],
+  "status": "data_rehearsal"
+}

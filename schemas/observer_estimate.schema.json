@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/observer_estimate.schema.json",
+  "title": "Observer Estimate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["observer_id", "theme_id", "as_of_utc", "state", "eligible", "uncertainty", "evidence_refs", "metrics", "data_ready", "model_estimated", "decision_eligible"],
+  "properties": {
+    "observer_id": {"type": "string", "minLength": 1},
+    "theme_id": {"type": "string", "minLength": 1},
+    "as_of_utc": {"type": "string", "format": "date-time"},
+    "state": {"type": "string", "minLength": 1},
+    "eligible": {"type": "boolean"},
+    "uncertainty": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "evidence_refs": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "metrics": {"type": "object"},
+    "invalidation": {"type": ["string", "null"]},
+    "notes": {"type": ["string", "null"]},
+    "data_ready": {"type": "boolean"},
+    "model_estimated": {"type": "boolean"},
+    "decision_eligible": {"type": "boolean"},
+    "source_version": {"type": ["string", "null"]},
+    "source_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-fA-F]{64}$"}
+  }
+}

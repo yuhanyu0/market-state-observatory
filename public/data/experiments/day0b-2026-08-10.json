@@ -1,0 +1,146 @@
+{
+  "all_records_explicit_sip": true,
+  "backfill_count": 0,
+  "captured_observation_points": [
+    "15:30",
+    "15:45",
+    "provider_session_close"
+  ],
+  "captured_valid_records": 666,
+  "collector": {
+    "bundle_sha256": "695537a203fcd840a7f5744866899ca2c622cacb5aab064e08e80db81f1d439d",
+    "tests": "124 passed"
+  },
+  "counts_toward_20_day_gate": false,
+  "counts_toward_model_shadow": false,
+  "credential_values_persisted": false,
+  "experiment_id": "day0b-alpaca-sip-20260810-03",
+  "feed": "sip",
+  "future_timestamp_count": 0,
+  "interpretation_boundary": [
+    "Data-ready does not mean Direction is positive.",
+    "Transmission-ready means required inputs are complete, not that broad transmission was observed.",
+    "Episode remains unavailable until a legal sequential history exists.",
+    "C2 remains disabled and does not block ETF-level evidence collection.",
+    "This rehearsal is infrastructure evidence and does not authorize paper or live positions."
+  ],
+  "missed_observation_points": [
+    "09:30",
+    "12:00"
+  ],
+  "missed_records": 74,
+  "next_milestone": "Run one full automated rehearsal including 09:30 and 12:00, then begin formal Data Shadow only after the full-day chain passes.",
+  "paper_positions_allowed": false,
+  "pending_records": 0,
+  "planned_records": 740,
+  "provider": "Alpaca Market Data SIP",
+  "published_at": "2026-08-10T16:00:42-04:00",
+  "quote_age_max_seconds": {
+    "15_30": 13.401112,
+    "15_45": 9.967655,
+    "smoke_test": 16.947581
+  },
+  "readiness_at_15_45": {
+    "c2_ready_themes": 0,
+    "direction_data_ready_themes": 6,
+    "episode_ready_themes": 0,
+    "theme_count": 6,
+    "transmission_data_ready_themes": 6
+  },
+  "real_orders_allowed": false,
+  "schema_version": "mso-public-rehearsal-summary-v0.1",
+  "status": "PASS_PARTIAL_AFTERNOON_CHAIN",
+  "themes": [
+    {
+      "blocking_reason_at_15_45": "none",
+      "c2_ready": false,
+      "constituent_coverage": 1.0,
+      "direction_data_ready_at_15_45": true,
+      "episode_ready": false,
+      "membership_frozen_point_in_time": true,
+      "minute_bar_coverage": 1.0,
+      "quote_age_15_30_seconds": 0.098768,
+      "quote_age_15_45_seconds": 0.067633,
+      "theme_etf": "SMH",
+      "theme_id": "semiconductors",
+      "transmission_data_ready_at_15_45": true,
+      "vwap_status": "valid"
+    },
+    {
+      "blocking_reason_at_15_45": "none",
+      "c2_ready": false,
+      "constituent_coverage": 1.0,
+      "direction_data_ready_at_15_45": true,
+      "episode_ready": false,
+      "membership_frozen_point_in_time": true,
+      "minute_bar_coverage": 1.0,
+      "quote_age_15_30_seconds": 0.138741,
+      "quote_age_15_45_seconds": 0.732905,
+      "theme_etf": "SKYY",
+      "theme_id": "cloud_computing",
+      "transmission_data_ready_at_15_45": true,
+      "vwap_status": "valid"
+    },
+    {
+      "blocking_reason_at_15_45": "none",
+      "c2_ready": false,
+      "constituent_coverage": 1.0,
+      "direction_data_ready_at_15_45": true,
+      "episode_ready": false,
+      "membership_frozen_point_in_time": true,
+      "minute_bar_coverage": 1.0,
+      "quote_age_15_30_seconds": 6.810884,
+      "quote_age_15_45_seconds": 0.559511,
+      "theme_etf": "CIBR",
+      "theme_id": "cybersecurity",
+      "transmission_data_ready_at_15_45": true,
+      "vwap_status": "valid"
+    },
+    {
+      "blocking_reason_at_15_45": "none",
+      "c2_ready": false,
+      "constituent_coverage": 1.0,
+      "direction_data_ready_at_15_45": true,
+      "episode_ready": false,
+      "membership_frozen_point_in_time": true,
+      "minute_bar_coverage": 1.0,
+      "quote_age_15_30_seconds": 0.375032,
+      "quote_age_15_45_seconds": 0.020945,
+      "theme_etf": "URA",
+      "theme_id": "uranium_nuclear",
+      "transmission_data_ready_at_15_45": true,
+      "vwap_status": "valid"
+    },
+    {
+      "blocking_reason_at_15_45": "none",
+      "c2_ready": false,
+      "constituent_coverage": 1.0,
+      "direction_data_ready_at_15_45": true,
+      "episode_ready": false,
+      "membership_frozen_point_in_time": true,
+      "minute_bar_coverage": 1.0,
+      "quote_age_15_30_seconds": 4.378289,
+      "quote_age_15_45_seconds": 9.967655,
+      "theme_etf": "TAN",
+      "theme_id": "solar_energy",
+      "transmission_data_ready_at_15_45": true,
+      "vwap_status": "valid"
+    },
+    {
+      "blocking_reason_at_15_45": "none",
+      "c2_ready": false,
+      "constituent_coverage": 1.0,
+      "direction_data_ready_at_15_45": true,
+      "episode_ready": false,
+      "membership_frozen_point_in_time": true,
+      "minute_bar_coverage": 1.0,
+      "quote_age_15_30_seconds": 13.401112,
+      "quote_age_15_45_seconds": 0.514776,
+      "theme_etf": "UFO",
+      "theme_id": "commercial_space",
+      "transmission_data_ready_at_15_45": true,
+      "vwap_status": "valid"
+    }
+  ],
+  "trading_date": "2026-08-10"
+}

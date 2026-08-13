@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/playbook_decision.schema.json",
+  "title": "Stateful Playbook Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["theme_id", "as_of_utc", "playbook", "action", "currently_held", "eligible", "reason", "previous_state", "vehicle", "invalidation", "decision_status", "paper_only", "real_order_created"],
+  "properties": {
+    "theme_id": {"type": "string"},
+    "as_of_utc": {"type": "string", "format": "date-time"},
+    "playbook": {"enum": ["A_transition_breakout", "B_retest_continuation", "D_wait_unresolved", "F_overextended_no_chase", "NoScript"]},
+    "action": {"enum": ["ENTER", "ENTER_MODEL_SHADOW", "HOLD", "REDUCE_MODEL_SHADOW", "EXIT", "WAIT"]},
+    "currently_held": {"type": "boolean"},
+    "eligible": {"type": "boolean"},
+    "reason": {"type": "string"},
+    "previous_state": {"type": ["string", "null"]},
+    "vehicle": {"type": ["string", "null"]},
+    "invalidation": {"type": "array", "items": {"type": "string"}},
+    "decision_status": {"enum": ["DATA_BLOCKED_NO_DECISION", "WAIT", "MODEL_SHADOW_ONLY", "PAPER_ELIGIBLE"]},
+    "paper_only": {"const": true},
+    "real_order_created": {"const": false}
+  }
+}

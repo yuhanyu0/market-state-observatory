@@ -1,0 +1,15 @@
+name: Bug report
+description: Report a reproducible implementation defect
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Reproduction and evidence grade
+    validations:
+      required: true

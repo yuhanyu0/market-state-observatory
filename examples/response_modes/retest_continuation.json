@@ -1,0 +1,7 @@
+{
+  "mode": "broad_positive_propagation",
+  "direction": "positive",
+  "transmission": "broad_confirmed",
+  "episode": "retest",
+  "semantic_theme_required": false
+}

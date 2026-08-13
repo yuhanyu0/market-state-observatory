@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/next_probe.schema.json",
+  "title": "Next Discriminating Probe",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["probe_id", "theme_id", "question", "acquire", "distinguishes", "deadline_utc", "expected_information_value", "acquisition_cost", "latency", "reason", "status"],
+  "properties": {
+    "probe_id": {"type": "string", "minLength": 1},
+    "theme_id": {"type": "string", "minLength": 1},
+    "question": {"type": "string", "minLength": 1},
+    "acquire": {"type": "string", "minLength": 1},
+    "distinguishes": {"type": "array", "prefixItems": [{"type": "string"}, {"type": "string"}], "items": false, "minItems": 2, "maxItems": 2},
+    "deadline_utc": {"type": "string", "format": "date-time"},
+    "expected_information_value": {"enum": ["low", "medium", "high"]},
+    "acquisition_cost": {"type": "string", "minLength": 1},
+    "latency": {"type": "string", "minLength": 1},
+    "reason": {"type": "string", "minLength": 1},
+    "status": {"enum": ["proposed", "scheduled", "complete", "missed"]}
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "experiment_id": "synthetic-positive_exhausted",
+  "title": "Positive Exhausted",
+  "evidence_grade": "synthetic_demo",
+  "hypothesis": "The structured evidence pipeline preserves uncertainty and action boundaries.",
+  "frozen_before_results": true,
+  "status": "REFERENCE_DEMO",
+  "counts_toward_strategy_evidence": false,
+  "real_orders_allowed": false
+}

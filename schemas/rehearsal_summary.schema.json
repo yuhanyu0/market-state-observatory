@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/rehearsal_summary.schema.json",
+  "title": "PublicRehearsalSummary",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "experiment_id",
+    "trading_date",
+    "published_at",
+    "status",
+    "provider",
+    "feed",
+    "counts_toward_20_day_gate",
+    "counts_toward_model_shadow",
+    "paper_positions_allowed",
+    "real_orders_allowed",
+    "planned_records",
+    "captured_valid_records",
+    "missed_records",
+    "pending_records",
+    "future_timestamp_count",
+    "backfill_count",
+    "all_records_explicit_sip",
+    "credential_values_persisted",
+    "themes"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "experiment_id": {
+      "type": "string"
+    },
+    "trading_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string"
+    },
+    "provider": {
+      "type": "string"
+    },
+    "feed": {
+      "const": "sip"
+    },
+    "counts_toward_20_day_gate": {
+      "const": false
+    },
+    "counts_toward_model_shadow": {
+      "const": false
+    },
+    "paper_positions_allowed": {
+      "const": false
+    },
+    "real_orders_allowed": {
+      "const": false
+    },
+    "planned_records": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "captured_valid_records": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "missed_records": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "pending_records": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "future_timestamp_count": {
+      "const": 0
+    },
+    "backfill_count": {
+      "const": 0
+    },
+    "all_records_explicit_sip": {
+      "const": true
+    },
+    "credential_values_persisted": {
+      "const": false
+    },
+    "themes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "theme_id",
+          "theme_etf",
+          "direction_data_ready_at_15_45",
+          "transmission_data_ready_at_15_45",
+          "episode_ready",
+          "c2_ready"
+        ],
+        "properties": {
+          "theme_id": {
+            "type": "string"
+          },
+          "theme_etf": {
+            "type": "string"
+          },
+          "direction_data_ready_at_15_45": {
+            "type": "boolean"
+          },
+          "transmission_data_ready_at_15_45": {
+            "type": "boolean"
+          },
+          "episode_ready": {
+            "type": "boolean"
+          },
+          "c2_ready": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

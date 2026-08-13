@@ -1,0 +1,45 @@
+version: mso-publication-policy-v1
+allowed_output_root: public/data
+raw_market_data_redistribution_allowed: false
+allowed_content:
+  - readiness
+  - freshness
+  - missingness
+  - aggregate_observer_states
+  - observer_conflicts
+  - state_certificates
+  - experiment_progress
+  - aggregate_model_shadow_metrics
+forbidden_fields:
+  - account_id
+  - account_number
+  - api_key
+  - api_secret
+  - authorization
+  - broker_position
+  - collector_request_id
+  - credential
+  - exact_execution
+  - order_id
+  - orders
+  - positions
+  - provider_payload
+  - provider_request_id
+  - raw_response
+  - raw_response_path
+  - raw_response_sha256
+  - request_started_at_utc
+  - sanitized_request_parameters
+  - response_headers_sha256
+  - token
+forbidden_paths:
+  - raw
+  - private
+  - secrets
+  - data_shadow
+  - model_shadow
+  - orders
+  - positions
+required_fixed_values:
+  paper_positions: 0
+  real_orders: 0

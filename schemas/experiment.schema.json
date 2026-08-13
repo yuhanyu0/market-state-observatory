@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/experiment.schema.json",
+  "title": "Research Experiment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["experiment_id", "title", "evidence_grade", "hypothesis", "frozen_before_results", "status", "counts_toward_strategy_evidence", "real_orders_allowed"],
+  "properties": {
+    "experiment_id": {"type": "string"}, "title": {"type": "string"}, "evidence_grade": {"type": "string"}, "hypothesis": {"type": "string"}, "frozen_before_results": {"type": "boolean"}, "status": {"type": "string"}, "counts_toward_strategy_evidence": {"type": "boolean"}, "real_orders_allowed": {"const": false}
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "response_mode_id": "demo-mode-001",
+  "as_of_utc": "2026-08-10T19:45:00Z",
+  "semantic_labels": [
+    "semiconductors"
+  ],
+  "support": [
+    {
+      "ticker": "SMH",
+      "weight": 0.5
+    },
+    {
+      "ticker": "NVDA",
+      "weight": 0.2
+    },
+    {
+      "ticker": "AMD",
+      "weight": 0.15
+    },
+    {
+      "ticker": "AVGO",
+      "weight": 0.15
+    }
+  ],
+  "direction": "unresolved",
+  "propagation": "not_estimable",
+  "status": "synthetic_demo",
+  "uncertainty": null
+}

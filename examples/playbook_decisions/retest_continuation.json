@@ -1,0 +1,17 @@
+{
+  "theme_id": "semiconductors",
+  "as_of_utc": "2026-08-10T19:45:00Z",
+  "playbook": "B_retest_continuation",
+  "action": "ENTER",
+  "currently_held": false,
+  "eligible": true,
+  "reason": "A qualified retest preserves the positive response state.",
+  "previous_state": null,
+  "vehicle": "Theme_ETF",
+  "invalidation": [
+    "The retest loses Direction or broad Transmission."
+  ],
+  "decision_status": "MODEL_SHADOW_ONLY",
+  "paper_only": true,
+  "real_order_created": false
+}

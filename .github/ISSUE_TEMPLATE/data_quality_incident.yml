@@ -1,0 +1,16 @@
+name: Data quality incident
+description: Report timestamp, lineage, coverage or backfill problems
+body:
+  - type: textarea
+    id: incident
+    attributes:
+      label: Incident
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options: [observation blocked, day invalid, publication risk, credential risk]
+    validations:
+      required: true

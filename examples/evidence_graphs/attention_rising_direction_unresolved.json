@@ -1,0 +1,139 @@
+{
+  "graph_id": "evidence-5b66918758b955827351ad2c",
+  "as_of_utc": "2026-08-10T19:45:00Z",
+  "nodes": [
+    {
+      "id": "estimate:direction:semiconductors",
+      "kind": "estimate",
+      "label": "unresolved",
+      "payload": {
+        "observer_id": "direction",
+        "eligible": true,
+        "uncertainty": 0.2,
+        "data_ready": true,
+        "model_estimated": true,
+        "decision_eligible": true
+      }
+    },
+    {
+      "id": "observation:synthetic:attention_rising_direction_unresolved:direction",
+      "kind": "observation",
+      "label": "synthetic:attention_rising_direction_unresolved:direction",
+      "payload": {}
+    },
+    {
+      "id": "estimate:transmission:semiconductors",
+      "kind": "estimate",
+      "label": "absent",
+      "payload": {
+        "observer_id": "transmission",
+        "eligible": true,
+        "uncertainty": 0.2,
+        "data_ready": true,
+        "model_estimated": true,
+        "decision_eligible": true
+      }
+    },
+    {
+      "id": "observation:synthetic:attention_rising_direction_unresolved:transmission",
+      "kind": "observation",
+      "label": "synthetic:attention_rising_direction_unresolved:transmission",
+      "payload": {}
+    },
+    {
+      "id": "estimate:episode:semiconductors",
+      "kind": "estimate",
+      "label": "not_estimable",
+      "payload": {
+        "observer_id": "episode",
+        "eligible": true,
+        "uncertainty": 0.2,
+        "data_ready": true,
+        "model_estimated": true,
+        "decision_eligible": true
+      }
+    },
+    {
+      "id": "observation:synthetic:attention_rising_direction_unresolved:episode",
+      "kind": "observation",
+      "label": "synthetic:attention_rising_direction_unresolved:episode",
+      "payload": {}
+    },
+    {
+      "id": "estimate:theme_radar_attention:semiconductors",
+      "kind": "estimate",
+      "label": "rising",
+      "payload": {
+        "observer_id": "theme_radar_attention",
+        "eligible": true,
+        "uncertainty": 0.2,
+        "data_ready": true,
+        "model_estimated": true,
+        "decision_eligible": false
+      }
+    },
+    {
+      "id": "observation:synthetic:attention_rising_direction_unresolved:theme_radar_attention",
+      "kind": "observation",
+      "label": "synthetic:attention_rising_direction_unresolved:theme_radar_attention",
+      "payload": {}
+    },
+    {
+      "id": "estimate:fragility:semiconductors",
+      "kind": "estimate",
+      "label": "medium",
+      "payload": {
+        "observer_id": "fragility",
+        "eligible": true,
+        "uncertainty": 0.2,
+        "data_ready": true,
+        "model_estimated": true,
+        "decision_eligible": true
+      }
+    },
+    {
+      "id": "observation:synthetic:attention_rising_direction_unresolved:fragility",
+      "kind": "observation",
+      "label": "synthetic:attention_rising_direction_unresolved:fragility",
+      "payload": {}
+    }
+  ],
+  "edges": [
+    {
+      "source": "observation:synthetic:attention_rising_direction_unresolved:direction",
+      "target": "estimate:direction:semiconductors",
+      "relation": "supports",
+      "weight": null
+    },
+    {
+      "source": "observation:synthetic:attention_rising_direction_unresolved:transmission",
+      "target": "estimate:transmission:semiconductors",
+      "relation": "supports",
+      "weight": null
+    },
+    {
+      "source": "observation:synthetic:attention_rising_direction_unresolved:episode",
+      "target": "estimate:episode:semiconductors",
+      "relation": "supports",
+      "weight": null
+    },
+    {
+      "source": "observation:synthetic:attention_rising_direction_unresolved:theme_radar_attention",
+      "target": "estimate:theme_radar_attention:semiconductors",
+      "relation": "supports",
+      "weight": null
+    },
+    {
+      "source": "observation:synthetic:attention_rising_direction_unresolved:fragility",
+      "target": "estimate:fragility:semiconductors",
+      "relation": "supports",
+      "weight": null
+    },
+    {
+      "source": "estimate:theme_radar_attention:semiconductors",
+      "target": "estimate:direction:semiconductors",
+      "relation": "contradicts",
+      "weight": null
+    }
+  ]
+}

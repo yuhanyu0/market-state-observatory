@@ -1,0 +1,133 @@
+{
+  "graph_id": "evidence-28036a7aee6bce40ac15b350",
+  "as_of_utc": "2026-08-10T19:45:00Z",
+  "nodes": [
+    {
+      "id": "estimate:direction:semiconductors",
+      "kind": "estimate",
+      "label": "unresolved",
+      "payload": {
+        "observer_id": "direction",
+        "eligible": false,
+        "uncertainty": null,
+        "data_ready": false,
+        "model_estimated": false,
+        "decision_eligible": false
+      }
+    },
+    {
+      "id": "observation:synthetic:data_blocked:direction",
+      "kind": "observation",
+      "label": "synthetic:data_blocked:direction",
+      "payload": {}
+    },
+    {
+      "id": "estimate:transmission:semiconductors",
+      "kind": "estimate",
+      "label": "not_estimable",
+      "payload": {
+        "observer_id": "transmission",
+        "eligible": false,
+        "uncertainty": null,
+        "data_ready": false,
+        "model_estimated": false,
+        "decision_eligible": false
+      }
+    },
+    {
+      "id": "observation:synthetic:data_blocked:transmission",
+      "kind": "observation",
+      "label": "synthetic:data_blocked:transmission",
+      "payload": {}
+    },
+    {
+      "id": "estimate:episode:semiconductors",
+      "kind": "estimate",
+      "label": "not_estimable",
+      "payload": {
+        "observer_id": "episode",
+        "eligible": false,
+        "uncertainty": null,
+        "data_ready": false,
+        "model_estimated": false,
+        "decision_eligible": false
+      }
+    },
+    {
+      "id": "observation:synthetic:data_blocked:episode",
+      "kind": "observation",
+      "label": "synthetic:data_blocked:episode",
+      "payload": {}
+    },
+    {
+      "id": "estimate:theme_radar_attention:semiconductors",
+      "kind": "estimate",
+      "label": "not_available",
+      "payload": {
+        "observer_id": "theme_radar_attention",
+        "eligible": true,
+        "uncertainty": 0.2,
+        "data_ready": true,
+        "model_estimated": true,
+        "decision_eligible": false
+      }
+    },
+    {
+      "id": "observation:synthetic:data_blocked:theme_radar_attention",
+      "kind": "observation",
+      "label": "synthetic:data_blocked:theme_radar_attention",
+      "payload": {}
+    },
+    {
+      "id": "estimate:fragility:semiconductors",
+      "kind": "estimate",
+      "label": "unknown",
+      "payload": {
+        "observer_id": "fragility",
+        "eligible": false,
+        "uncertainty": null,
+        "data_ready": false,
+        "model_estimated": false,
+        "decision_eligible": false
+      }
+    },
+    {
+      "id": "observation:synthetic:data_blocked:fragility",
+      "kind": "observation",
+      "label": "synthetic:data_blocked:fragility",
+      "payload": {}
+    }
+  ],
+  "edges": [
+    {
+      "source": "observation:synthetic:data_blocked:direction",
+      "target": "estimate:direction:semiconductors",
+      "relation": "supports",
+      "weight": null
+    },
+    {
+      "source": "observation:synthetic:data_blocked:transmission",
+      "target": "estimate:transmission:semiconductors",
+      "relation": "supports",
+      "weight": null
+    },
+    {
+      "source": "observation:synthetic:data_blocked:episode",
+      "target": "estimate:episode:semiconductors",
+      "relation": "supports",
+      "weight": null
+    },
+    {
+      "source": "observation:synthetic:data_blocked:theme_radar_attention",
+      "target": "estimate:theme_radar_attention:semiconductors",
+      "relation": "supports",
+      "weight": null
+    },
+    {
+      "source": "observation:synthetic:data_blocked:fragility",
+      "target": "estimate:fragility:semiconductors",
+      "relation": "supports",
+      "weight": null
+    }
+  ]
+}

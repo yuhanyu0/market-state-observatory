@@ -1,0 +1,12 @@
+{
+  "theme_id": "uranium_nuclear",
+  "display_name": "Uranium & Nuclear",
+  "tracker_etf": "URA",
+  "benchmark": "SPY",
+  "constituents": [
+    "CCJ",
+    "UEC",
+    "OKLO"
+  ],
+  "status": "data_rehearsal"
+}

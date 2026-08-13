@@ -1,0 +1,10 @@
+{
+  "experiment_id": "synthetic-observer_conflict_next_probe",
+  "title": "Observer Conflict Next Probe",
+  "evidence_grade": "synthetic_demo",
+  "hypothesis": "The structured evidence pipeline preserves uncertainty and action boundaries.",
+  "frozen_before_results": true,
+  "status": "REFERENCE_DEMO",
+  "counts_toward_strategy_evidence": false,
+  "real_orders_allowed": false
+}

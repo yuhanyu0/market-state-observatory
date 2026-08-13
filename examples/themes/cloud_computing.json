@@ -1,0 +1,13 @@
+{
+  "theme_id": "cloud_computing",
+  "display_name": "Cloud Computing",
+  "tracker_etf": "SKYY",
+  "benchmark": "SPY",
+  "constituents": [
+    "MSFT",
+    "ORCL",
+    "CRM",
+    "NOW"
+  ],
+  "status": "data_rehearsal"
+}

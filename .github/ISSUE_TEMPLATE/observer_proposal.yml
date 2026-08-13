@@ -1,0 +1,15 @@
+name: Observer proposal
+description: Propose a new independent observer
+body:
+  - type: input
+    id: target
+    attributes:
+      label: Target question
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Point-in-time input and validation contract
+    validations:
+      required: true

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/reflexive_memory_entry.schema.json",
+  "title": "Reflexive Memory Entry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["entry_id", "certificate_id", "recorded_at_utc", "prior_state", "observed_outcome", "invalidation_triggered", "lesson", "may_change_core_contract"],
+  "properties": {
+    "entry_id": {"type": "string"}, "certificate_id": {"type": "string"}, "recorded_at_utc": {"type": "string", "format": "date-time"}, "prior_state": {"type": "string"}, "observed_outcome": {"type": "string"}, "invalidation_triggered": {"type": "boolean"}, "lesson": {"type": "string"}, "may_change_core_contract": {"const": false}
+  }
+}

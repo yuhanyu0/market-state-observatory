@@ -1,0 +1,52 @@
+{
+  "schema_version": "mso-runtime-universe-v1",
+  "frozen_at_utc": "2026-08-12T00:00:00Z",
+  "benchmark": "SPY",
+  "themes": [
+    {
+      "theme_id": "semiconductors",
+      "display_name": "Semiconductors",
+      "theme_etf": "SMH",
+      "industry_benchmark": "SOXX",
+      "basket": ["NVDA", "AMD", "AVGO", "TSM"]
+    },
+    {
+      "theme_id": "cloud_computing",
+      "display_name": "Cloud Computing",
+      "theme_etf": "SKYY",
+      "industry_benchmark": "CLOU",
+      "basket": ["MSFT", "ORCL", "CRM", "NOW"]
+    },
+    {
+      "theme_id": "cybersecurity",
+      "display_name": "Cybersecurity",
+      "theme_etf": "CIBR",
+      "industry_benchmark": "HACK",
+      "basket": ["CRWD", "PANW", "FTNT", "CSCO"]
+    },
+    {
+      "theme_id": "uranium_nuclear",
+      "display_name": "Uranium & Nuclear",
+      "theme_etf": "URA",
+      "industry_benchmark": "NLR",
+      "basket": ["CCJ", "UEC", "OKLO"]
+    },
+    {
+      "theme_id": "solar_energy",
+      "display_name": "Solar Energy",
+      "theme_etf": "TAN",
+      "industry_benchmark": "ICLN",
+      "basket": ["FSLR", "ENPH", "RUN"]
+    },
+    {
+      "theme_id": "commercial_space",
+      "display_name": "Commercial Space",
+      "theme_etf": "UFO",
+      "industry_benchmark": "ARKX",
+      "basket": ["RKLB", "ASTS", "IRDM", "PL"]
+    }
+  ],
+  "c2_enabled": false,
+  "paper_positions_allowed": false,
+  "real_orders_allowed": false
+}

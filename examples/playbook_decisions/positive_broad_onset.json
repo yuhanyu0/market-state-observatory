@@ -1,0 +1,17 @@
+{
+  "theme_id": "semiconductors",
+  "as_of_utc": "2026-08-10T19:45:00Z",
+  "playbook": "A_transition_breakout",
+  "action": "ENTER",
+  "currently_held": false,
+  "eligible": true,
+  "reason": "Positive Direction and broad Transmission support the transition option.",
+  "previous_state": null,
+  "vehicle": "Theme_ETF",
+  "invalidation": [
+    "Direction or Transmission confirmation fails."
+  ],
+  "decision_status": "MODEL_SHADOW_ONLY",
+  "paper_only": true,
+  "real_order_created": false
+}

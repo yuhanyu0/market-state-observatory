@@ -1,0 +1,97 @@
+[
+  {
+    "observer_id": "direction",
+    "theme_id": "semiconductors",
+    "as_of_utc": "2026-08-10T19:45:00Z",
+    "state": "negative",
+    "eligible": true,
+    "uncertainty": 0.2,
+    "evidence_refs": [
+      "synthetic:negative_broad_propagation:direction"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition.",
+    "notes": null,
+    "data_ready": true,
+    "model_estimated": true,
+    "decision_eligible": true,
+    "source_version": null,
+    "source_sha256": null
+  },
+  {
+    "observer_id": "transmission",
+    "theme_id": "semiconductors",
+    "as_of_utc": "2026-08-10T19:45:00Z",
+    "state": "broad_confirmed",
+    "eligible": true,
+    "uncertainty": 0.2,
+    "evidence_refs": [
+      "synthetic:negative_broad_propagation:transmission"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition.",
+    "notes": null,
+    "data_ready": true,
+    "model_estimated": true,
+    "decision_eligible": true,
+    "source_version": null,
+    "source_sha256": null
+  },
+  {
+    "observer_id": "episode",
+    "theme_id": "semiconductors",
+    "as_of_utc": "2026-08-10T19:45:00Z",
+    "state": "reversal",
+    "eligible": true,
+    "uncertainty": 0.2,
+    "evidence_refs": [
+      "synthetic:negative_broad_propagation:episode"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition.",
+    "notes": null,
+    "data_ready": true,
+    "model_estimated": true,
+    "decision_eligible": true,
+    "source_version": null,
+    "source_sha256": null
+  },
+  {
+    "observer_id": "theme_radar_attention",
+    "theme_id": "semiconductors",
+    "as_of_utc": "2026-08-10T19:45:00Z",
+    "state": "high",
+    "eligible": true,
+    "uncertainty": 0.2,
+    "evidence_refs": [
+      "synthetic:negative_broad_propagation:theme_radar_attention"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition.",
+    "notes": null,
+    "data_ready": true,
+    "model_estimated": true,
+    "decision_eligible": false,
+    "source_version": null,
+    "source_sha256": null
+  },
+  {
+    "observer_id": "fragility",
+    "theme_id": "semiconductors",
+    "as_of_utc": "2026-08-10T19:45:00Z",
+    "state": "high",
+    "eligible": true,
+    "uncertainty": 0.2,
+    "evidence_refs": [
+      "synthetic:negative_broad_propagation:fragility"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition.",
+    "notes": null,
+    "data_ready": true,
+    "model_estimated": true,
+    "decision_eligible": true,
+    "source_version": null,
+    "source_sha256": null
+  }
+]

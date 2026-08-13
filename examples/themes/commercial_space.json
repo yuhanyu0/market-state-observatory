@@ -1,0 +1,13 @@
+{
+  "theme_id": "commercial_space",
+  "display_name": "Commercial Space",
+  "tracker_etf": "UFO",
+  "benchmark": "SPY",
+  "constituents": [
+    "RKLB",
+    "ASTS",
+    "IRDM",
+    "PL"
+  ],
+  "status": "data_rehearsal"
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/validation_result.schema.json",
+  "title": "ValidationResult",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "validation_id",
+    "layer",
+    "evidence_grade",
+    "sample_count",
+    "status",
+    "metrics"
+  ],
+  "properties": {
+    "validation_id": {
+      "type": "string"
+    },
+    "layer": {
+      "enum": [
+        "data",
+        "direction",
+        "transmission",
+        "episode",
+        "playbook",
+        "vehicle",
+        "theme_radar_increment"
+      ]
+    },
+    "evidence_grade": {
+      "type": "string"
+    },
+    "sample_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "enum": [
+        "not_started",
+        "data_blocked",
+        "exploratory",
+        "low_power",
+        "failed",
+        "passed"
+      ]
+    },
+    "metrics": {
+      "type": "object"
+    }
+  }
+}

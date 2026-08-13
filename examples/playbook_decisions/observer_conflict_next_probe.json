@@ -1,0 +1,17 @@
+{
+  "theme_id": "semiconductors",
+  "as_of_utc": "2026-08-10T19:45:00Z",
+  "playbook": "D_wait_unresolved",
+  "action": "WAIT",
+  "currently_held": false,
+  "eligible": false,
+  "reason": "Required Direction and Transmission evidence is unresolved.",
+  "previous_state": null,
+  "vehicle": "Theme_ETF",
+  "invalidation": [
+    "Direction and broad Transmission must both confirm."
+  ],
+  "decision_status": "WAIT",
+  "paper_only": true,
+  "real_order_created": false
+}

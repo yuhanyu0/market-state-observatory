@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "scenario_count": 8,
+  "real_orders_created": 0,
+  "allowed_decision_states": [
+    "DATA_BLOCKED_NO_DECISION",
+    "WAIT",
+    "MODEL_SHADOW_ONLY"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "observation_id": "synthetic-positive_exhausted",
+  "dataset_type": "synthetic_reference_state",
+  "ticker": "SYNTH",
+  "theme_id": "semiconductors",
+  "event_time_utc": "2026-08-10T19:45:00Z",
+  "observed_at_utc": "2026-08-10T19:45:01Z",
+  "data_max_timestamp": "2026-08-10T19:45:00Z",
+  "provider": "synthetic_reference_demo",
+  "collector_request_id": "synthetic-positive_exhausted",
+  "provider_request_id": null,
+  "raw_response_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "backfilled": false,
+  "data_ready": true,
+  "model_estimated": false,
+  "decision_eligible": false,
+  "values": {
+    "scenario": "positive_exhausted"
+  }
+}
