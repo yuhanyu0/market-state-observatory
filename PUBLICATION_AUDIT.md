@@ -1,6 +1,6 @@
 # Publication Audit
 
-Status: **PASS locally; remote publication pending the first verified push.**
+Status: **PASS locally and in GitHub Actions; Pages deployed.**
 
 ## Passed
 
@@ -19,8 +19,13 @@ Status: **PASS locally; remote publication pending the first verified push.**
 ## Not performed
 
 - No private quality artifact exists to publish.
-- No `public-data` commit or push was created.
-- GitHub CLI authentication is available through the system keyring. GitHub
-  Pages remains undeployed until the first verified repository push.
 - SIP redistribution rights were treated conservatively; no raw or near-raw SIP
   market data is in the public tree.
+
+## Remote result
+
+- The initial `public-data` branch contains only redacted `data/` artifacts.
+- GitHub Actions passed schema validation, secret scan, private-path rejection,
+  Python tests, React tests, production build, and link checks.
+- GitHub Pages is live at
+  `https://yuhanyu0.github.io/market-state-observatory/`.

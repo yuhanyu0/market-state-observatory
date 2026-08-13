@@ -2,11 +2,13 @@
 param()
 
 $ErrorActionPreference = 'Stop'
-if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+$ghCommand = Get-Command gh -ErrorAction SilentlyContinue
+$ghPath = if ($ghCommand) { $ghCommand.Source } else { Join-Path $env:ProgramFiles 'GitHub CLI\gh.exe' }
+if (-not (Test-Path -LiteralPath $ghPath -PathType Leaf)) {
     Write-Output 'GITHUB_CLI=ABSENT'
     exit 1
 }
-& gh auth status
+& $ghPath auth status
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 $helper = (& git config --global credential.helper) -join ','
 if ($helper -match '(^|,)store($|,)') {

@@ -10,7 +10,8 @@
 - Data-only daily daemon and independent quality engine.
 - Windows scheduler install/uninstall/status/smoke tooling.
 - Public projection, policy, redaction, schema, secret scan, manifest, worktree
-  publisher, public-data push, and Pages dispatch.
+  publisher, public-data push, and Pages dispatch wired after a successful
+  formal collection day only.
 - CI for Python 3.11/3.12, React, security, schemas, and performance budget.
 
 ## Host state at handoff
@@ -20,7 +21,10 @@
 - GitHub CLI 2.97.0: installed and authenticated as `yuhanyu0` through the
   system keyring; no token value was requested or persisted by the project.
 - Scheduled task: not installed; next run unavailable.
-- `public-data` branch: not created locally or remotely.
+- Repository: https://github.com/yuhanyu0/market-state-observatory (`PUBLIC`).
+- Pages: https://yuhanyu0.github.io/market-state-observatory/ (HTTP 200).
+- `public-data` branch: active; its initial tree contains only redacted `data/`
+  artifacts. No private quality artifact has yet produced a daily update.
 - Formal Data Shadow: not started. Model Shadow: not started.
 - Paper positions: 0. Real orders: 0.
 

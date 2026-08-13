@@ -26,5 +26,5 @@ methodology read. Theme cards never confuse data readiness with signed state.
 ## Boundary
 
 Formal Data Shadow and Model Shadow are not started. No paper position or real
-order exists. GitHub authentication is complete; publication remains gated on
-the final local acceptance checks and first verified push.
+order exists. GitHub authentication uses the system keyring, `main` and the
+redacted `public-data` branch are pushed, and the Pages deployment is live.

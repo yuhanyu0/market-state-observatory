@@ -1,8 +1,8 @@
 # Known Limitations
 
 - The host has not completed DPAPI credential setup or a full-day rehearsal.
-- GitHub CLI authentication is ready, but the target repository, `public-data`
-  branch, and Pages deployment are not available until the first verified push.
+- GitHub repository, `public-data`, and Pages are active, but daily publication
+  cannot run until DPAPI credential setup and Task Scheduler installation.
 - Task Scheduler v1 requires the user to be logged on and Windows set to Eastern
   Time; Python independently handles DST through `America/New_York`.
 - The exchange calendar covers standard NYSE holidays and common early closes,

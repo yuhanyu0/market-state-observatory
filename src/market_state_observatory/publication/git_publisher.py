@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -7,6 +8,18 @@ from pathlib import Path
 
 class GitPublicationError(RuntimeError):
     pass
+
+
+def _github_cli() -> str:
+    command = shutil.which("gh")
+    if command:
+        return command
+    if os.name == "nt":
+        program_files = Path(os.environ.get("PROGRAMFILES", r"C:\Program Files"))
+        candidate = program_files / "GitHub CLI" / "gh.exe"
+        if candidate.is_file():
+            return str(candidate)
+    raise GitPublicationError("GitHub CLI is unavailable; public-data push is blocked")
 
 
 def _git(repository: Path, *arguments: str, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -24,7 +37,7 @@ def _git(repository: Path, *arguments: str, check: bool = True) -> subprocess.Co
 
 def _dispatch_pages(repository: Path) -> None:
     result = subprocess.run(
-        ["gh", "workflow", "run", "pages.yml", "--ref", "main"],
+        [_github_cli(), "workflow", "run", "pages.yml", "--ref", "main"],
         cwd=repository,
         check=False,
         capture_output=True,

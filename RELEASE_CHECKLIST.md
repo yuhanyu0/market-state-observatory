@@ -9,8 +9,8 @@
 - [x] Python, TypeScript, schema, security, and PowerShell checks passed.
 - [x] Old Theme Radar HEAD/status match the recorded baseline.
 - [x] Complete GitHub CLI web login using the system keyring.
-- [ ] Create and push `yuhanyu0/market-state-observatory`.
-- [ ] Enable GitHub Pages Actions and record the deployed URL.
+- [x] Create and push `yuhanyu0/market-state-observatory`.
+- [x] Enable GitHub Pages Actions and verify the deployed URL returns HTTP 200.
 - [ ] Initialize DPAPI runtime credential.
 - [ ] Install `MSO-Daily-Runtime` after `-WhatIf` review.
 - [ ] Complete a full-day rehearsal before formal Data Shadow.

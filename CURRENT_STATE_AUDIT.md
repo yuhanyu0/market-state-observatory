@@ -40,3 +40,14 @@ Audit date: 2026-08-13 ET.
 This pass replaces the duplicated public path with `public/data`, keeps all real
 runtime state outside Git, and adds a React product build. The legacy `site/`
 tree is ignored and is no longer a release input.
+
+## Hardening outcome
+
+- The new public repository is
+  `https://github.com/yuhanyu0/market-state-observatory`.
+- `main` contains product source; `public-data` contains redacted data only.
+- GitHub Pages is deployed from Actions at
+  `https://yuhanyu0.github.io/market-state-observatory/`.
+- GitHub authentication uses the system keyring. Alpaca DPAPI credentials,
+  private runtime initialization, and Task Scheduler installation remain
+  deliberately incomplete.

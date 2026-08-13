@@ -6,6 +6,9 @@ Market State Observatory is an independent public research product. It does **no
 [`yuhanyu0/theme-radar-log`](https://github.com/yuhanyu0/theme-radar-log),
 and Theme Radar can enter only as an isolated, unsigned benchmark observer.
 
+- Product: https://yuhanyu0.github.io/market-state-observatory/
+- Repository: https://github.com/yuhanyu0/market-state-observatory
+
 ```text
 Private point-in-time collection
   -> evidence quality
@@ -76,7 +79,9 @@ normally `http://127.0.0.1:5173/`.
 
 The first command initializes the external runtime and stores Alpaca credentials
 with current-user Windows DPAPI. The second never displays a GitHub token. The
-third installs `MSO-Daily-Runtime` and first runs an offline dry-run.
+third installs `MSO-Daily-Runtime` and first runs an offline dry-run. A
+successful formal day then publishes only derived, redacted state to
+`public-data`; rehearsal and failed-quality runs never publish.
 
 ## Validation
 

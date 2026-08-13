@@ -173,3 +173,12 @@ def test_repository_has_no_order_or_position_runtime_modules() -> None:
     universe = json.loads((root / "config" / "runtime_universe_v1.json").read_text())
     assert universe["paper_positions_allowed"] is False
     assert universe["real_orders_allowed"] is False
+
+
+def test_formal_runtime_publishes_only_after_success() -> None:
+    root = Path(__file__).resolve().parents[1]
+    script = (root / "ops" / "windows" / "run_daily_runtime.ps1").read_text(encoding="utf-8")
+    assert "if ($exitCode -eq 0 -and $Mode -eq 'formal')" in script
+    assert "publish_public_snapshot.ps1" in script
+    assert "-PrivateQualityPath $quality.FullName -Push" in script
+    assert "failure_stage = $failureStage" in script

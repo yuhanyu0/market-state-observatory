@@ -2,17 +2,19 @@
 param()
 
 $ErrorActionPreference = 'Stop'
-if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+$ghCommand = Get-Command gh -ErrorAction SilentlyContinue
+$ghPath = if ($ghCommand) { $ghCommand.Source } else { Join-Path $env:ProgramFiles 'GitHub CLI\gh.exe' }
+if (-not (Test-Path -LiteralPath $ghPath -PathType Leaf)) {
     throw 'GitHub CLI is not installed or not on PATH.'
 }
-& gh auth status
+& $ghPath auth status
 if ($LASTEXITCODE -ne 0) {
-    & gh auth login --web --git-protocol https
+    & $ghPath auth login --web --git-protocol https
     if ($LASTEXITCODE -ne 0) { throw 'GitHub web authentication failed.' }
 }
-& gh auth setup-git
+& $ghPath auth setup-git
 if ($LASTEXITCODE -ne 0) { throw 'GitHub Git credential integration failed.' }
-& gh auth status
+& $ghPath auth status
 if ($LASTEXITCODE -ne 0) { throw 'GitHub authentication verification failed.' }
 $helper = (& git config --global credential.helper) -join ','
 if ($helper -match '(^|,)store($|,)') {

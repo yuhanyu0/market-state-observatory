@@ -29,6 +29,6 @@
 - [ ] Complete a full-day rehearsal with no future timestamps or backfill.
 - [ ] Confirm all core ETF Direction inputs and at least 80% constituent coverage.
 - [ ] Confirm issuer membership snapshot is frozen for the run.
-- [ ] Confirm publication audit and Pages build pass.
+- [x] Confirm publication audit and Pages build pass.
 - [ ] Deliberately choose to start formal Data Shadow; setup does not start it.
 - [ ] Confirm Model Shadow, paper positions, and real orders remain disabled.

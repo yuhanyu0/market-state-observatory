@@ -8,6 +8,9 @@ evidence boundary. Theme detail, evidence drawer, printable certificates,
 experiments, data quality, methodology, research, and status are hash-routed for
 static Pages hosting.
 
+The deployed product is available at
+https://yuhanyu0.github.io/market-state-observatory/.
+
 Theme cards explicitly separate `DATA_READY`, `MODEL_ESTIMATED`, and
 `DECISION_ELIGIBLE`. The application never translates input readiness into a
 positive Direction state and shows no BUY/SELL output.

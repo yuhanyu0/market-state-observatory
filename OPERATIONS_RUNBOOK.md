@@ -43,6 +43,9 @@ Manual formal Data Shadow, only after setup and an accepted rehearsal:
 ```
 
 No command may be run after an observation point to reconstruct that point.
+A successful scheduled formal run automatically publishes the derived quality
+snapshot after session close. Rehearsals, failed collection runs, and formal
+runs without an immutable quality artifact do not publish.
 
 ## Health and recovery
 
@@ -59,7 +62,7 @@ older than 15 minutes and its PID is no longer running.
 
 ## Public snapshot
 
-After session quality exists:
+Manual recovery publication after session quality exists:
 
 ```powershell
 .\ops\windows\publish_public_snapshot.ps1 `

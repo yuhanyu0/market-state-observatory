@@ -5,7 +5,7 @@ Playwright Chromium 151.
 
 | Gate | Result |
 |---|---|
-| Python unit/contract/security | PASS, 64 tests |
+| Python unit/contract/security | PASS, 68 tests |
 | Ruff | PASS |
 | strict mypy | PASS, 43 source files |
 | JSON Schema Draft 2020-12 | PASS, 17 schemas |
@@ -14,13 +14,15 @@ Playwright Chromium 151.
 | Playwright desktop/mobile | PASS, 12 tests |
 | axe serious/critical | PASS, zero on Today desktop/mobile |
 | React production build | PASS |
-| initial JavaScript | 182.27 kB raw, 56.98 kB gzip |
+| initial JavaScript | 182.30 kB raw, 56.99 kB gzip |
 | route/asset/public JSON check | PASS, 9 routes |
 | publication audit | PASS |
 | credential/secret scan | PASS |
 | PowerShell parser | PASS, 21 scripts |
 | unattended runtime dry-run | PASS, no network call |
+| Task Scheduler `-WhatIf` preview | PASS, no runtime or task created |
 | synthetic scenarios | PASS, 8 scenarios, zero orders |
+| GitHub Actions | PASS, CI, manifest, publication, Pages |
 
 Public-safe screenshots:
 
