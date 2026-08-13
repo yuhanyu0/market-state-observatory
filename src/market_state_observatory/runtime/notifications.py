@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import contextlib
 import json
 import subprocess
 import uuid
@@ -67,7 +68,7 @@ def emit_local_alert(
     path = alerts_directory / f"{observed}-{payload['alert_id']}.json"
     write_exclusive(path, encoded)
     if toast:
-        try:
+        with contextlib.suppress(OSError, subprocess.SubprocessError):
             subprocess.run(
                 ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", _toast_script(title, message)],
                 check=False,
@@ -75,8 +76,6 @@ def emit_local_alert(
                 text=True,
                 timeout=3,
             )
-        except (OSError, subprocess.SubprocessError):
-            pass
     return path
 
 
