@@ -6,11 +6,14 @@ type Props = { theme: Theme; certificate?: Certificate; onOpen: () => void; onEv
 
 export function ThemeCard({ theme, certificate, onOpen, onEvidence }: Props) {
   const direction = certificate?.direction;
+  const agreement = !certificate || certificate.observer_agreement.estimated_observers < 2
+    ? "INSUFFICIENT_OBSERVERS"
+    : `${Math.round(certificate.observer_agreement.score * 100)}%`;
   return (
     <article className="theme-card">
-      <header><div><p className="ticker">{theme.tracker_etf}</p><h3>{theme.display_name}</h3></div><StatusBadge label="DATA REHEARSAL" state="neutral" /></header>
+      <header><div><p className="ticker">{theme.tracker_etf}</p><h3>{theme.display_name}</h3></div><StatusBadge label={certificate?.evidence_grade.replaceAll("_", " ").toUpperCase() ?? theme.status.toUpperCase()} state="neutral" /></header>
       <dl className="state-grid">
-        <div><dt>Data freshness</dt><dd>Aug 10, 15:45 ET</dd></div>
+        <div><dt>Evidence timestamp</dt><dd>{certificate ? new Date(certificate.as_of_utc).toLocaleString() : "Unavailable"}</dd></div>
         <div><dt>Direction</dt><dd>{direction?.model_estimated ? direction.state : "Not estimated"}</dd></div>
         <div><dt>Transmission</dt><dd>{certificate?.transmission.model_estimated ? certificate.transmission.state : "Not estimated"}</dd></div>
         <div><dt>Episode</dt><dd>{certificate?.episode.state ?? "Unavailable"}</dd></div>
@@ -18,7 +21,7 @@ export function ThemeCard({ theme, certificate, onOpen, onEvidence }: Props) {
         <div><dt>Fragility</dt><dd>{certificate?.fragility.state ?? "Unknown"}</dd></div>
       </dl>
       <div className="card-notice"><CircleHelp aria-hidden="true" /><span>Input readiness is not a positive Direction estimate.</span></div>
-      <p className="conflict-line">Observer conflict: {certificate?.observer_agreement.conflict_count ?? 0} detected</p>
+      <p className="conflict-line">Agreement: {agreement}; conflicts: {certificate?.observer_agreement.conflict_count ?? 0}</p>
       <p className="next-probe"><strong>Next probe</strong>{certificate?.next_probe.acquire ?? "Acquire the next legal point-in-time observation."}</p>
       <footer>
         <button className="text-button" onClick={onEvidence}>Evidence</button>

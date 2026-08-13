@@ -6,7 +6,10 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $runtimeRoot = Join-Path $env:LOCALAPPDATA 'MarketStateObservatoryRuntime'
-$children = @('secrets', 'raw', 'observations', 'data_shadow', 'model_shadow', 'logs', 'locks', 'public_staging', 'backups')
+$children = @(
+    'secrets', 'raw', 'observations', 'data_shadow', 'model_shadow', 'logs', 'locks',
+    'public_staging', 'backups', 'label_ledger', 'alerts', 'releases', 'operator'
+)
 $resolvedRepository = (Resolve-Path -LiteralPath $RepositoryRoot).Path
 if ([string]::IsNullOrWhiteSpace($PythonExecutable)) {
     $command = Get-Command python -ErrorAction SilentlyContinue

@@ -13,16 +13,24 @@ $previewRequested = $WhatIfPreference
 if (-not (Test-Path -LiteralPath $runtimeConfig) -and -not $previewRequested) {
     throw 'Runtime is not initialized. Run initialize_runtime.ps1 first.'
 }
-$repositoryRoot = if (Test-Path -LiteralPath $runtimeConfig) {
-    (Get-Content -LiteralPath $runtimeConfig -Raw | ConvertFrom-Json).repository_root
-} else {
-    (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+$config = if (Test-Path -LiteralPath $runtimeConfig) {
+    Get-Content -LiteralPath $runtimeConfig -Raw | ConvertFrom-Json
+} else { $null }
+if (-not $previewRequested) {
+    foreach ($field in @('release_root', 'release_launcher', 'release_python', 'release_version', 'release_experiment_lane')) {
+        if (-not $config.$field) { throw "Frozen production release field is missing: $field" }
+    }
 }
-$scriptPath = (Resolve-Path (Join-Path $PSScriptRoot 'run_daily_runtime.ps1')).Path
+$workingDirectory = if ($config -and $config.release_root) { $config.release_root } else { $runtimeRoot }
+$scriptPath = if ($config -and $config.release_launcher) {
+    $config.release_launcher
+} else {
+    Join-Path $runtimeRoot 'releases\PREVIEW\runtime_release_launcher.ps1'
+}
 $powerShell = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
 $arguments = "-NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$scriptPath`" -Mode formal"
 
-$action = New-ScheduledTaskAction -Execute $powerShell -Argument $arguments -WorkingDirectory $repositoryRoot
+$action = New-ScheduledTaskAction -Execute $powerShell -Argument $arguments -WorkingDirectory $workingDirectory
 $trigger = New-ScheduledTaskTrigger -Weekly -WeeksInterval 1 -DaysOfWeek Monday,Tuesday,Wednesday,Thursday,Friday -At '09:20'
 $settings = New-ScheduledTaskSettingsSet `
     -WakeToRun `

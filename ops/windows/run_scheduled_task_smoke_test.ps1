@@ -1,7 +1,10 @@
 [CmdletBinding()]
 param()
 
-& (Join-Path $PSScriptRoot 'run_daily_runtime.ps1') -Mode formal -DryRun
+$runtimeRoot = Join-Path $env:LOCALAPPDATA 'MarketStateObservatoryRuntime'
+$config = Get-Content -LiteralPath (Join-Path $runtimeRoot 'runtime_paths.json') -Raw | ConvertFrom-Json
+if (-not $config.release_launcher) { throw 'Frozen release launcher is not installed.' }
+& $config.release_launcher -Mode formal -DryRun
 if ($LASTEXITCODE -ne 0) {
     Write-Output 'SCHEDULED_TASK_SMOKE_TEST=FAIL'
     exit $LASTEXITCODE

@@ -27,6 +27,7 @@ jobs:
       - run: python scripts/run_synthetic_demo.py
       - run: python scripts/audit_publication.py
       - run: python scripts/check_secret_patterns.py
+      - run: python scripts/run_stream_load_test.py --messages 35000
 
   web:
     runs-on: ubuntu-latest
@@ -42,11 +43,13 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
       - run: python scripts/check_site_links.py
       - name: Enforce initial JavaScript budget
         run: |
           bytes=$(find dist/web/assets -name '*.js' -printf '%s\n' | awk '{sum += $1} END {print sum + 0}')
-          test "$bytes" -le 225280
+          test "$bytes" -le 262144
           echo "initial_js_bytes=$bytes"
 
   windows-runtime:

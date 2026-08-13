@@ -21,7 +21,21 @@ const certificate = (theme_id: string) => ({
   eligible_playbooks: ["D_wait_unresolved"], vehicle_eligibility: { Theme_ETF: false }, decision_status: "DATA_BLOCKED_NO_DECISION",
 });
 
-const status = { updated_at: "2026-08-10T20:00:00Z", mode: "ALPACA_SIP_DATA_REHEARSAL_COMPLETE", data_ready: true, model_estimated: false, decision_eligible: false, formal_data_shadow_started: false, model_shadow_started: false, data_shadow_gate: { valid_days: 0, required_days: 20 }, paper_positions: 0, real_orders: 0, next_milestone: "Full-day rehearsal", day0b: {} };
+const status = {
+  schema_version: "market-state-observatory-status-v0.4.1", updated_at: "2026-08-10T20:00:00Z",
+  trading_date: "2026-08-10", last_evidence_at: "2026-08-10T20:00:00Z",
+  snapshot_evidence_grade: "public_rehearsal", snapshot_kind: "rehearsal", health_state: "STALE",
+  runtime_phase: "DATA_CAPTURE_REHEARSAL_COMPLETE", next_event: null,
+  timeline: [
+    { name: "open_snapshot", scheduled_at: "2026-08-10T13:30:00Z", status: "missed", evidence_at: null },
+    { name: "decision_snapshot", scheduled_at: "2026-08-10T19:45:00Z", status: "captured", evidence_at: "2026-08-10T19:45:02Z" },
+  ], action_required: "Run full-day rehearsal", live_trading_enabled: false,
+  data_ready: false, model_estimated: false, decision_eligible: false,
+  formal_data_shadow_started: false, model_shadow_started: false,
+  data_shadow_gate: { valid_days: 0, required_days: 20 }, paper_positions: 0, real_orders: 0,
+  quality: { planned: 10, captured: 5, missed: 5, future_timestamps: 0, backfill: 0, websocket_reconnects: 0, ticker_coverage: 0.5, theme_coverage: 1, missing_tickers: [] },
+  next_milestone: "Full-day rehearsal",
+};
 
 beforeEach(() => {
   window.location.hash = "#/today";
@@ -41,8 +55,18 @@ describe("Market State Observatory product boundary", () => {
   it("renders Today as the first operational view", async () => {
     render(<App />);
     expect(await screen.findByRole("heading", { name: "Today" })).toBeInTheDocument();
-    expect(screen.getByText("DATA SHADOW 0 / 20")).toBeInTheDocument();
+    expect(screen.getByText("DATA_CAPTURE_REHEARSAL_COMPLETE 0 / 20")).toBeInTheDocument();
     expect(screen.getByText("NO BUY / SELL OUTPUT")).toBeInTheDocument();
+    expect(screen.getByText("STALE SNAPSHOT")).toBeInTheDocument();
+  });
+
+  it("fails closed when the public status does not match its schema", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => ({
+      ok: true,
+      json: async () => String(input).endsWith("status.json") ? { updated_at: "invalid" } : themes,
+    } as Response)));
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "Public state invalid" })).toBeInTheDocument();
   });
 
   it("does not confuse data readiness with positive Direction", async () => {

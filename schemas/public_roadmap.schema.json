@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/public_roadmap.schema.json", "title": "PublicRoadmap",
+  "type": "object", "additionalProperties": false, "required": ["phases"],
+  "properties": {"phases": {"type": "array", "items": {"type": "object", "additionalProperties": false,
+    "required": ["phase", "title", "status", "items"], "properties": {"phase": {"type": "string"}, "title": {"type": "string"}, "status": {"type": "string"}, "items": {"type": "array", "items": {"type": "string"}}}}}}
+}

@@ -1,74 +1,30 @@
 {
-  "schema_version": "market-state-observatory-status-v0.4",
-  "updated_at": "2026-08-10T16:00:42-04:00",
-  "mode": "ALPACA_SIP_DATA_REHEARSAL_COMPLETE",
+  "schema_version": "market-state-observatory-status-v0.4.1",
+  "updated_at": "2026-08-10T20:00:42Z",
+  "trading_date": "2026-08-10",
+  "last_evidence_at": "2026-08-10T20:00:42Z",
+  "snapshot_evidence_grade": "public_rehearsal_partial",
+  "snapshot_kind": "rehearsal",
+  "health_state": "STALE",
+  "runtime_phase": "DATA_CAPTURE_REHEARSAL_COMPLETE",
+  "next_event": null,
+  "timeline": [
+    {"name": "open_snapshot", "scheduled_at": "2026-08-10T13:30:00Z", "status": "missed", "evidence_at": null},
+    {"name": "midpoint_snapshot", "scheduled_at": "2026-08-10T16:00:00Z", "status": "missed", "evidence_at": null},
+    {"name": "preclose_snapshot", "scheduled_at": "2026-08-10T19:30:00Z", "status": "captured", "evidence_at": "2026-08-10T19:30:13Z"},
+    {"name": "decision_snapshot", "scheduled_at": "2026-08-10T19:45:00Z", "status": "captured", "evidence_at": "2026-08-10T19:45:10Z"},
+    {"name": "session_close_diagnostic", "scheduled_at": "2026-08-10T20:00:00Z", "status": "captured", "evidence_at": "2026-08-10T20:00:42Z"}
+  ],
+  "action_required": "Run a complete frozen-runtime rehearsal before any formal Data Shadow start.",
   "live_trading_enabled": false,
   "formal_data_shadow_started": false,
   "model_shadow_started": false,
   "paper_positions": 0,
   "real_orders": 0,
-  "data_ready": true,
+  "data_ready": false,
   "model_estimated": false,
   "decision_eligible": false,
-  "data_shadow_gate": {
-    "valid_days": 0,
-    "required_days": 20
-  },
-  "alpaca_sip": {
-    "status": "PASS",
-    "all_requests_explicit_sip": true,
-    "core_symbols": [
-      "SPY",
-      "SMH",
-      "SKYY",
-      "CIBR",
-      "URA",
-      "TAN",
-      "UFO"
-    ],
-    "snapshot_symbol_count": 7,
-    "quote_symbol_count": 7,
-    "trade_symbol_count": 7,
-    "bar_symbol_count": 7,
-    "maximum_quote_age_seconds": 13.401112,
-    "provider_request_id_available": true
-  },
-  "collector": {
-    "tests": "124 passed",
-    "bundle_sha256": "695537a203fcd840a7f5744866899ca2c622cacb5aab064e08e80db81f1d439d"
-  },
-  "day0b": {
-    "status": "PASS_PARTIAL_AFTERNOON_CHAIN",
-    "experiment_id": "day0b-alpaca-sip-20260810-03",
-    "planned_records": 740,
-    "captured_valid_records": 666,
-    "missed_records": 74,
-    "pending_records": 0,
-    "missed_observation_points": [
-      "09:30",
-      "12:00"
-    ],
-    "captured_observation_points": [
-      "15:30",
-      "15:45",
-      "provider_session_close"
-    ],
-    "future_timestamp_count": 0,
-    "backfill_count": 0,
-    "all_records_explicit_sip": true,
-    "credential_values_persisted": false,
-    "direction_data_ready_themes": 6,
-    "transmission_data_ready_themes": 6,
-    "episode_ready_themes": 0,
-    "c2_ready_themes": 0,
-    "theme_count": 6,
-    "maximum_quote_age_15_30_seconds": 13.401112,
-    "maximum_quote_age_15_45_seconds": 9.967655,
-    "minute_bar_coverage": 1.0,
-    "vwap_valid_themes": 6,
-    "constituent_coverage": 1.0,
-    "counts_toward_20_day_gate": false,
-    "public_summary_path": "data/experiments/day0b-2026-08-10.json"
-  },
-  "next_milestone": "Full automated rehearsal with 09:30 and 12:00; formal Data Shadow remains 0/20."
+  "data_shadow_gate": {"valid_days": 0, "required_days": 20},
+  "quality": {"planned": 740, "captured": 666, "missed": 74, "future_timestamps": 0, "backfill": 0, "websocket_reconnects": 0, "ticker_coverage": 1.0, "theme_coverage": 6, "missing_tickers": []},
+  "next_milestone": "Complete full-day soak validation; Formal Data Shadow remains stopped."
 }

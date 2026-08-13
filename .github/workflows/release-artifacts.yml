@@ -1,0 +1,23 @@
+name: Clean release artifacts
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/build_release_packages.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: market-state-observatory-v0.4.1
+          path: release-artifacts/

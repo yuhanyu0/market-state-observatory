@@ -49,13 +49,38 @@ def project_public_status(
     private_quality: dict[str, Any], valid_data_shadow_days: int
 ) -> dict[str, Any]:
     published_at = datetime.now(UTC).isoformat()
+    formal = private_quality.get("run_mode") == "FORMAL_DATA_SHADOW"
+    health = "HEALTHY" if private_quality.get("data_quality_pass") else "DEGRADED"
+    timeline = list(private_quality.get("timeline", []))
+    captured_at = [row.get("evidence_at") for row in timeline if row.get("evidence_at")]
+    last_evidence = max(captured_at) if captured_at else published_at
+    next_event = next((row for row in timeline if row.get("status") == "pending"), None)
+    capture_rate = float(private_quality.get("capture_rate", 0))
+    planned = int(private_quality.get("planned_observations", 0))
+    themes = list(private_quality.get("themes", []))
     return redact_derived_payload(
         {
-            "schema_version": "market-state-observatory-status-v0.4",
+            "schema_version": "market-state-observatory-status-v0.4.1",
             "updated_at": published_at,
-            "mode": "FORMAL_DATA_SHADOW" if private_quality.get("status") == "DATA_CAPTURE_ONLY" else "DATA_CAPTURE_REHEARSAL",
+            "trading_date": private_quality["trading_date"],
+            "last_evidence_at": last_evidence,
+            "snapshot_evidence_grade": "prospective_point_in_time",
+            "snapshot_kind": "formal" if formal else "rehearsal",
+            "health_state": health,
+            "runtime_phase": private_quality["run_mode"],
+            "next_event": (
+                {"name": next_event["name"], "scheduled_at": next_event["scheduled_at"]}
+                if next_event
+                else None
+            ),
+            "timeline": timeline,
+            "action_required": (
+                "No action required; continue the frozen data-only lane."
+                if health == "HEALTHY"
+                else "Operator review required: latest data quality did not pass."
+            ),
             "live_trading_enabled": False,
-            "formal_data_shadow_started": private_quality.get("status") == "DATA_CAPTURE_ONLY",
+            "formal_data_shadow_started": formal,
             "model_shadow_started": False,
             "paper_positions": 0,
             "real_orders": 0,
@@ -63,6 +88,17 @@ def project_public_status(
             "model_estimated": False,
             "decision_eligible": False,
             "data_shadow_gate": {"valid_days": valid_data_shadow_days, "required_days": 20},
+            "quality": {
+                "planned": planned,
+                "captured": int(private_quality.get("captured_observations", 0)),
+                "missed": max(0, planned - int(private_quality.get("captured_observations", 0))),
+                "future_timestamps": int(private_quality.get("future_timestamp_count", 0)),
+                "backfill": int(private_quality.get("backfill_count", 0)),
+                "websocket_reconnects": int(private_quality.get("websocket_reconnect_count", 0)),
+                "ticker_coverage": capture_rate,
+                "theme_coverage": sum(bool(theme.get("data_ready")) for theme in themes),
+                "missing_tickers": [],
+            },
             "next_milestone": "Continue point-in-time data collection; models and decisions remain disabled.",
         }
     )

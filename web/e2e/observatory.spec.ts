@@ -4,7 +4,8 @@ import { expect, test } from "@playwright/test";
 test("Today loads public state without presenting a signed decision", async ({ page }) => {
   await page.goto("/#/today");
   await expect(page.getByRole("heading", { name: "Today", exact: true })).toBeVisible();
-  await expect(page.getByText("DATA SHADOW 0 / 20")).toBeVisible();
+  await expect(page.getByText("DATA_CAPTURE_REHEARSAL_COMPLETE 0 / 20")).toBeVisible();
+  await expect(page.getByText("STALE SNAPSHOT")).toBeVisible();
   await expect(page.getByText("NO BUY / SELL OUTPUT")).toBeVisible();
   await expect(page.getByText("Direction positive")).toHaveCount(0);
   await expect(page.locator("canvas.evidence-graph")).toBeVisible();

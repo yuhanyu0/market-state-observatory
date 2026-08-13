@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/private_data_quality.schema.json",
+  "title": "PrivateDataQuality",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version", "run_id", "trading_date", "run_mode", "process_success",
+    "production_release", "data_quality_pass", "publication_eligible",
+    "schema_validation_pass", "secret_scan_pass", "forbidden_path_scan_pass",
+    "paper_positions", "real_orders", "themes"
+  ],
+  "properties": {
+    "schema_version": {"const": "mso-private-data-quality-v2"},
+    "run_id": {"type": "string", "minLength": 1},
+    "trading_date": {"type": "string", "format": "date"},
+    "run_mode": {"enum": ["FORMAL_DATA_SHADOW", "DATA_CAPTURE_REHEARSAL"]},
+    "process_success": {"type": "boolean"},
+    "production_release": {"type": "boolean"},
+    "data_quality_pass": {"type": "boolean"},
+    "publication_eligible": {"type": "boolean"},
+    "schema_validation_pass": {"type": "boolean"},
+    "secret_scan_pass": {"type": "boolean"},
+    "forbidden_path_scan_pass": {"type": "boolean"},
+    "paper_positions": {"const": 0},
+    "real_orders": {"const": 0},
+    "themes": {"type": "array"}
+  }
+}

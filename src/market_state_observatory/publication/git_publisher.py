@@ -1,25 +1,13 @@
 from __future__ import annotations
 
-import os
 import shutil
 import subprocess
+import time
 from pathlib import Path
 
 
 class GitPublicationError(RuntimeError):
     pass
-
-
-def _github_cli() -> str:
-    command = shutil.which("gh")
-    if command:
-        return command
-    if os.name == "nt":
-        program_files = Path(os.environ.get("PROGRAMFILES", r"C:\Program Files"))
-        candidate = program_files / "GitHub CLI" / "gh.exe"
-        if candidate.is_file():
-            return str(candidate)
-    raise GitPublicationError("GitHub CLI is unavailable; public-data push is blocked")
 
 
 def _git(repository: Path, *arguments: str, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -35,16 +23,24 @@ def _git(repository: Path, *arguments: str, check: bool = True) -> subprocess.Co
     return result
 
 
-def _dispatch_pages(repository: Path) -> None:
-    result = subprocess.run(
-        [_github_cli(), "workflow", "run", "pages.yml", "--ref", "main"],
-        cwd=repository,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode:
-        raise GitPublicationError("Public data pushed but Pages workflow dispatch failed")
+def _cleanup_crashed_worktree(repository: Path, worktree: Path) -> None:
+    if not worktree.exists():
+        return
+    if repository.resolve() == worktree.resolve() or repository.resolve() in worktree.resolve().parents:
+        raise GitPublicationError("Publication worktree must be outside the source repository")
+    _git(repository, "worktree", "remove", "--force", str(worktree), check=False)
+    if worktree.exists():
+        shutil.rmtree(worktree)
+
+
+def _push_with_retry(worktree: Path, attempts: int = 3) -> None:
+    for attempt in range(1, attempts + 1):
+        result = _git(worktree, "push", "origin", "public-data", check=False)
+        if result.returncode == 0:
+            return
+        if attempt < attempts:
+            time.sleep(2 ** (attempt - 1))
+    raise GitPublicationError(f"Public-data push failed after {attempts} attempts")
 
 
 def publish_public_data(
@@ -57,8 +53,7 @@ def publish_public_data(
 ) -> str:
     if not (repository / ".git").exists():
         raise GitPublicationError("Git repository is not initialized")
-    if worktree.exists():
-        raise GitPublicationError("Publication worktree path already exists")
+    _cleanup_crashed_worktree(repository, worktree)
     _git(repository, "fetch", "origin", "public-data", check=False)
     remote = _git(repository, "show-ref", "--verify", "refs/remotes/origin/public-data", check=False)
     if remote.returncode == 0:
@@ -81,8 +76,7 @@ def publish_public_data(
             return "NO_PUBLIC_DATA_CHANGE"
         _git(worktree, "commit", "-m", commit_message)
         if push:
-            _git(worktree, "push", "origin", "public-data")
-            _dispatch_pages(repository)
+            _push_with_retry(worktree)
         return _git(worktree, "rev-parse", "HEAD").stdout.strip()
     finally:
         _git(repository, "worktree", "remove", "--force", str(worktree), check=False)

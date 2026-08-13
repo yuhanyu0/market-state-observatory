@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/public_experiments.schema.json", "title": "PublicExperiments",
+  "type": "array", "items": {
+    "type": "object", "additionalProperties": true,
+    "required": ["schema_version", "experiment_id", "trading_date", "status", "counts_toward_20_day_gate", "captured_valid_records", "planned_records", "interpretation_boundary"],
+    "properties": {"schema_version": {"type": "string"}, "experiment_id": {"type": "string"}, "trading_date": {"type": "string", "format": "date"}, "status": {"type": "string"}, "counts_toward_20_day_gate": {"type": "boolean"}, "captured_valid_records": {"type": "integer", "minimum": 0}, "planned_records": {"type": "integer", "minimum": 0}, "interpretation_boundary": {"type": "array", "items": {"type": "string"}}}
+  }
+}

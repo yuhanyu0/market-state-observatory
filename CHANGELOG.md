@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.1 - 2026-08-13
+
+- Replaced per-message WebSocket files with a bounded latest-state cache and
+  immutable hourly Zstandard stream chunks.
+- Added XNYS calendar-derived observation schedules, early-close handling, and
+  atomic cross-section freeze/skew evidence.
+- Added immutable label settlement, frozen wheel runtime identity, fail-closed
+  publication locking/retry, local alerts, and a loopback operator console.
+- Replaced operational UI constants with schema-validated public JSON, explicit
+  stale/evidence-grade states, and insufficient-observer semantics.
+- Added clean release packaging, early-close/crash/publication/schema tests, and
+  a one-million-message 35-symbol stream load acceptance test.
+
 ## 0.4.0 - 2026-08-12
 
 - Formalized 16 Draft 2020-12 schemas and readiness-state separation.

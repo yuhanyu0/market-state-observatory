@@ -16,6 +16,10 @@ RUNTIME_CHILDREN = (
     "locks",
     "public_staging",
     "backups",
+    "label_ledger",
+    "alerts",
+    "releases",
+    "operator",
 )
 
 
@@ -35,6 +39,10 @@ class RuntimePaths:
     locks: Path
     public_staging: Path
     backups: Path
+    label_ledger: Path
+    alerts: Path
+    releases: Path
+    operator: Path
 
     def as_public_status(self) -> dict[str, str]:
         return {"runtime_root": str(self.root), "status": "PRIVATE_RUNTIME_RESOLVED"}

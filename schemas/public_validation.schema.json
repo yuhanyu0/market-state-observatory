@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/public_validation.schema.json", "title": "PublicValidation",
+  "type": "object", "additionalProperties": false, "required": ["updated_at", "layers"],
+  "properties": {"updated_at": {"type": "string", "format": "date-time"}, "layers": {"type": "array", "items": {"type": "object", "additionalProperties": false,
+    "required": ["id", "label", "status", "detail"], "properties": {"id": {"type": "string"}, "label": {"type": "string"}, "status": {"type": "string"}, "detail": {"type": "string"}}}}}
+}

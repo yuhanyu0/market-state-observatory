@@ -3,55 +3,67 @@
   "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/publication_status.schema.json",
   "title": "PublicationStatus",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
-    "schema_version",
-    "updated_at",
-    "mode",
-    "live_trading_enabled",
-    "formal_data_shadow_started",
-    "model_shadow_started",
-    "paper_positions",
-    "real_orders",
-    "data_ready",
-    "model_estimated",
-    "decision_eligible"
+    "schema_version", "updated_at", "trading_date", "last_evidence_at",
+    "snapshot_evidence_grade", "snapshot_kind", "health_state", "runtime_phase",
+    "next_event", "timeline", "action_required", "live_trading_enabled",
+    "formal_data_shadow_started", "model_shadow_started", "paper_positions",
+    "real_orders", "data_ready", "model_estimated", "decision_eligible",
+    "data_shadow_gate", "quality", "next_milestone"
   ],
   "properties": {
-    "schema_version": {
-      "type": "string"
+    "schema_version": {"const": "market-state-observatory-status-v0.4.1"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "trading_date": {"type": "string", "format": "date"},
+    "last_evidence_at": {"type": "string", "format": "date-time"},
+    "snapshot_evidence_grade": {"type": "string", "minLength": 1},
+    "snapshot_kind": {"enum": ["synthetic", "rehearsal", "formal", "model_shadow"]},
+    "health_state": {"enum": ["HEALTHY", "STALE", "DEGRADED", "FAILED"]},
+    "runtime_phase": {"type": "string", "minLength": 1},
+    "next_event": {
+      "type": ["object", "null"],
+      "required": ["name", "scheduled_at"],
+      "properties": {"name": {"type": "string"}, "scheduled_at": {"type": "string", "format": "date-time"}},
+      "additionalProperties": false
     },
-    "updated_at": {
-      "type": "string",
-      "format": "date-time"
+    "timeline": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["name", "scheduled_at", "status", "evidence_at"],
+        "properties": {
+          "name": {"type": "string"}, "scheduled_at": {"type": "string", "format": "date-time"},
+          "status": {"enum": ["captured", "missed", "pending", "failed"]},
+          "evidence_at": {"type": ["string", "null"], "format": "date-time"}
+        }
+      }
     },
-    "mode": {
-      "type": "string"
+    "action_required": {"type": "string", "minLength": 1},
+    "live_trading_enabled": {"const": false},
+    "formal_data_shadow_started": {"type": "boolean"},
+    "model_shadow_started": {"type": "boolean"},
+    "paper_positions": {"const": 0},
+    "real_orders": {"const": 0},
+    "data_ready": {"type": "boolean"},
+    "model_estimated": {"type": "boolean"},
+    "decision_eligible": {"type": "boolean"},
+    "data_shadow_gate": {
+      "type": "object", "additionalProperties": false, "required": ["valid_days", "required_days"],
+      "properties": {"valid_days": {"type": "integer", "minimum": 0}, "required_days": {"type": "integer", "minimum": 1}}
     },
-    "live_trading_enabled": {
-      "const": false
+    "quality": {
+      "type": "object", "additionalProperties": false,
+      "required": ["planned", "captured", "missed", "future_timestamps", "backfill", "websocket_reconnects", "ticker_coverage", "theme_coverage", "missing_tickers"],
+      "properties": {
+        "planned": {"type": "integer", "minimum": 0}, "captured": {"type": "integer", "minimum": 0},
+        "missed": {"type": "integer", "minimum": 0}, "future_timestamps": {"type": "integer", "minimum": 0},
+        "backfill": {"type": "integer", "minimum": 0}, "websocket_reconnects": {"type": "integer", "minimum": 0},
+        "ticker_coverage": {"type": "number", "minimum": 0, "maximum": 1},
+        "theme_coverage": {"type": "integer", "minimum": 0},
+        "missing_tickers": {"type": "array", "items": {"type": "string"}}
+      }
     },
-    "formal_data_shadow_started": {
-      "type": "boolean"
-    },
-    "model_shadow_started": {
-      "type": "boolean"
-    },
-    "paper_positions": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "real_orders": {
-      "const": 0
-    },
-    "data_ready": {
-      "type": "boolean"
-    },
-    "model_estimated": {
-      "type": "boolean"
-    },
-    "decision_eligible": {
-      "type": "boolean"
-    }
+    "next_milestone": {"type": "string", "minLength": 1}
   }
 }

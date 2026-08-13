@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/public_themes.schema.json", "title": "PublicThemes",
+  "type": "object", "additionalProperties": false, "required": ["themes"],
+  "properties": {"themes": {"type": "array", "minItems": 1, "items": {
+    "type": "object", "additionalProperties": false,
+    "required": ["theme_id", "display_name", "tracker_etf", "benchmark", "constituents", "status"],
+    "properties": {"theme_id": {"type": "string"}, "display_name": {"type": "string"}, "tracker_etf": {"type": "string"}, "benchmark": {"type": "string"}, "constituents": {"type": "array", "items": {"type": "string"}}, "status": {"type": "string"}}
+  }}}
+}

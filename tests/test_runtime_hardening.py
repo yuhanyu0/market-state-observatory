@@ -178,7 +178,6 @@ def test_repository_has_no_order_or_position_runtime_modules() -> None:
 def test_formal_runtime_publishes_only_after_success() -> None:
     root = Path(__file__).resolve().parents[1]
     script = (root / "ops" / "windows" / "run_daily_runtime.ps1").read_text(encoding="utf-8")
-    assert "if ($exitCode -eq 0 -and $Mode -eq 'formal')" in script
-    assert "publish_public_snapshot.ps1" in script
-    assert "-PrivateQualityPath $quality.FullName -Push" in script
-    assert "failure_stage = $failureStage" in script
+    assert "Formal runtime is fail-closed" in script
+    assert "$releaseLauncher -Mode formal" in script
+    assert "publish_public_snapshot.ps1" not in script

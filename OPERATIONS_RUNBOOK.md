@@ -13,6 +13,7 @@ From the project root in non-elevated PowerShell:
 ```powershell
 .\ops\windows\setup_alpaca_credentials.ps1
 .\ops\windows\setup_github_auth.ps1
+.\ops\windows\build_runtime_release.ps1
 .\ops\windows\install_scheduled_tasks.ps1 -WhatIf
 .\ops\windows\install_scheduled_tasks.ps1 -Install
 ```
@@ -20,7 +21,10 @@ From the project root in non-elevated PowerShell:
 The Alpaca command initializes the private runtime when needed, prompts for the
 Key ID and a SecureString secret, exports a current-user DPAPI credential, and
 prints only the path plus PRESENT status. The GitHub command never requests or
-displays a token. The scheduler installation first performs an offline dry-run.
+displays a token. The release command requires a clean committed tree and freezes
+a wheel, dedicated venv, dependency lock, schemas, universe, membership, and
+runtime config. The scheduler executes only the frozen release launcher and first
+performs an offline dry-run.
 
 ## Daily runtime
 
@@ -53,10 +57,13 @@ runs without an immutable quality artifact do not publish.
 .\ops\windows\runtime_health_check.ps1
 .\ops\windows\show_scheduled_task_status.ps1
 .\ops\windows\run_scheduled_task_smoke_test.ps1
+.\ops\windows\run_operator_console.ps1
 ```
 
 The daemon resumes the latest incomplete same-day run, reads immutable recovery
-checkpoints, and never overwrites raw or manifest artifacts. Network errors
+checkpoints, and never overwrites raw or manifest artifacts. The operator console
+binds only to `127.0.0.1` and exposes private status, logs, lineage, alerts,
+quality recheck, and fail-closed publication retry. Network errors
 produce missing observations. A stale process lock is removed only when it is
 older than 15 minutes and its PID is no longer running.
 
@@ -72,7 +79,7 @@ Manual recovery publication after session quality exists:
 
 Projection, redaction, schema validation, forbidden-field scanning, manifest,
 and secret audit all happen before Git. The publisher changes `public-data`
-only, then dispatches the Pages workflow on `main`.
+only; that push triggers one Pages deployment without a second explicit dispatch.
 
 ## Incident response
 

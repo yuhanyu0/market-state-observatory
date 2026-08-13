@@ -3,5 +3,10 @@
   "repository_root": "C:\\absolute\\path\\to\\market-state-observatory",
   "python_executable": "C:\\absolute\\path\\to\\python.exe",
   "mode": "DATA_CAPTURE_ONLY",
-  "timezone": "America/New_York"
+  "timezone": "America/New_York",
+  "release_root": "%LOCALAPPDATA%\\MarketStateObservatoryRuntime\\releases\\v0.4.1-01234567",
+  "release_python": "%LOCALAPPDATA%\\MarketStateObservatoryRuntime\\releases\\v0.4.1-01234567\\venv\\Scripts\\python.exe",
+  "release_launcher": "%LOCALAPPDATA%\\MarketStateObservatoryRuntime\\releases\\v0.4.1-01234567\\runtime_release_launcher.ps1",
+  "release_version": "0.4.1",
+  "release_experiment_lane": "data-shadow-v0.4.1-example"
 }

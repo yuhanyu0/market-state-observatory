@@ -27,7 +27,7 @@ export function EvidenceDrawer({ certificate, onClose }: Props) {
           <div><dt>Timestamp</dt><dd>{certificate.as_of_utc}</dd></div>
           <div><dt>Evidence grade</dt><dd>{certificate.evidence_grade}</dd></div>
           <div><dt>Model version</dt><dd>mso-certificate-v0.4</dd></div>
-          <div><dt>Uncertainty</dt><dd>{certificate.uncertainty.toFixed(2)}</dd></div>
+          <div><dt>Uncertainty</dt><dd>{certificate.uncertainty === null ? "Unavailable" : certificate.uncertainty.toFixed(2)}</dd></div>
           <div><dt>Threshold source</dt><dd>Frozen structured contract</dd></div>
           <div><dt>Counts toward Shadow</dt><dd>No, synthetic public reference</dd></div>
         </dl>

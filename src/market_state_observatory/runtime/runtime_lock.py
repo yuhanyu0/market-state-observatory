@@ -15,6 +15,7 @@ class RuntimeAlreadyRunning(RuntimeError):
 @dataclass
 class RuntimeLock:
     path: Path
+    stale_after_seconds: int = 15 * 60
     _descriptor: int | None = None
 
     @staticmethod
@@ -32,7 +33,7 @@ class RuntimeLock:
             age_seconds = time.time() - self.path.stat().st_mtime
         except (OSError, ValueError, KeyError, json.JSONDecodeError):
             return False
-        if age_seconds < 15 * 60 or self._pid_running(pid):
+        if age_seconds < self.stale_after_seconds or self._pid_running(pid):
             return False
         try:
             self.path.unlink()

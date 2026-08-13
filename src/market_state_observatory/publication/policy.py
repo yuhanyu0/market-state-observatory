@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path, PurePath
 from typing import Any
@@ -8,14 +9,20 @@ import yaml
 
 from ..security import assert_public_safe
 
-POLICY_PATH = Path(__file__).resolve().parents[3] / "config" / "publication_policy.yml"
-
 
 class PublicationPolicyError(ValueError):
     pass
 
 
-def load_policy(path: Path = POLICY_PATH) -> dict[str, Any]:
+def policy_path() -> Path:
+    release_root = os.environ.get("MSO_RELEASE_ROOT")
+    if release_root:
+        return Path(release_root) / "config" / "publication_policy.yml"
+    return Path(__file__).resolve().parents[3] / "config" / "publication_policy.yml"
+
+
+def load_policy(path: Path | None = None) -> dict[str, Any]:
+    path = path or policy_path()
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise PublicationPolicyError("Publication policy must be an object")
@@ -64,3 +71,24 @@ def assert_destination_allowed(destination: Path, repository_root: Path) -> None
     forbidden_parts = {"raw", "private", "data_shadow", "model_shadow", "orders", "positions"}
     if forbidden_parts & {part.lower() for part in PurePath(resolved).parts}:
         raise PublicationPolicyError("Public destination contains a forbidden path segment")
+
+
+def assert_publication_eligible(private_quality: dict[str, Any]) -> None:
+    required_truthy = (
+        "process_success",
+        "data_quality_pass",
+        "publication_eligible",
+        "schema_validation_pass",
+        "secret_scan_pass",
+        "forbidden_path_scan_pass",
+        "production_release",
+    )
+    if private_quality.get("run_mode") != "FORMAL_DATA_SHADOW":
+        raise PublicationPolicyError("Publication rejected: run is not FORMAL_DATA_SHADOW")
+    failed = [field for field in required_truthy if private_quality.get(field) is not True]
+    if failed:
+        raise PublicationPolicyError(f"Publication rejected: failed gates {failed}")
+    if private_quality.get("paper_positions") != 0:
+        raise PublicationPolicyError("Publication rejected: paper_positions must be zero")
+    if private_quality.get("real_orders") != 0:
+        raise PublicationPolicyError("Publication rejected: real_orders must be zero")

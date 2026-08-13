@@ -1,49 +1,73 @@
 from __future__ import annotations
 
 import asyncio
-import json
-import uuid
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from .alpaca_adapter import INGESTION_VERSION, PARSER_VERSION, PROVIDER, AlpacaSIPAdapter
-from .observation_freezer import canonical_json, freeze_provider_response, write_exclusive
+from .alpaca_adapter import PROVIDER, AlpacaSIPAdapter
+from .observation_freezer import canonical_json, write_exclusive
+from .stream_store import BoundedHourlyStreamStore
 
 
 class AlpacaStreamArchive:
-    """Reconnectable private SIP stream archive; never publishes provider payloads."""
+    """SIP latest-state cache plus bounded immutable hourly stream chunks."""
 
-    def __init__(self, raw_directory: Path, manifest_directory: Path) -> None:
-        self.raw_directory = raw_directory
+    def __init__(
+        self,
+        raw_directory: Path,
+        manifest_directory: Path,
+        *,
+        queue_size: int = 10_000,
+        disk_budget_bytes: int = 2 * 1024 * 1024 * 1024,
+        full_stream_debug: bool | None = None,
+    ) -> None:
+        debug = (
+            os.environ.get("MSO_FULL_STREAM_DEBUG", "false").lower() == "true"
+            if full_stream_debug is None
+            else full_stream_debug
+        )
+        self.store = BoundedHourlyStreamStore(
+            chunk_directory=raw_directory,
+            manifest_directory=manifest_directory / "chunks",
+            queue_size=queue_size,
+            disk_budget_bytes=disk_budget_bytes,
+            full_stream_debug=debug,
+        )
         self.manifest_directory = manifest_directory
-        self.message_count = 0
         self.reconnect_count = 0
+        self.last_message_at_utc: str | None = None
 
     async def on_message(self, item: dict[str, Any], raw: bytes) -> None:
-        event_time = str(item.get("t", datetime.now(UTC).isoformat()))
-        observation_id = f"ws-{datetime.now(UTC).strftime('%H%M%S%f')}-{uuid.uuid4().hex[:8]}"
-        freeze_provider_response(
-            raw_directory=self.raw_directory,
-            manifest_directory=self.manifest_directory,
-            observation_id=observation_id,
-            raw_response=raw,
-            metadata={
-                "source": "alpaca_sip_websocket",
-                "provider": PROVIDER,
-                "feed": "sip",
-                "event_type": item.get("T"),
-                "symbol": item.get("S"),
-                "event_time_utc": event_time,
-                "observed_at_utc": datetime.now(UTC).isoformat(),
-                "data_max_timestamp": event_time,
-                "collector_request_id": observation_id,
-                "provider_request_id": None,
-                "parser_version": PARSER_VERSION,
-                "ingestion_version": INGESTION_VERSION,
-            },
-        )
-        self.message_count += 1
+        await self.store.ingest(item, raw)
+        self.last_message_at_utc = datetime.now(UTC).isoformat()
+
+    async def run(
+        self, *, symbols: list[str], stop: asyncio.Event, adapter: AlpacaSIPAdapter | None = None
+    ) -> None:
+        provider = adapter or AlpacaSIPAdapter()
+        await self.store.start()
+        try:
+            await provider.stream(symbols, self.on_message, stop)
+        finally:
+            self.reconnect_count = provider.reconnect_count
+            await self.store.stop()
+            stamp = datetime.now(UTC).strftime("%H%M%S%f")
+            write_exclusive(
+                self.manifest_directory / f"stream-health-{stamp}.json",
+                canonical_json(
+                    {
+                        "provider": PROVIDER,
+                        "feed": "sip",
+                        **self.store.health_payload(),
+                        "reconnect_count": self.reconnect_count,
+                        "last_message_at_utc": self.last_message_at_utc,
+                        "observed_at_utc": datetime.now(UTC).isoformat(),
+                        "private_raw_only": True,
+                    }
+                ),
+            )
 
 
 async def archive_stream(
@@ -54,34 +78,14 @@ async def archive_stream(
     stop: asyncio.Event,
 ) -> AlpacaStreamArchive:
     archive = AlpacaStreamArchive(raw_directory, manifest_directory)
-    adapter = AlpacaSIPAdapter()
-    try:
-        await adapter.stream(symbols, archive.on_message, stop)
-    finally:
-        archive.reconnect_count = adapter.reconnect_count
-        stamp = datetime.now(UTC).strftime("%H%M%S%f")
-        write_exclusive(
-            manifest_directory / f"stream-health-{stamp}.json",
-            canonical_json(
-                {
-                    "provider": PROVIDER,
-                    "feed": "sip",
-                    "message_count": archive.message_count,
-                    "reconnect_count": archive.reconnect_count,
-                    "observed_at_utc": datetime.now(UTC).isoformat(),
-                    "private_raw_only": True,
-                }
-            ),
-        )
+    await archive.run(symbols=symbols, stop=stop)
     return archive
 
 
-def stream_status(archive: AlpacaStreamArchive) -> str:
-    return json.dumps(
-        {
-            "message_count": archive.message_count,
-            "reconnect_count": archive.reconnect_count,
-            "private_raw_only": True,
-        },
-        sort_keys=True,
-    )
+def stream_status(archive: AlpacaStreamArchive) -> dict[str, Any]:
+    return {
+        **archive.store.health_payload(),
+        "reconnect_count": archive.reconnect_count,
+        "last_message_at_utc": archive.last_message_at_utc,
+        "private_raw_only": True,
+    }

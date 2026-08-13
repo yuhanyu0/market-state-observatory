@@ -52,6 +52,7 @@ web/node_modules/
 web/dist/
 playwright-report/
 test-results/
+release-artifacts/
 
 # Runtime is always external, even if a caller misconfigures a relative path.
 MarketStateObservatoryRuntime/

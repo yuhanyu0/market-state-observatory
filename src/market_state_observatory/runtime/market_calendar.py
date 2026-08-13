@@ -1,86 +1,85 @@
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta
+from dataclasses import dataclass
+from datetime import UTC, date, datetime, timedelta
+from functools import lru_cache
+from typing import Any, cast
 from zoneinfo import ZoneInfo
+
+import exchange_calendars as exchange_calendars  # type: ignore[import-untyped]
 
 ET = ZoneInfo("America/New_York")
 
 
-def _observed(day: date) -> date:
-    if day.weekday() == 5:
-        return day - timedelta(days=1)
-    if day.weekday() == 6:
-        return day + timedelta(days=1)
-    return day
+@dataclass(frozen=True)
+class SessionSchedule:
+    trading_date: date
+    market_open: datetime
+    midpoint: datetime
+    close_minus_30m: datetime
+    close_minus_15m: datetime
+    market_close: datetime
+
+    def observation_points(self) -> tuple[tuple[str, datetime], ...]:
+        points = (
+            ("open_snapshot", self.market_open),
+            ("midpoint_snapshot", self.midpoint),
+            ("preclose_snapshot", self.close_minus_30m),
+            ("decision_snapshot", self.close_minus_15m),
+            ("session_close_diagnostic", self.market_close),
+        )
+        return tuple(sorted(points, key=lambda row: row[1]))
 
 
-def _nth_weekday(year: int, month: int, weekday: int, n: int) -> date:
-    day = date(year, month, 1)
-    delta = (weekday - day.weekday()) % 7
-    return day + timedelta(days=delta + 7 * (n - 1))
+@lru_cache(maxsize=1)
+def _xnys() -> Any:
+    return exchange_calendars.get_calendar("XNYS")
 
 
-def _last_weekday(year: int, month: int, weekday: int) -> date:
-    if month == 12:
-        day = date(year + 1, 1, 1) - timedelta(days=1)
-    else:
-        day = date(year, month + 1, 1) - timedelta(days=1)
-    return day - timedelta(days=(day.weekday() - weekday) % 7)
-
-
-def _easter(year: int) -> date:
-    a = year % 19
-    b, c = divmod(year, 100)
-    d, e = divmod(b, 4)
-    f = (b + 8) // 25
-    g = (b - f + 1) // 3
-    h = (19 * a + b - d - g + 15) % 30
-    i, k = divmod(c, 4)
-    correction = (32 + 2 * e + 2 * i - h - k) % 7
-    m = (a + 11 * h + 22 * correction) // 451
-    month, day = divmod(h + correction - 7 * m + 114, 31)
-    return date(year, month, day + 1)
-
-
-def nyse_holidays(year: int) -> set[date]:
-    holidays = {
-        _observed(date(year, 1, 1)),
-        _nth_weekday(year, 1, 0, 3),
-        _nth_weekday(year, 2, 0, 3),
-        _easter(year) - timedelta(days=2),
-        _last_weekday(year, 5, 0),
-        _observed(date(year, 7, 4)),
-        _nth_weekday(year, 9, 0, 1),
-        _nth_weekday(year, 11, 3, 4),
-        _observed(date(year, 12, 25)),
-    }
-    if year >= 2022:
-        holidays.add(_observed(date(year, 6, 19)))
-    return holidays
+def _session_label(day: date) -> str:
+    return day.isoformat()
 
 
 def is_trading_day(day: date) -> bool:
-    return day.weekday() < 5 and day not in nyse_holidays(day.year)
+    return bool(_xnys().is_session(_session_label(day)))
 
 
 def next_trading_day(day: date) -> date:
-    candidate = day + timedelta(days=1)
-    while not is_trading_day(candidate):
-        candidate += timedelta(days=1)
-    return candidate
+    label = _xnys().date_to_session(_session_label(day), direction="next")
+    candidate = cast(date, label.date())
+    if candidate == day:
+        label = _xnys().next_session(label)
+    return cast(date, label.date())
+
+
+def session_schedule(day: date) -> SessionSchedule:
+    calendar = _xnys()
+    label = _session_label(day)
+    if not calendar.is_session(label):
+        raise ValueError(f"Not an XNYS trading session: {day.isoformat()}")
+    market_open = calendar.session_open(label).to_pydatetime().astimezone(ET)
+    market_close = calendar.session_close(label).to_pydatetime().astimezone(ET)
+    duration = market_close - market_open
+    return SessionSchedule(
+        trading_date=day,
+        market_open=market_open,
+        midpoint=market_open + duration / 2,
+        close_minus_30m=market_close - timedelta(minutes=30),
+        close_minus_15m=market_close - timedelta(minutes=15),
+        market_close=market_close,
+    )
 
 
 def market_close_time(day: date) -> tuple[int, int]:
-    """Return the regular or standard NYSE early-close time in ET."""
+    close = session_schedule(day).market_close
+    return close.hour, close.minute
 
-    thanksgiving = _nth_weekday(day.year, 11, 3, 4)
-    if day == thanksgiving + timedelta(days=1):
-        return (13, 0)
-    if day.month == 7 and day.day == 3 and day.weekday() < 5:
-        return (13, 0)
-    if day.month == 12 and day.day == 24 and day.weekday() < 5:
-        return (13, 0)
-    return (16, 0)
+
+def schedule_as_utc(day: date) -> tuple[tuple[str, datetime], ...]:
+    return tuple(
+        (name, timestamp.astimezone(UTC))
+        for name, timestamp in session_schedule(day).observation_points()
+    )
 
 
 def now_et() -> datetime:

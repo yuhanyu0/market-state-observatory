@@ -34,7 +34,8 @@ def test_required_schema_set_is_present() -> None:
         "state_certificate", "playbook_decision", "next_probe", "publication_status",
         "rehearsal_summary", "data_shadow_summary", "model_shadow_summary", "theme",
             "validation_result", "experiment", "observer_conflict", "reflexive_memory_entry",
-            "public_data_quality",
+            "public_data_quality", "private_data_quality", "public_themes",
+            "public_experiments", "public_roadmap", "public_validation",
     }
     assert set(schema_names()) == required
 

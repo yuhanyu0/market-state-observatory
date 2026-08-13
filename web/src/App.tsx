@@ -67,6 +67,19 @@ function formatTime(date: Date, zone: "ET" | "UTC", options: Intl.DateTimeFormat
   }).format(date);
 }
 
+function evidenceIsToday(status: Status): boolean {
+  const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" });
+  return formatter.format(new Date(status.last_evidence_at)) === formatter.format(new Date());
+}
+
+function countdown(iso: string | null): string {
+  if (!iso) return "No event scheduled";
+  const seconds = Math.max(0, Math.floor((new Date(iso).getTime() - Date.now()) / 1000));
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  return `${hours}h ${minutes}m`;
+}
+
 function EmptyState({ title, detail }: { title: string; detail: string }) {
   return <div className="empty-state"><Info /><h3>{title}</h3><p>{detail}</p></div>;
 }
@@ -89,35 +102,31 @@ function TodayPage({ status, themes, certificates, onOpenTheme, onEvidence, zone
   status: Status; themes: Theme[]; certificates: Record<string, Certificate>; onOpenTheme: (id: string) => void; onEvidence: (item: Certificate) => void; zone: "ET" | "UTC";
 }) {
   const now = new Date();
-  const timeline = [
-    ["09:20", "Runtime start", "pending"],
-    ["09:30", "Open snapshot", "pending"],
-    ["12:00", "Midday snapshot", "pending"],
-    ["15:30", "Preclose snapshot", "captured"],
-    ["15:45", "Decision snapshot", "captured"],
-    ["16:00", "Close diagnostic", "captured"],
-  ];
+  const stale = !evidenceIsToday(status);
+  const healthState = stale ? "STALE" : status.health_state;
+  const badgeState = healthState === "HEALTHY" ? "ready" : healthState === "FAILED" ? "blocked" : "warning";
   return <>
+    {stale && <div className="stale-banner" role="alert"><AlertTriangle /> STALE SNAPSHOT <span>Latest evidence: {formatTime(new Date(status.last_evidence_at), zone, { year: "numeric", month: "short", day: "numeric" })}</span></div>}
     <section className="today-hero">
       <div className="today-copy">
         <p className="eyebrow">System operating view</p>
         <h1>Today</h1>
         <div className="live-clock"><Clock3 /><span>{formatTime(now, zone)}</span><small>{zone}</small></div>
-        <p className="hero-summary">Point-in-time evidence collection is the active layer. Models, decisions, paper positions, and live orders remain disabled.</p>
-        <div className="hero-badges"><StatusBadge label="SYSTEM HEALTHY" state="ready" /><StatusBadge label="DATA SHADOW 0 / 20" state="warning" /><StatusBadge label="NO DECISION" state="neutral" /></div>
+        <p className="hero-summary">{status.action_required}</p>
+        <div className="hero-badges"><StatusBadge label={healthState} state={badgeState} /><StatusBadge label={`${status.runtime_phase} ${status.data_shadow_gate.valid_days} / ${status.data_shadow_gate.required_days}`} state="warning" /><StatusBadge label={status.decision_eligible ? "DECISION ELIGIBLE" : "NO DECISION"} state="neutral" /></div>
       </div>
       <div className="graph-panel"><div className="graph-label">Evidence system</div><EvidenceGraph /><div className="graph-foot">Structured lineage, not a trade signal</div></div>
     </section>
     <ReadinessLegend />
     <section className="metric-strip" aria-label="Current system metrics">
       <div><span>Updated</span><strong>{formatTime(new Date(status.updated_at), zone, { month: "short", day: "numeric" })}</strong></div>
-      <div><span>Core themes</span><strong>6 / 6</strong></div>
-      <div><span>Missing points</span><strong>2</strong></div>
+      <div><span>Core themes ready</span><strong>{status.quality.theme_coverage} / {themes.length}</strong></div>
+      <div><span>Missing observations</span><strong>{status.quality.missed}</strong></div>
       <div><span>Positions / orders</span><strong>{status.paper_positions} / {status.real_orders}</strong></div>
     </section>
     <section className="content-band">
-      <div className="band-header"><div><p className="eyebrow">Observation chain</p><h2>Today&apos;s timeline</h2></div><p>Latest published evidence is the Aug 10 partial rehearsal.</p></div>
-      <ol className="session-timeline">{timeline.map(([time, label, state]) => <li key={time} className={state}><time>{time}</time><span>{label}</span><small>{state === "captured" ? "Captured in rehearsal" : "Missed, not backfilled"}</small></li>)}</ol>
+      <div className="band-header"><div><p className="eyebrow">Observation chain</p><h2>Published timeline</h2></div><p>{status.next_event ? `Next: ${status.next_event.name} in ${countdown(status.next_event.scheduled_at)}` : "No future event in this public snapshot."}</p></div>
+      <ol className="session-timeline">{status.timeline.map((item) => <li key={`${item.name}-${item.scheduled_at}`} className={item.status}><time>{formatTime(new Date(item.scheduled_at), zone, { second: undefined })}</time><span>{item.name.replaceAll("_", " ")}</span><small>{item.status}{item.evidence_at ? ` at ${formatTime(new Date(item.evidence_at), zone)}` : ""}</small></li>)}</ol>
     </section>
     <section className="content-band">
       <div className="band-header"><div><p className="eyebrow">Six frozen themes</p><h2>Evidence states</h2></div><p>Readiness and signed state remain separate.</p></div>
@@ -128,24 +137,16 @@ function TodayPage({ status, themes, certificates, onOpenTheme, onEvidence, zone
 }
 
 function ThemeDetail({ theme, certificate, onEvidence }: { theme: Theme; certificate: Certificate; onEvidence: () => void }) {
-  const detailMetrics = [
-    ["15:30 quote", "Data ready", "Readiness only"],
-    ["15:45 quote", "Data ready", "Readiness only"],
-    ["ETF vs benchmark", "Not estimated", "Model disabled"],
-    ["VWAP position", "Input captured", "No signed interpretation"],
-    ["Breadth", "Not estimated", "Transmission disabled"],
-    ["Median residual", "Not estimated", "Transmission disabled"],
-    ["Volume breadth", "Not estimated", "Transmission disabled"],
-    ["Concentration", "Not estimated", "Fragility disabled"],
-  ];
+  const layers = [["Direction", certificate.direction], ["Transmission", certificate.transmission], ["Episode", certificate.episode], ["Structural attention", certificate.structural_attention], ["Fragility", certificate.fragility]] as const;
+  const detailMetrics = layers.flatMap(([layer, state]) => Object.entries(state.metrics).map(([name, value]) => [layer, name, String(value)]));
   return <>
     <SectionHeader eyebrow={`${theme.tracker_etf} · Theme detail`} title={theme.display_name} detail="Point-in-time state components, conflicts, invalidation, and source lineage." />
     <ReadinessLegend />
     <div className="detail-layout">
       <section className="detail-main">
-        <div className="panel-header"><h2>Observation state</h2><StatusBadge label="DATA READY ONLY" state="warning" /></div>
-        <div className="metric-table">{detailMetrics.map(([name, value, note]) => <div key={name}><span>{name}</span><strong>{value}</strong><small>{note}</small></div>)}</div>
-        <section className="unframed-section"><h2>Observer evidence</h2><div className="observer-row"><span>Direction</span><b>unresolved</b><span>Transmission</span><b>not estimable</b><span>Episode</span><b>not estimable</b></div></section>
+        <div className="panel-header"><h2>Observation state</h2><StatusBadge label={certificate.evidence_grade.replaceAll("_", " ").toUpperCase()} state="warning" /></div>
+        {detailMetrics.length ? <div className="metric-table">{detailMetrics.map(([layer, name, value]) => <div key={`${layer}-${name}`}><span>{name}</span><strong>{value}</strong><small>{layer}</small></div>)}</div> : <EmptyState title="Theme metrics unavailable" detail="The validated public certificate contains no publishable observer metrics." />}
+        <section className="unframed-section"><h2>Observer evidence</h2><div className="observer-row">{layers.map(([name, state]) => <span key={name}>{name}: <b>{state.model_estimated ? state.state : "not estimated"}</b></span>)}</div></section>
         <section className="unframed-section"><h2>Episode timeline</h2><EmptyState title="Sequential evidence not available" detail="Episode inference begins only after a legal prospective sequence exists." /></section>
       </section>
       <aside className="certificate-summary">
@@ -181,30 +182,21 @@ function CertificatesPage({ themes, certificates, selected, onSelect, onEvidence
 }
 
 function ExperimentsPage({ experiments }: { experiments: Experiment[] }) {
-  const rows = [
-    ["Day 0B", "Partial rehearsal", "Infrastructure", "Pass, does not count"],
-    ["Full-day rehearsal", "Not started", "Infrastructure", "Blocked"],
-    ["Data Shadow", "0 / 20", "Prospective", "Collecting not started"],
-    ["Direction", "Not started", "Model Shadow", "Gate closed"],
-    ["Direction + Transmission", "Not started", "Ablation", "Gate closed"],
-    ["D + T + Episode", "Not started", "Ablation", "Gate closed"],
-    ["D + T + E + Playbook", "Not started", "Ablation", "Gate closed"],
-    ["Vehicle overlay", "Not started", "Ablation", "Gate closed"],
-    ["Model Shadow", "Not started", "Prospective", "Gate closed"],
-  ];
+  const rows = experiments.map((item) => [item.experiment_id, item.status, item.schema_version, item.counts_toward_20_day_gate ? "Counts toward gate" : "Does not count"]);
   return <><SectionHeader eyebrow="Evidence program" title="Experiments" detail="Progress is reported by evidence grade and preregistered gate, never promoted by interim performance." /><div className="table-actions"><button className="icon-text-button" onClick={() => downloadCsv("experiments.csv", rows.map(([name,status,grade,gate]) => ({ name,status,grade,gate })))}><Download /> CSV</button></div><div className="data-table" role="table" aria-label="Experiment program"><div role="row" className="table-head"><span>Name</span><span>Status</span><span>Evidence grade</span><span>Gate</span></div>{rows.map((row) => <div role="row" key={row[0]}>{row.map((cell) => <span key={cell}>{cell}</span>)}</div>)}</div>{experiments[0] && <aside className="experiment-note"><AlertTriangle /><p>{experiments[0].interpretation_boundary?.[0] ?? "Data readiness is not signed Direction."}</p></aside>}</>;
 }
 
 function DataQualityPage({ status, themes }: { status: Status; themes: Theme[] }) {
   const metrics = [
-    ["Planned records", "740"], ["Captured", "666"], ["Missed", "74"], ["Future timestamps", "0"], ["Backfill", "0"], ["WebSocket reconnect", "0"], ["Ticker coverage", "100%"], ["Theme coverage", "6 / 6"],
+    ["Planned records", status.quality.planned], ["Captured", status.quality.captured], ["Missed", status.quality.missed], ["Future timestamps", status.quality.future_timestamps], ["Backfill", status.quality.backfill], ["WebSocket reconnect", status.quality.websocket_reconnects], ["Ticker coverage", `${Math.round(status.quality.ticker_coverage * 100)}%`], ["Theme coverage", `${status.quality.theme_coverage} / ${themes.length}`],
   ];
-  return <><SectionHeader eyebrow="Collection integrity" title="Data Quality" detail="The latest published rehearsal proves the afternoon chain only. Missing observations remain missing." /><div className="quality-grid">{metrics.map(([label,value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div><section className="content-band"><div className="band-header"><div><h2>Theme coverage</h2><p>Readiness at 15:45 ET</p></div><StatusBadge label="PARTIAL REHEARSAL" state="warning" /></div><div className="coverage-list">{themes.map((theme) => <div key={theme.theme_id}><span>{theme.display_name}</span><progress max="100" value="100">100%</progress><strong>100%</strong></div>)}</div></section><section className="health-callout"><Gauge /><div><h2>Runtime health</h2><p>Collector checks passed in the Day 0B artifact. Scheduled task is not installed and formal Data Shadow has not started.</p></div><StatusBadge label={status.formal_data_shadow_started ? "RUNNING" : "NOT STARTED"} state="neutral" /></section></>;
+  const coverage = Math.round(status.quality.ticker_coverage * 100);
+  return <><SectionHeader eyebrow="Collection integrity" title="Data Quality" detail={`Validated public evidence from ${status.trading_date}.`} /><div className="quality-grid">{metrics.map(([label,value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div><section className="content-band"><div className="band-header"><div><h2>Theme coverage</h2><p>{status.snapshot_evidence_grade}</p></div><StatusBadge label={status.snapshot_kind.toUpperCase()} state="warning" /></div><div className="coverage-list">{themes.map((theme) => <div key={theme.theme_id}><span>{theme.display_name}</span><progress max="100" value={coverage}>{coverage}%</progress><strong>{coverage}%</strong></div>)}</div></section><section className="health-callout"><Gauge /><div><h2>Runtime health</h2><p>{status.action_required}</p></div><StatusBadge label={status.health_state} state={status.health_state === "HEALTHY" ? "ready" : "warning"} /></section></>;
 }
 
 function MethodologyPage() { return <><SectionHeader eyebrow="Evidence before action" title="Methodology" detail="The Observatory separates factual completeness, estimated state, and decision eligibility." /><div className="prose-grid"><section><h2>Point in time</h2><p>Every observation carries event, observed, and maximum-data timestamps. A missed scheduled point is never reconstructed.</p></section><section><h2>Observer separation</h2><p>Direction, Transmission, Episode, structural attention, and Fragility are independent estimates with explicit conflicts.</p></section><section><h2>Decision sufficiency</h2><p>No action is eligible unless the certificate has enough timely evidence and all relevant invalidations remain clear.</p></section><section><h2>Prospective validation</h2><p>Data Shadow precedes Model Shadow. Thresholds remain frozen during evaluation and costs remain part of the objective.</p></section></div></>; }
 function ResearchPage() { return <><SectionHeader eyebrow="Disabled by default" title="Research" detail="Complex modules remain removable labs until they provide reproducible incremental value." /><div className="research-list">{[["Graph SSM","Disabled","Must beat the transparent baseline out of sample."],["Field models","Disabled","No activation without independent validation."],["Semantic event observer","Disabled","Known-at event timing must be reliable first."],["Torque overlay","Disabled","High beta alone is not a qualification mechanism."]].map(([name,status,detail]) => <article key={name}><Beaker /><div><h2>{name}</h2><p>{detail}</p></div><StatusBadge label={status.toUpperCase()} state="neutral" /></article>)}</div></>; }
-function StatusPage({ status }: { status: Status }) { return <><SectionHeader eyebrow="Public system state" title="Status" detail="A concise record of what is running, what is blocked, and what cannot occur." /><div className="status-board"><section><h2>Runtime</h2><dl><div><dt>Mode</dt><dd>{status.mode}</dd></div><div><dt>Formal Data Shadow</dt><dd>{String(status.formal_data_shadow_started)}</dd></div><div><dt>Model Shadow</dt><dd>{String(status.model_shadow_started)}</dd></div></dl></section><section><h2>Evidence gates</h2><dl><div><dt>Data ready</dt><dd>{String(status.data_ready)}</dd></div><div><dt>Model estimated</dt><dd>{String(status.model_estimated)}</dd></div><div><dt>Decision eligible</dt><dd>{String(status.decision_eligible)}</dd></div></dl></section><section><h2>Prohibited outputs</h2><dl><div><dt>Paper positions</dt><dd>{status.paper_positions}</dd></div><div><dt>Real orders</dt><dd>{status.real_orders}</dd></div><div><dt>Live advice</dt><dd>Disabled</dd></div></dl></section></div></>; }
+function StatusPage({ status }: { status: Status }) { return <><SectionHeader eyebrow="Public system state" title="Status" detail="A concise record of what is running, what is blocked, and what cannot occur." /><div className="status-board"><section><h2>Runtime</h2><dl><div><dt>Phase</dt><dd>{status.runtime_phase}</dd></div><div><dt>Formal Data Shadow</dt><dd>{String(status.formal_data_shadow_started)}</dd></div><div><dt>Model Shadow</dt><dd>{String(status.model_shadow_started)}</dd></div></dl></section><section><h2>Evidence gates</h2><dl><div><dt>Data ready</dt><dd>{String(status.data_ready)}</dd></div><div><dt>Model estimated</dt><dd>{String(status.model_estimated)}</dd></div><div><dt>Decision eligible</dt><dd>{String(status.decision_eligible)}</dd></div></dl></section><section><h2>Prohibited outputs</h2><dl><div><dt>Paper positions</dt><dd>{status.paper_positions}</dd></div><div><dt>Real orders</dt><dd>{status.real_orders}</dd></div><div><dt>Live advice</dt><dd>Disabled</dd></div></dl></section></div></>; }
 
 export default function App() {
   const [route, setRoute] = useState<Route>(routeFromHash());
@@ -215,7 +207,6 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [zone, setZone] = useState<"ET" | "UTC">("ET");
   const [themeFilter, setThemeFilter] = useState("all");
-  const [range, setRange] = useState("latest");
   const [stateFilter, setStateFilter] = useState("all");
   const [menuOpen, setMenuOpen] = useState(false);
   const [drawer, setDrawer] = useState<Certificate | null>(null);
@@ -242,7 +233,7 @@ export default function App() {
   const selectedTheme = themeFromHash();
   const certificateSelection = selectedTheme ?? themes[0]?.theme_id ?? "semiconductors";
 
-  if (error) return <main className="fatal-state"><AlertTriangle /><h1>Public state unavailable</h1><p>{error}</p><button onClick={() => window.location.reload()}>Retry</button></main>;
+  if (error) return <main className="fatal-state"><AlertTriangle /><h1>{error.startsWith("Public state invalid") ? "Public state invalid" : "Public state unavailable"}</h1><p>{error}</p><button onClick={() => window.location.reload()}>Retry</button></main>;
   if (!status || themes.length === 0 || Object.keys(certificates).length === 0) return <main className="loading-state" aria-busy="true"><div className="skeleton wide" /><div className="skeleton" /><div className="skeleton" /><span>Loading public evidence state</span></main>;
 
   const navigate = (next: Route, theme?: string) => routeTo(next, theme);
@@ -260,13 +251,12 @@ export default function App() {
     <header className="app-header">
       <a className="brand" href="#/today"><span className="brand-mark">MS</span><span>Market State Observatory</span></a>
       <nav className={menuOpen ? "main-nav open" : "main-nav"} aria-label="Primary navigation">{nav.map(([id,label]) => <a key={id} href={`#/${id}`} className={route === id ? "active" : ""} aria-current={route === id ? "page" : undefined}>{label}</a>)}</nav>
-      <div className="header-status"><span className="health-dot" aria-hidden="true" /> Healthy <time>{formatTime(now, zone)}</time></div>
+      <div className="header-status"><span className="health-dot" aria-hidden="true" /> {evidenceIsToday(status) ? status.health_state : "STALE"} <time>{formatTime(now, zone)}</time></div>
       <button className="icon-button menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-label="Toggle navigation">{menuOpen ? <X /> : <Menu />}</button>
     </header>
     <aside className="filter-bar" aria-label="Global filters">
       <Filter aria-hidden="true" />
       <label>Theme<select value={themeFilter} onChange={(event) => setThemeFilter(event.target.value)}><option value="all">All themes</option>{themes.map((theme) => <option key={theme.theme_id} value={theme.theme_id}>{theme.display_name}</option>)}</select></label>
-      <label>Range<select value={range} onChange={(event) => setRange(event.target.value)}><option value="latest">Latest</option><option value="day">Session</option><option value="20d">20-day gate</option></select></label>
       <label>State<select value={stateFilter} onChange={(event) => setStateFilter(event.target.value)}><option value="all">All states</option><option value="blocked">Blocked</option><option value="ready">Data ready</option></select></label>
       <div className="segmented" aria-label="Time zone"><button className={zone === "ET" ? "active" : ""} onClick={() => setZone("ET")}>ET</button><button className={zone === "UTC" ? "active" : ""} onClick={() => setZone("UTC")}>UTC</button></div>
     </aside>
