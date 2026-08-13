@@ -37,7 +37,7 @@ packages = ["src/market_state_observatory"]
 [tool.pytest.ini_options]
 addopts = "-q --basetemp=.pytest-tmp"
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "."]
 cache_dir = ".pytest-runtime-cache"
 
 [tool.ruff]
