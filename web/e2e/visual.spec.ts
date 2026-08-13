@@ -4,14 +4,14 @@ test("capture public-safe responsive product screenshots", async ({ page }, test
   await page.goto("/#/today");
   await expect(page.getByRole("heading", { name: "Today", exact: true })).toBeVisible();
   await page.screenshot({
-    path: `docs/screenshots/today-${testInfo.project.name}.png`,
+    path: `test-results/screenshots/today-${testInfo.project.name}.png`,
     fullPage: true,
   });
   if (testInfo.project.name === "desktop") {
     await page.goto("/#/themes?theme=semiconductors");
     await expect(page.getByRole("heading", { name: "Semiconductors" })).toBeVisible();
     await page.screenshot({
-      path: "docs/screenshots/theme-detail-desktop.png",
+      path: "test-results/screenshots/theme-detail-desktop.png",
       fullPage: true,
     });
   }
