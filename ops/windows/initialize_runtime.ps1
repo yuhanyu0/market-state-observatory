@@ -18,6 +18,8 @@ if ([string]::IsNullOrWhiteSpace($PythonExecutable)) {
     elseif (Test-Path -LiteralPath $adjacent) { $PythonExecutable = $adjacent }
     else { throw 'Python executable not found. Pass -PythonExecutable with an absolute path.' }
 }
+$pythonCommand = Get-Command $PythonExecutable -ErrorAction SilentlyContinue
+if ($pythonCommand) { $PythonExecutable = $pythonCommand.Source }
 $PythonExecutable = (Resolve-Path -LiteralPath $PythonExecutable).Path
 
 if ($PSCmdlet.ShouldProcess($runtimeRoot, 'Initialize private Market State Observatory runtime')) {
