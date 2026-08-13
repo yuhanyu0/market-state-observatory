@@ -7,7 +7,7 @@ from pathlib import Path
 EXCLUDED_PARTS = {
     ".cache", ".git", ".mypy_cache", ".pytest-runtime-cache", ".pytest-tmp",
     ".pytest_cache", ".ruff_cache", ".tmp", ".venv", "__pycache__", "dist",
-    "node_modules", "playwright-report", "site", "test-results",
+    "node_modules", "playwright-report", "release-artifacts", "site", "test-results",
 }
 EXCLUDED_NAMES = {"PROJECT_MANIFEST.csv", "PROJECT_MANIFEST.sha256"}
 EXCLUDED_SUFFIXES = {".tsbuildinfo"}
