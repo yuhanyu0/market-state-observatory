@@ -40,7 +40,7 @@ position, order, scientific target, or Formal Data Shadow run was added.
 
 ## Acceptance Evidence
 
-- Python: 76 passed.
+- Python: 77 passed.
 - Vitest: 4 passed.
 - Playwright: 12 passed across desktop and mobile; accessibility checks passed.
 - Static checks: Ruff and strict mypy passed.
@@ -51,6 +51,8 @@ position, order, scientific target, or Formal Data Shadow run was added.
   1,000,000 messages reconstructed, zero drops, debug false, no credential match.
 - Backpressure was exercised 99 times with no message loss. Compressed storage was
   12,659,923 bytes under a 512 MiB test budget.
+- Clean release inspection passed; the final source zip was 2,008,956 bytes,
+  below the 5 MB ceiling, with a separate Windows bootstrap zip and SHA256SUMS.
 - Early close, stale UI, crash-lock cleanup, failed-quality publication rejection,
   cross-section skew degradation, immutable settlement, and loopback binding are
   automated tests.
