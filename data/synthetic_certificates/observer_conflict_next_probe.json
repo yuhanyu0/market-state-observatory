@@ -1,0 +1,112 @@
+{
+  "certificate_id": "certificate-9cdfada8ef481b809d5cac60",
+  "theme_id": "semiconductors",
+  "as_of_utc": "2026-08-10T19:45:00Z",
+  "evidence_grade": "synthetic_demo",
+  "facts": [
+    {
+      "kind": "synthetic",
+      "text": "observer_conflict_next_probe"
+    }
+  ],
+  "direction": {
+    "state": "negative",
+    "eligible": true,
+    "data_ready": true,
+    "model_estimated": true,
+    "decision_eligible": true,
+    "uncertainty": 0.2,
+    "evidence_refs": [
+      "synthetic:observer_conflict_next_probe:direction"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition."
+  },
+  "transmission": {
+    "state": "negative_coherence",
+    "eligible": true,
+    "data_ready": true,
+    "model_estimated": true,
+    "decision_eligible": true,
+    "uncertainty": 0.2,
+    "evidence_refs": [
+      "synthetic:observer_conflict_next_probe:transmission"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition."
+  },
+  "episode": {
+    "state": "mature",
+    "eligible": true,
+    "data_ready": true,
+    "model_estimated": true,
+    "decision_eligible": true,
+    "uncertainty": 0.2,
+    "evidence_refs": [
+      "synthetic:observer_conflict_next_probe:episode"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition."
+  },
+  "structural_attention": {
+    "state": "accelerating",
+    "eligible": true,
+    "data_ready": true,
+    "model_estimated": true,
+    "decision_eligible": false,
+    "uncertainty": 0.2,
+    "evidence_refs": [
+      "synthetic:observer_conflict_next_probe:theme_radar_attention"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition."
+  },
+  "fragility": {
+    "state": "medium",
+    "eligible": true,
+    "data_ready": true,
+    "model_estimated": true,
+    "decision_eligible": true,
+    "uncertainty": 0.2,
+    "evidence_refs": [
+      "synthetic:observer_conflict_next_probe:fragility"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition."
+  },
+  "observer_agreement": {
+    "score": 0.8,
+    "estimated_observers": 5,
+    "conflict_count": 1,
+    "state": "conflicted"
+  },
+  "observer_conflicts": [
+    {
+      "theme_id": "semiconductors",
+      "left": "theme_radar_attention",
+      "right": "direction",
+      "kind": "sign_conflict",
+      "explanation": "Structural attention is rising while signed Direction is negative.",
+      "severity": "high",
+      "discriminating_probe": "Capture the next signed relative-return and breadth observation."
+    }
+  ],
+  "uncertainty": 0.2,
+  "invalidation": [
+    "Synthetic invalidation condition.",
+    "Synthetic invalidation condition.",
+    "Synthetic invalidation condition.",
+    "Synthetic invalidation condition.",
+    "Synthetic invalidation condition."
+  ],
+  "next_probe": null,
+  "eligible_playbooks": [
+    "NoScript"
+  ],
+  "vehicle_eligibility": {
+    "Theme_ETF": false,
+    "Theme_Basket": false,
+    "Torque_Overlay": false
+  },
+  "decision_status": "WAIT"
+}

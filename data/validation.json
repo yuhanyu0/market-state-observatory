@@ -1,0 +1,41 @@
+{
+  "updated_at": "2026-08-10T19:45:00Z",
+  "layers": [
+    {
+      "id": "data",
+      "label": "Data rehearsal",
+      "status": "in_progress",
+      "detail": "Alpaca SIP smoke test passed; Day 0B remains partial and does not count toward the 20-day gate."
+    },
+    {
+      "id": "direction",
+      "label": "Direction Model Shadow",
+      "status": "not_started",
+      "detail": "Transparent historical daily baseline did not establish a robust investable edge."
+    },
+    {
+      "id": "transmission",
+      "label": "Transmission",
+      "status": "not_started",
+      "detail": "Requires legal membership and constituent point-in-time coverage."
+    },
+    {
+      "id": "episode",
+      "label": "Episode",
+      "status": "not_started",
+      "detail": "Requires a continuous eligible prospective sequence."
+    },
+    {
+      "id": "playbook",
+      "label": "Playbook",
+      "status": "not_started",
+      "detail": "A/B/D/F state machine must beat simpler policies."
+    },
+    {
+      "id": "vehicle",
+      "label": "Vehicle layer",
+      "status": "not_started",
+      "detail": "Torque is tested only as an equal-risk incremental overlay."
+    }
+  ]
+}

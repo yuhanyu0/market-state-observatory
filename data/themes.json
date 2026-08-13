@@ -1,0 +1,80 @@
+{
+  "themes": [
+    {
+      "theme_id": "semiconductors",
+      "display_name": "Semiconductors",
+      "tracker_etf": "SMH",
+      "benchmark": "SPY",
+      "constituents": [
+        "NVDA",
+        "AMD",
+        "AVGO",
+        "TSM"
+      ],
+      "status": "data_rehearsal"
+    },
+    {
+      "theme_id": "cloud_computing",
+      "display_name": "Cloud Computing",
+      "tracker_etf": "SKYY",
+      "benchmark": "SPY",
+      "constituents": [
+        "MSFT",
+        "ORCL",
+        "CRM",
+        "NOW"
+      ],
+      "status": "data_rehearsal"
+    },
+    {
+      "theme_id": "cybersecurity",
+      "display_name": "Cybersecurity",
+      "tracker_etf": "CIBR",
+      "benchmark": "SPY",
+      "constituents": [
+        "CRWD",
+        "PANW",
+        "FTNT",
+        "CSCO"
+      ],
+      "status": "data_rehearsal"
+    },
+    {
+      "theme_id": "uranium_nuclear",
+      "display_name": "Uranium & Nuclear",
+      "tracker_etf": "URA",
+      "benchmark": "SPY",
+      "constituents": [
+        "CCJ",
+        "UEC",
+        "OKLO"
+      ],
+      "status": "data_rehearsal"
+    },
+    {
+      "theme_id": "solar_energy",
+      "display_name": "Solar Energy",
+      "tracker_etf": "TAN",
+      "benchmark": "SPY",
+      "constituents": [
+        "FSLR",
+        "ENPH",
+        "RUN"
+      ],
+      "status": "data_rehearsal"
+    },
+    {
+      "theme_id": "commercial_space",
+      "display_name": "Commercial Space",
+      "tracker_etf": "UFO",
+      "benchmark": "SPY",
+      "constituents": [
+        "RKLB",
+        "ASTS",
+        "IRDM",
+        "PL"
+      ],
+      "status": "data_rehearsal"
+    }
+  ]
+}

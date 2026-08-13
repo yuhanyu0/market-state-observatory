@@ -1,0 +1,121 @@
+{
+  "certificate_id": "public-synthetic-solar_energy-v040",
+  "theme_id": "solar_energy",
+  "as_of_utc": "2026-08-10T19:45:00Z",
+  "evidence_grade": "synthetic_demo",
+  "facts": [
+    {
+      "kind": "boundary",
+      "text": "Synthetic public certificate; no current live state is published."
+    },
+    {
+      "kind": "infrastructure",
+      "text": "Day 0B input readiness does not encode signed Direction."
+    }
+  ],
+  "direction": {
+    "state": "unresolved",
+    "eligible": false,
+    "data_ready": false,
+    "model_estimated": false,
+    "decision_eligible": false,
+    "uncertainty": null,
+    "evidence_refs": [
+      "synthetic:data_blocked:direction"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition."
+  },
+  "transmission": {
+    "state": "not_estimable",
+    "eligible": false,
+    "data_ready": false,
+    "model_estimated": false,
+    "decision_eligible": false,
+    "uncertainty": null,
+    "evidence_refs": [
+      "synthetic:data_blocked:transmission"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition."
+  },
+  "episode": {
+    "state": "not_estimable",
+    "eligible": false,
+    "data_ready": false,
+    "model_estimated": false,
+    "decision_eligible": false,
+    "uncertainty": null,
+    "evidence_refs": [
+      "synthetic:data_blocked:episode"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition."
+  },
+  "structural_attention": {
+    "state": "not_available",
+    "eligible": true,
+    "data_ready": true,
+    "model_estimated": true,
+    "decision_eligible": false,
+    "uncertainty": 0.2,
+    "evidence_refs": [
+      "synthetic:data_blocked:theme_radar_attention"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition."
+  },
+  "fragility": {
+    "state": "unknown",
+    "eligible": false,
+    "data_ready": false,
+    "model_estimated": false,
+    "decision_eligible": false,
+    "uncertainty": null,
+    "evidence_refs": [
+      "synthetic:data_blocked:fragility"
+    ],
+    "metrics": {},
+    "invalidation": "Synthetic invalidation condition."
+  },
+  "observer_agreement": {
+    "score": 1.0,
+    "estimated_observers": 1,
+    "conflict_count": 0,
+    "state": "no_detected_conflict"
+  },
+  "observer_conflicts": [],
+  "uncertainty": 0.2,
+  "invalidation": [
+    "Synthetic invalidation condition.",
+    "Synthetic invalidation condition.",
+    "Synthetic invalidation condition.",
+    "Synthetic invalidation condition.",
+    "Synthetic invalidation condition."
+  ],
+  "next_probe": {
+    "probe_id": "solar_energy-data-completion",
+    "theme_id": "solar_energy",
+    "acquire": "Complete the missing signed-direction point-in-time inputs.",
+    "distinguishes": [
+      "estimable direction",
+      "data blocked"
+    ],
+    "deadline_utc": "2026-08-10T19:45:00Z",
+    "expected_information_value": "high",
+    "acquisition_cost": "missing scheduled data capture",
+    "latency": "next legal observation; never backfill",
+    "reason": "The current evidence state is not decision-sufficient.",
+    "status": "proposed",
+    "question": "Can the missing point-in-time evidence be acquired legally?"
+  },
+  "eligible_playbooks": [
+    "D_wait_unresolved"
+  ],
+  "vehicle_eligibility": {
+    "Theme_ETF": false,
+    "Theme_Basket": false,
+    "Torque_Overlay": false
+  },
+  "decision_status": "DATA_BLOCKED_NO_DECISION"
+}

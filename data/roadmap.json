@@ -1,0 +1,55 @@
+{
+  "phases": [
+    {
+      "phase": "0",
+      "title": "Standalone public contract",
+      "status": "complete",
+      "items": [
+        "new repository scaffold",
+        "schemas",
+        "website",
+        "publication audit"
+      ]
+    },
+    {
+      "phase": "1",
+      "title": "Prospective Data Shadow",
+      "status": "next",
+      "items": [
+        "complete Day 0B",
+        "20 valid capture days",
+        "public-safe readiness cards"
+      ]
+    },
+    {
+      "phase": "2",
+      "title": "Direction Model Shadow",
+      "status": "future",
+      "items": [
+        "transparent baseline",
+        "calibration",
+        "cost-aware evaluation"
+      ]
+    },
+    {
+      "phase": "3",
+      "title": "Transmission and Episode",
+      "status": "future",
+      "items": [
+        "breadth and propagation",
+        "change points",
+        "lifecycle semantics"
+      ]
+    },
+    {
+      "phase": "4",
+      "title": "Playbook and vehicle control",
+      "status": "future",
+      "items": [
+        "A/B/D/F controller",
+        "ETF vs Basket",
+        "equal-risk torque experiment"
+      ]
+    }
+  ]
+}

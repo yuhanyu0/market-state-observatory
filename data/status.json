@@ -1,0 +1,74 @@
+{
+  "alpaca_sip": {
+    "all_requests_explicit_sip": true,
+    "bar_symbol_count": 7,
+    "core_symbols": [
+      "SPY",
+      "SMH",
+      "SKYY",
+      "CIBR",
+      "URA",
+      "TAN",
+      "UFO"
+    ],
+    "maximum_quote_age_seconds": 13.401112,
+    "provider_request_id_available": true,
+    "quote_symbol_count": 7,
+    "snapshot_symbol_count": 7,
+    "status": "PASS",
+    "trade_symbol_count": 7
+  },
+  "collector": {
+    "bundle_sha256": "695537a203fcd840a7f5744866899ca2c622cacb5aab064e08e80db81f1d439d",
+    "tests": "124 passed"
+  },
+  "data_ready": true,
+  "data_shadow_gate": {
+    "required_days": 20,
+    "valid_days": 0
+  },
+  "day0b": {
+    "all_records_explicit_sip": true,
+    "backfill_count": 0,
+    "c2_ready_themes": 0,
+    "captured_observation_points": [
+      "15:30",
+      "15:45",
+      "provider_session_close"
+    ],
+    "captured_valid_records": 666,
+    "constituent_coverage": 1.0,
+    "counts_toward_20_day_gate": false,
+    "credential_values_persisted": false,
+    "direction_data_ready_themes": 6,
+    "episode_ready_themes": 0,
+    "experiment_id": "day0b-alpaca-sip-20260810-03",
+    "future_timestamp_count": 0,
+    "maximum_quote_age_15_30_seconds": 13.401112,
+    "maximum_quote_age_15_45_seconds": 9.967655,
+    "minute_bar_coverage": 1.0,
+    "missed_observation_points": [
+      "09:30",
+      "12:00"
+    ],
+    "missed_records": 74,
+    "pending_records": 0,
+    "planned_records": 740,
+    "public_summary_path": "data/experiments/day0b-2026-08-10.json",
+    "status": "PASS_PARTIAL_AFTERNOON_CHAIN",
+    "theme_count": 6,
+    "transmission_data_ready_themes": 6,
+    "vwap_valid_themes": 6
+  },
+  "decision_eligible": false,
+  "formal_data_shadow_started": false,
+  "live_trading_enabled": false,
+  "mode": "ALPACA_SIP_DATA_REHEARSAL_COMPLETE",
+  "model_estimated": false,
+  "model_shadow_started": false,
+  "next_milestone": "Full automated rehearsal with 09:30 and 12:00; formal Data Shadow remains 0/20.",
+  "paper_positions": 0,
+  "real_orders": 0,
+  "schema_version": "market-state-observatory-status-v0.4",
+  "updated_at": "2026-08-10T16:00:42-04:00"
+}
