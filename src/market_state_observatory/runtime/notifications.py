@@ -67,13 +67,16 @@ def emit_local_alert(
     path = alerts_directory / f"{observed}-{payload['alert_id']}.json"
     write_exclusive(path, encoded)
     if toast:
-        subprocess.run(
-            ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", _toast_script(title, message)],
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
+        try:
+            subprocess.run(
+                ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", _toast_script(title, message)],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=3,
+            )
+        except (OSError, subprocess.SubprocessError):
+            pass
     return path
 
 

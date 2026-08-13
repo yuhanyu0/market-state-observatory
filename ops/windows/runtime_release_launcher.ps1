@@ -48,7 +48,8 @@ function Invoke-SanitizedPython {
         $startInfo.Environment['APCA_API_SECRET_KEY'] = $plainSecret
         $startInfo.Environment['ALPACA_DATA_FEED'] = 'sip'
     }
-    foreach ($argument in $Arguments) { [void]$startInfo.ArgumentList.Add($argument) }
+    $quotedArguments = $Arguments | ForEach-Object { '"' + $_.Replace('"', '\"') + '"' }
+    $startInfo.Arguments = $quotedArguments -join ' '
     try {
         $process = [System.Diagnostics.Process]::new()
         $process.StartInfo = $startInfo

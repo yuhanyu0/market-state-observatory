@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import subprocess
 import time
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -133,6 +134,17 @@ def test_alert_ledger_never_serializes_credentials(tmp_path: Path, monkeypatch: 
     text = path.read_text()
     assert "private-key-value" not in text
     assert "private-secret-value" not in text
+
+
+def test_toast_failure_does_not_lose_private_alert(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def timeout(*args: object, **kwargs: object) -> None:
+        raise subprocess.TimeoutExpired("toast", 3)
+
+    monkeypatch.setattr(subprocess, "run", timeout)
+    path = emit_local_alert(
+        tmp_path, kind="publication_failed", title="Publication failed", message="Review", toast=True
+    )
+    assert path.is_file()
 
 
 def test_cross_section_skew_degrades_transmission_quality(tmp_path: Path) -> None:
