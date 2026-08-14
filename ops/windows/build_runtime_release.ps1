@@ -65,12 +65,20 @@ try {
         formal_promotion_required = $true
         minimum_scheduler_rehearsal_sessions = 3
     } | ConvertTo-Json | Set-Content (Join-Path $staging 'config\runtime_release_config.json') -Encoding utf8
-    $testedShells = @("$($PSVersionTable.PSEdition) $($PSVersionTable.PSVersion.ToString())")
+    $testedShells = @()
+    $windowsPowerShell = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+    if (Test-Path -LiteralPath $windowsPowerShell -PathType Leaf) {
+        $desktopIdentity = (& $windowsPowerShell -NoProfile -NonInteractive -Command `
+            '$PSVersionTable.PSEdition + " " + $PSVersionTable.PSVersion.ToString()').Trim()
+        if ($desktopIdentity) { $testedShells += $desktopIdentity }
+    }
+    $testedShells += "$($PSVersionTable.PSEdition) $($PSVersionTable.PSVersion.ToString())"
     $pwsh = Get-Command pwsh -ErrorAction SilentlyContinue
     if ($pwsh) {
         $pwshIdentity = (& $pwsh.Source -NoProfile -Command '$PSVersionTable.PSEdition + " " + $PSVersionTable.PSVersion.ToString()').Trim()
         if ($pwshIdentity) { $testedShells += $pwshIdentity }
     }
+    $testedShells = @($testedShells | Sort-Object -Unique)
     $manifestArguments = @(
         '-I', '-m', 'market_state_observatory.runtime.release_identity',
         '--build-manifest', '--release', $staging, '--repository', $repository,
