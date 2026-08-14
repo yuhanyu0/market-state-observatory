@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.4 - 2026-08-14
+
+- Replaced bundled REST completeness with one explicit PIT observation row per
+  planned symbol, using the pre-REST WebSocket freeze as primary evidence.
+- Added independent quote, trade, completed-bar, and VWAP statuses plus REST
+  reconciliation that cannot replace the frozen primary state.
+- Defined exact-open bar and VWAP as `NOT_YET_DEFINED`, split atomic freeze
+  duration from provider event-time dispersion, and scoped Transmission quality
+  to its decision snapshot.
+- Added per-field readiness rates, hourly stream rotation, current-hour durable
+  checkpoints and crash recovery, an independent operator heartbeat, and
+  Windows PowerShell 5.1-safe operator JSON.
+- Preserved the v0.4.3 Day A quality failure and required a new v0.4.4 lane with
+  three new scheduler-driven PASS trading dates before Formal promotion.
+
 ## 0.4.3 - 2026-08-13
 
 - Changed the scheduler default from formal to rehearsal and split rehearsal and

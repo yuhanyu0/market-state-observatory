@@ -34,18 +34,21 @@ def _load_json(path: Path | None) -> dict[str, Any] | None:
 def _scheduler_status() -> dict[str, object]:
     if os.name != "nt":
         return {"state": "UNAVAILABLE_NON_WINDOWS"}
-    result = subprocess.run(
-        ["schtasks.exe", "/Query", "/TN", "MSO-Daily-Runtime", "/FO", "LIST"],
-        check=False,
-        capture_output=True,
-        text=True,
-        timeout=10,
-    )
-    return {"state": "INSTALLED" if result.returncode == 0 else "NOT_INSTALLED"}
+    states: dict[str, str] = {}
+    for name in ("MSO-Daily-Rehearsal", "MSO-Daily-Formal"):
+        result = subprocess.run(
+            ["schtasks.exe", "/Query", "/TN", name, "/FO", "LIST"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        states[name] = "INSTALLED" if result.returncode == 0 else "NOT_INSTALLED"
+    return {"state": "CHECKED", "tasks": states}
 
 
 def operator_state(paths: RuntimePaths) -> dict[str, Any]:
-    runtime_status = _load_json(_latest_file(paths.operator, "runtime-status*.json")) or {}
+    runtime_status = _load_json(_latest_file(paths.operator, "runtime_status*.json")) or {}
     quality_path = _latest_file(paths.data_shadow, "DATA_QUALITY.json")
     return {
         "schema_version": "mso-private-operator-state-v1",

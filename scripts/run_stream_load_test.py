@@ -33,7 +33,8 @@ async def run(messages: int, output: Path | None = None) -> dict[str, object]:
         event = start + timedelta(seconds=(index * 23_400) / max(messages - 1, 1))
         symbol = symbols[index % len(symbols)]
         await store.ingest(
-            {"T": "q", "S": symbol, "t": event.isoformat(), "bp": 100.0, "ap": 100.02}
+            {"T": "q", "S": symbol, "t": event.isoformat(), "bp": 100.0, "ap": 100.02},
+            observed_at=event,
         )
         if index + 1 in checkpoints:
             frozen = await store.freeze_cross_section(symbols, event)
@@ -41,7 +42,8 @@ async def run(messages: int, output: Path | None = None) -> dict[str, object]:
                 {
                     "scheduled_at_utc": frozen.scheduled_at_utc,
                     "symbols_present": frozen.symbols_present,
-                    "cross_section_skew_seconds": frozen.cross_section_skew_seconds,
+                    "freeze_duration_seconds": frozen.freeze_duration_seconds,
+                    "event_time_dispersion_seconds": frozen.event_time_dispersion_seconds,
                 }
             )
     await store.stop()

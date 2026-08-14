@@ -16,13 +16,59 @@ CORE_POINTS = (
     "decision_snapshot",
     "session_close_diagnostic",
 )
+FREEZE_DURATION_LIMIT_SECONDS = 5.0
 
 
 def _load_point_manifests(run_directory: Path) -> list[dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
-    for path in sorted((run_directory / "manifests" / "points").glob("*.json")):
-        rows.append(json.loads(path.read_text(encoding="utf-8")))
-    return rows
+    return [
+        json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted((run_directory / "manifests" / "points").glob("*.json"))
+    ]
+
+
+def _captured(row: dict[str, Any]) -> bool:
+    return bool(row.get("observation_status", "CAPTURED") == "CAPTURED")
+
+
+def _quote_ready(row: dict[str, Any]) -> bool:
+    quote = row.get("quote")
+    if isinstance(quote, dict) and "status" in quote:
+        return quote.get("status") == "READY" and float(quote.get("freshness_age_seconds", 1e9)) <= 60
+    return row.get("quote_age_seconds") is not None and float(row["quote_age_seconds"]) <= 60
+
+
+def _quote_age(row: dict[str, Any]) -> float | None:
+    quote = row.get("quote")
+    if isinstance(quote, dict) and quote.get("status") == "READY":
+        value = quote.get("freshness_age_seconds")
+        return float(value) if value is not None else None
+    value = row.get("quote_age_seconds")
+    return float(value) if value is not None else None
+
+
+def _trade_ready(row: dict[str, Any]) -> bool:
+    trade = row.get("last_trade")
+    if isinstance(trade, dict) and "status" in trade:
+        return trade.get("status") == "READY"
+    return trade is not None or "quote_age_seconds" in row
+
+
+def _bar_ready(row: dict[str, Any]) -> bool:
+    bar = row.get("minute_bar")
+    if isinstance(bar, dict) and "status" in bar:
+        return bar.get("status") == "READY"
+    return bar is not None or "quote_age_seconds" in row
+
+
+def _vwap_ready(row: dict[str, Any]) -> bool:
+    vwap = row.get("vwap")
+    if isinstance(vwap, dict):
+        return vwap.get("status") == "READY" and vwap.get("value") is not None
+    return vwap is not None
+
+
+def _rate(ready: int, planned: int) -> float:
+    return ready / planned if planned else 0.0
 
 
 def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[str, Any]:
@@ -31,17 +77,12 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
     stream_health_paths = sorted(
         (run_directory / "manifests" / "websocket").glob("stream-health-*.json")
     )
-    stream_health_path = stream_health_paths[-1] if stream_health_paths else None
     stream_health = (
-        json.loads(stream_health_path.read_text(encoding="utf-8"))
-        if stream_health_path is not None and stream_health_path.is_file()
+        json.loads(stream_health_paths[-1].read_text(encoding="utf-8"))
+        if stream_health_paths
         else {"reconnect_count": 0}
     )
     by_point = {str(row["observation_point"]): row for row in points}
-    symbols_by_point = {
-        point: {str(row["symbol"]) for row in payload.get("symbols", [])}
-        for point, payload in by_point.items()
-    }
     symbol_rows: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
     for point, payload in by_point.items():
         for row in payload.get("symbols", []):
@@ -53,55 +94,77 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
             [str(theme["theme_etf"]), str(theme["industry_benchmark"]), *theme["basket"]]
         )
     planned = len(CORE_POINTS) * len(all_symbols)
-    captured = sum(len(symbols_by_point.get(point, set()) & all_symbols) for point in CORE_POINTS)
-    quote_ages = [
-        float(row["quote_age_seconds"])
-        for payload in points
-        for row in payload.get("symbols", [])
-        if row.get("quote_age_seconds") is not None
+    core_rows = [
+        symbol_rows[point][symbol]
+        for point in CORE_POINTS
+        for symbol in all_symbols
+        if symbol in symbol_rows.get(point, {})
     ]
+    captured = sum(_captured(row) for row in core_rows)
+    quote_ready = sum(_quote_ready(row) for row in core_rows)
+    trade_ready = sum(_trade_ready(row) for row in core_rows)
+    bar_ready = sum(_bar_ready(row) for row in core_rows)
+    vwap_ready = sum(_vwap_ready(row) for row in core_rows)
+    quote_ages = [age for row in core_rows if (age := _quote_age(row)) is not None]
     future_timestamps = sum(int(payload.get("future_timestamp_count", 0)) for payload in points)
     backfill_count = sum(int(bool(payload.get("backfilled", False))) for payload in points)
-    cross_section_skews = [
-        float(payload["cross_section_skew_seconds"])
-        for payload in points
-        if payload.get("cross_section_skew_seconds") is not None
-    ]
-    maximum_cross_section_skew = max(cross_section_skews) if cross_section_skews else None
-    cross_section_skew_limit = 5.0
+    freeze_durations = {
+        point: (
+            float(payload["freeze_duration_seconds"])
+            if payload.get("freeze_duration_seconds") is not None
+            else float(payload["cross_section_skew_seconds"])
+            if payload.get("cross_section_skew_seconds") is not None
+            else None
+        )
+        for point, payload in by_point.items()
+    }
+    event_dispersions = {
+        point: (
+            float(payload["event_time_dispersion_seconds"])
+            if payload.get("event_time_dispersion_seconds") is not None
+            else None
+        )
+        for point, payload in by_point.items()
+    }
+
     theme_quality: list[dict[str, Any]] = []
+    direction_points = ("preclose_snapshot", "decision_snapshot")
+    decision_freeze_duration = freeze_durations.get("decision_snapshot")
     for theme in universe["themes"]:
         theme_id = str(theme["theme_id"])
         etf = str(theme["theme_etf"])
         benchmark = str(theme["industry_benchmark"])
         required_direction = {etf, str(universe["benchmark"]), benchmark}
-        direction_points = ("preclose_snapshot", "decision_snapshot")
-        direction_coverage = all(
-            required_direction <= symbols_by_point.get(point, set()) for point in direction_points
-        )
         direction_rows = [
-            symbol_rows[point][symbol]
+            symbol_rows.get(point, {}).get(symbol)
             for point in direction_points
             for symbol in required_direction
-            if symbol in symbol_rows.get(point, {})
         ]
         direction_ready = bool(
-            direction_coverage
-            and direction_rows
-            and all(float(row["quote_age_seconds"]) <= 60 for row in direction_rows)
-            and all(row.get("vwap") is not None for row in direction_rows)
+            all(row is not None for row in direction_rows)
+            and all(_captured(row) and _quote_ready(row) and _vwap_ready(row) for row in direction_rows if row)
         )
         constituents = set(map(str, theme["basket"]))
-        present_constituents = constituents & symbols_by_point.get("decision_snapshot", set())
-        constituent_coverage = (
-            len(present_constituents) / len(constituents) if constituents else 0.0
+        decision_rows = symbol_rows.get("decision_snapshot", {})
+        ready_constituents = {
+            symbol
+            for symbol in constituents
+            if symbol in decision_rows
+            and _captured(decision_rows[symbol])
+            and _quote_ready(decision_rows[symbol])
+            and _bar_ready(decision_rows[symbol])
+            and _vwap_ready(decision_rows[symbol])
+        }
+        constituent_coverage = len(ready_constituents) / len(constituents) if constituents else 0.0
+        atomic_decision_freeze = bool(
+            decision_freeze_duration is not None
+            and decision_freeze_duration <= FREEZE_DURATION_LIMIT_SECONDS
         )
         transmission_ready = bool(
             direction_ready
             and run.get("membership_snapshot_frozen")
             and constituent_coverage >= 0.8
-            and maximum_cross_section_skew is not None
-            and maximum_cross_section_skew <= cross_section_skew_limit
+            and atomic_decision_freeze
         )
         blockers: list[str] = []
         if not direction_ready:
@@ -109,9 +172,9 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
         if not run.get("membership_snapshot_frozen"):
             blockers.append("membership_not_frozen")
         if constituent_coverage < 0.8:
-            blockers.append("constituent_coverage_below_80_percent")
-        if maximum_cross_section_skew is not None and maximum_cross_section_skew > cross_section_skew_limit:
-            blockers.append("cross_section_skew_above_5_seconds")
+            blockers.append("decision_constituent_coverage_below_80_percent")
+        if not atomic_decision_freeze:
+            blockers.append("decision_freeze_duration_above_5_seconds")
         theme_quality.append(
             {
                 "theme_id": theme_id,
@@ -124,10 +187,16 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
                 "episode_ready": False,
                 "c2_ready": False,
                 "constituent_coverage": constituent_coverage,
+                "transmission_snapshot": "decision_snapshot",
+                "decision_freeze_duration_seconds": decision_freeze_duration,
+                "decision_event_time_dispersion_seconds": event_dispersions.get(
+                    "decision_snapshot"
+                ),
                 "blocking_reasons": blockers,
             }
         )
-    success_rate = captured / planned if planned else 0.0
+
+    observation_capture_rate = _rate(captured, planned)
     max_quote_age = max(quote_ages) if quote_ages else None
     required_points_present = all(point in by_point for point in CORE_POINTS)
     schedule = dict(schedule_as_utc(date.fromisoformat(str(run["trading_date"]))))
@@ -142,7 +211,7 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
     ]
     quality_pass = bool(
         required_points_present
-        and success_rate >= 0.95
+        and observation_capture_rate >= 0.95
         and all(theme["direction_ready"] for theme in theme_quality)
         and max_quote_age is not None
         and max_quote_age <= 60
@@ -164,7 +233,7 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
         and int(run.get("real_orders_allowed", False)) == 0
     )
     return {
-        "schema_version": "mso-private-data-quality-v2",
+        "schema_version": "mso-private-data-quality-v3",
         "run_id": run["run_id"],
         "trading_date": run["trading_date"],
         "status": run["status"],
@@ -180,7 +249,12 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
         "publication_as_formal": bool(formal_mode),
         "planned_observations": planned,
         "captured_observations": captured,
-        "capture_rate": success_rate,
+        "observation_capture_rate": observation_capture_rate,
+        "quote_ready_rate": _rate(quote_ready, planned),
+        "trade_ready_rate": _rate(trade_ready, planned),
+        "bar_ready_rate": _rate(bar_ready, planned),
+        "vwap_ready_rate": _rate(vwap_ready, planned),
+        "capture_rate": observation_capture_rate,
         "quote_age_seconds_max": max_quote_age,
         "future_timestamp_count": future_timestamps,
         "backfill_count": backfill_count,
@@ -190,8 +264,9 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
         "stream_chunk_count": int(stream_health.get("chunk_count", 0)),
         "stream_disk_budget_bytes": int(stream_health.get("disk_budget_bytes", 0)),
         "stream_disk_budget_used_bytes": int(stream_health.get("disk_budget_used_bytes", 0)),
-        "cross_section_skew_seconds_max": maximum_cross_section_skew,
-        "cross_section_skew_limit_seconds": cross_section_skew_limit,
+        "freeze_duration_seconds_by_point": freeze_durations,
+        "freeze_duration_limit_seconds": FREEZE_DURATION_LIMIT_SECONDS,
+        "event_time_dispersion_seconds_by_point": event_dispersions,
         "timeline": timeline,
         "data_quality_pass": quality_pass,
         "publication_eligible": publication_eligible,

@@ -1,0 +1,1503 @@
+{
+  "active_symbol_hypothesis": {
+    "all_exclusions_due_to_timestamp_or_bar_eligibility": true,
+    "excluded_rows": [
+      {
+        "all_exclusion_reasons": [
+          "quote_future_vs_collector_clock"
+        ],
+        "ask": 225.11,
+        "bid": 225.09,
+        "eligible_completed_bar_count": 375,
+        "point": "decision_snapshot",
+        "primary_exclusion_reason": "quote_future_vs_collector_clock",
+        "quote_age_seconds": -0.123638,
+        "quote_event_time_utc": "2026-08-14T19:45:04.600077+00:00",
+        "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+        "quote_present": true,
+        "symbol": "NVDA",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "quote_future_vs_collector_clock"
+        ],
+        "ask": 586.51,
+        "bid": 586.36,
+        "eligible_completed_bar_count": 375,
+        "point": "decision_snapshot",
+        "primary_exclusion_reason": "quote_future_vs_collector_clock",
+        "quote_age_seconds": -0.170342,
+        "quote_event_time_utc": "2026-08-14T19:45:04.646781+00:00",
+        "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+        "quote_present": true,
+        "symbol": "SMH",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "quote_future_vs_collector_clock"
+        ],
+        "ask": 548.97,
+        "bid": 548.85,
+        "eligible_completed_bar_count": 375,
+        "point": "decision_snapshot",
+        "primary_exclusion_reason": "quote_future_vs_collector_clock",
+        "quote_age_seconds": -0.082807,
+        "quote_event_time_utc": "2026-08-14T19:45:04.559246+00:00",
+        "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+        "quote_present": true,
+        "symbol": "SOXX",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "quote_future_vs_collector_clock"
+        ],
+        "ask": 776.18,
+        "bid": 776.17,
+        "eligible_completed_bar_count": 375,
+        "point": "decision_snapshot",
+        "primary_exclusion_reason": "quote_future_vs_collector_clock",
+        "quote_age_seconds": -0.156153,
+        "quote_event_time_utc": "2026-08-14T19:45:04.632592+00:00",
+        "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+        "quote_present": true,
+        "symbol": "SPY",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "quote_future_vs_collector_clock"
+        ],
+        "ask": 225.05,
+        "bid": 225.03,
+        "eligible_completed_bar_count": 195,
+        "point": "midpoint_snapshot",
+        "primary_exclusion_reason": "quote_future_vs_collector_clock",
+        "quote_age_seconds": -0.049868,
+        "quote_event_time_utc": "2026-08-14T16:45:06.229842+00:00",
+        "quote_observed_at_utc": "2026-08-14T16:45:06.179974+00:00",
+        "quote_present": true,
+        "symbol": "NVDA",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "quote_future_vs_collector_clock"
+        ],
+        "ask": 584.39,
+        "bid": 584.27,
+        "eligible_completed_bar_count": 195,
+        "point": "midpoint_snapshot",
+        "primary_exclusion_reason": "quote_future_vs_collector_clock",
+        "quote_age_seconds": -0.089894,
+        "quote_event_time_utc": "2026-08-14T16:45:06.269868+00:00",
+        "quote_observed_at_utc": "2026-08-14T16:45:06.179974+00:00",
+        "quote_present": true,
+        "symbol": "SMH",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "quote_future_vs_collector_clock"
+        ],
+        "ask": 776.16,
+        "bid": 776.14,
+        "eligible_completed_bar_count": 195,
+        "point": "midpoint_snapshot",
+        "primary_exclusion_reason": "quote_future_vs_collector_clock",
+        "quote_age_seconds": -0.049677,
+        "quote_event_time_utc": "2026-08-14T16:45:06.229651+00:00",
+        "quote_observed_at_utc": "2026-08-14T16:45:06.179974+00:00",
+        "quote_present": true,
+        "symbol": "SPY",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "quote_future_vs_collector_clock"
+        ],
+        "ask": 225.56,
+        "bid": 225.5,
+        "eligible_completed_bar_count": 30,
+        "point": "next_10_00",
+        "primary_exclusion_reason": "quote_future_vs_collector_clock",
+        "quote_age_seconds": -0.061332,
+        "quote_event_time_utc": "2026-08-14T14:00:04.605755+00:00",
+        "quote_observed_at_utc": "2026-08-14T14:00:04.544423+00:00",
+        "quote_present": true,
+        "symbol": "NVDA",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "quote_future_vs_collector_clock"
+        ],
+        "ask": 587.17,
+        "bid": 586.67,
+        "eligible_completed_bar_count": 30,
+        "point": "next_10_00",
+        "primary_exclusion_reason": "quote_future_vs_collector_clock",
+        "quote_age_seconds": -0.052392,
+        "quote_event_time_utc": "2026-08-14T14:00:04.596815+00:00",
+        "quote_observed_at_utc": "2026-08-14T14:00:04.544423+00:00",
+        "quote_present": true,
+        "symbol": "SMH",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "quote_future_vs_collector_clock"
+        ],
+        "ask": 778.45,
+        "bid": 778.36,
+        "eligible_completed_bar_count": 30,
+        "point": "next_10_00",
+        "primary_exclusion_reason": "quote_future_vs_collector_clock",
+        "quote_age_seconds": -0.062782,
+        "quote_event_time_utc": "2026-08-14T14:00:04.607205+00:00",
+        "quote_observed_at_utc": "2026-08-14T14:00:04.544423+00:00",
+        "quote_present": true,
+        "symbol": "SPY",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "no_eligible_completed_bar"
+        ],
+        "ask": 227.07,
+        "bid": 226.98,
+        "eligible_completed_bar_count": 0,
+        "point": "open_snapshot",
+        "primary_exclusion_reason": "no_eligible_completed_bar",
+        "quote_age_seconds": 0.127066,
+        "quote_event_time_utc": "2026-08-14T13:30:02.815535+00:00",
+        "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+        "quote_present": true,
+        "symbol": "NVDA",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "no_eligible_completed_bar"
+        ],
+        "ask": 587.87,
+        "bid": 587.23,
+        "eligible_completed_bar_count": 0,
+        "point": "open_snapshot",
+        "primary_exclusion_reason": "no_eligible_completed_bar",
+        "quote_age_seconds": 0.107853,
+        "quote_event_time_utc": "2026-08-14T13:30:02.834748+00:00",
+        "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+        "quote_present": true,
+        "symbol": "SMH",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "no_eligible_completed_bar"
+        ],
+        "ask": 549.2,
+        "bid": 548.44,
+        "eligible_completed_bar_count": 0,
+        "point": "open_snapshot",
+        "primary_exclusion_reason": "no_eligible_completed_bar",
+        "quote_age_seconds": 0.110525,
+        "quote_event_time_utc": "2026-08-14T13:30:02.832076+00:00",
+        "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+        "quote_present": true,
+        "symbol": "SOXX",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "no_eligible_completed_bar"
+        ],
+        "ask": 778.31,
+        "bid": 778.27,
+        "eligible_completed_bar_count": 0,
+        "point": "open_snapshot",
+        "primary_exclusion_reason": "no_eligible_completed_bar",
+        "quote_age_seconds": 0.11838,
+        "quote_event_time_utc": "2026-08-14T13:30:02.824221+00:00",
+        "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+        "quote_present": true,
+        "symbol": "SPY",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "quote_future_vs_collector_clock"
+        ],
+        "ask": 586.26,
+        "bid": 586.1,
+        "eligible_completed_bar_count": 360,
+        "point": "preclose_snapshot",
+        "primary_exclusion_reason": "quote_future_vs_collector_clock",
+        "quote_age_seconds": -0.185144,
+        "quote_event_time_utc": "2026-08-14T19:30:03.148555+00:00",
+        "quote_observed_at_utc": "2026-08-14T19:30:02.963411+00:00",
+        "quote_present": true,
+        "symbol": "SMH",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "quote_future_vs_collector_clock"
+        ],
+        "ask": 548.41,
+        "bid": 548.2,
+        "eligible_completed_bar_count": 360,
+        "point": "preclose_snapshot",
+        "primary_exclusion_reason": "quote_future_vs_collector_clock",
+        "quote_age_seconds": -0.1793,
+        "quote_event_time_utc": "2026-08-14T19:30:03.142711+00:00",
+        "quote_observed_at_utc": "2026-08-14T19:30:02.963411+00:00",
+        "quote_present": true,
+        "symbol": "SOXX",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "quote_future_vs_collector_clock"
+        ],
+        "ask": 225.19,
+        "bid": 224.96,
+        "eligible_completed_bar_count": 389,
+        "point": "session_close_diagnostic",
+        "primary_exclusion_reason": "quote_future_vs_collector_clock",
+        "quote_age_seconds": -0.040715,
+        "quote_event_time_utc": "2026-08-14T20:00:02.452199+00:00",
+        "quote_observed_at_utc": "2026-08-14T20:00:02.411484+00:00",
+        "quote_present": true,
+        "symbol": "NVDA",
+        "trade_present": true
+      },
+      {
+        "all_exclusion_reasons": [
+          "quote_future_vs_collector_clock"
+        ],
+        "ask": 776.33,
+        "bid": 776.29,
+        "eligible_completed_bar_count": 390,
+        "point": "session_close_diagnostic",
+        "primary_exclusion_reason": "quote_future_vs_collector_clock",
+        "quote_age_seconds": -0.242049,
+        "quote_event_time_utc": "2026-08-14T20:00:02.653533+00:00",
+        "quote_observed_at_utc": "2026-08-14T20:00:02.411484+00:00",
+        "quote_present": true,
+        "symbol": "SPY",
+        "trade_present": true
+      }
+    ],
+    "symbols": [
+      "SPY",
+      "NVDA",
+      "SMH",
+      "SOXX"
+    ]
+  },
+  "day_a_remains_failed": true,
+  "network_called": false,
+  "overall_all_exclusion_reason_counts": {
+    "no_eligible_completed_bar": 35,
+    "quote_future_vs_collector_clock": 37
+  },
+  "overall_primary_exclusion_reason_counts": {
+    "no_eligible_completed_bar": 35,
+    "quote_future_vs_collector_clock": 37
+  },
+  "points": [
+    {
+      "all_exclusion_reason_counts": {
+        "quote_future_vs_collector_clock": 11
+      },
+      "missing_symbols": [
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 508.64,
+          "bid": 508.37,
+          "eligible_completed_bar_count": 375,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.066952,
+          "quote_event_time_utc": "2026-08-14T19:45:04.543391+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+          "quote_present": true,
+          "symbol": "AMD",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 99.59,
+          "bid": 99.56,
+          "eligible_completed_bar_count": 361,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.160786,
+          "quote_event_time_utc": "2026-08-14T19:45:04.637225+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+          "quote_present": true,
+          "symbol": "CIBR",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 196.49,
+          "bid": 196.4,
+          "eligible_completed_bar_count": 375,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.107127,
+          "quote_event_time_utc": "2026-08-14T19:45:04.583566+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+          "quote_present": true,
+          "symbol": "CRM",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 111.72,
+          "bid": 111.7,
+          "eligible_completed_bar_count": 375,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.167517,
+          "quote_event_time_utc": "2026-08-14T19:45:04.643956+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+          "quote_present": true,
+          "symbol": "CSCO",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 495.39,
+          "bid": 495.31,
+          "eligible_completed_bar_count": 375,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.022991,
+          "quote_event_time_utc": "2026-08-14T19:45:04.499430+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+          "quote_present": true,
+          "symbol": "MSFT",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 225.11,
+          "bid": 225.09,
+          "eligible_completed_bar_count": 375,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.123638,
+          "quote_event_time_utc": "2026-08-14T19:45:04.600077+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+          "quote_present": true,
+          "symbol": "NVDA",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 24.59,
+          "bid": 24.58,
+          "eligible_completed_bar_count": 375,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.058522,
+          "quote_event_time_utc": "2026-08-14T19:45:04.534961+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+          "quote_present": true,
+          "symbol": "PL",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 80.31,
+          "bid": 80.27,
+          "eligible_completed_bar_count": 375,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.058023,
+          "quote_event_time_utc": "2026-08-14T19:45:04.534462+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+          "quote_present": true,
+          "symbol": "RKLB",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 586.51,
+          "bid": 586.36,
+          "eligible_completed_bar_count": 375,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.170342,
+          "quote_event_time_utc": "2026-08-14T19:45:04.646781+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+          "quote_present": true,
+          "symbol": "SMH",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 548.97,
+          "bid": 548.85,
+          "eligible_completed_bar_count": 375,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.082807,
+          "quote_event_time_utc": "2026-08-14T19:45:04.559246+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+          "quote_present": true,
+          "symbol": "SOXX",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 776.18,
+          "bid": 776.17,
+          "eligible_completed_bar_count": 375,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.156153,
+          "quote_event_time_utc": "2026-08-14T19:45:04.632592+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:45:04.476439+00:00",
+          "quote_present": true,
+          "symbol": "SPY",
+          "trade_present": true
+        }
+      ],
+      "old_cross_section_skew_seconds": 2.69602,
+      "planned_symbols": 35,
+      "point": "decision_snapshot",
+      "primary_exclusion_reason_counts": {
+        "quote_future_vs_collector_clock": 11
+      },
+      "rest_captured_symbols": 24,
+      "scheduled_at_utc": "2026-08-14T19:45:00+00:00",
+      "websocket_symbols_present": 35
+    },
+    {
+      "all_exclusion_reason_counts": {
+        "quote_future_vs_collector_clock": 5
+      },
+      "missing_symbols": [
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 99.88,
+          "bid": 99.8,
+          "eligible_completed_bar_count": 191,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.046328,
+          "quote_event_time_utc": "2026-08-14T16:45:06.226302+00:00",
+          "quote_observed_at_utc": "2026-08-14T16:45:06.179974+00:00",
+          "quote_present": true,
+          "symbol": "CIBR",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 225.05,
+          "bid": 225.03,
+          "eligible_completed_bar_count": 195,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.049868,
+          "quote_event_time_utc": "2026-08-14T16:45:06.229842+00:00",
+          "quote_observed_at_utc": "2026-08-14T16:45:06.179974+00:00",
+          "quote_present": true,
+          "symbol": "NVDA",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 584.39,
+          "bid": 584.27,
+          "eligible_completed_bar_count": 195,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.089894,
+          "quote_event_time_utc": "2026-08-14T16:45:06.269868+00:00",
+          "quote_observed_at_utc": "2026-08-14T16:45:06.179974+00:00",
+          "quote_present": true,
+          "symbol": "SMH",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 776.16,
+          "bid": 776.14,
+          "eligible_completed_bar_count": 195,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.049677,
+          "quote_event_time_utc": "2026-08-14T16:45:06.229651+00:00",
+          "quote_observed_at_utc": "2026-08-14T16:45:06.179974+00:00",
+          "quote_present": true,
+          "symbol": "SPY",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 45.2,
+          "bid": 45.17,
+          "eligible_completed_bar_count": 192,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.041502,
+          "quote_event_time_utc": "2026-08-14T16:45:06.221476+00:00",
+          "quote_observed_at_utc": "2026-08-14T16:45:06.179974+00:00",
+          "quote_present": true,
+          "symbol": "URA",
+          "trade_present": true
+        }
+      ],
+      "old_cross_section_skew_seconds": 3.015436,
+      "planned_symbols": 35,
+      "point": "midpoint_snapshot",
+      "primary_exclusion_reason_counts": {
+        "quote_future_vs_collector_clock": 5
+      },
+      "rest_captured_symbols": 30,
+      "scheduled_at_utc": "2026-08-14T16:45:00+00:00",
+      "websocket_symbols_present": 35
+    },
+    {
+      "all_exclusion_reason_counts": {
+        "quote_future_vs_collector_clock": 10
+      },
+      "missing_symbols": [
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 497.33,
+          "bid": 496.84,
+          "eligible_completed_bar_count": 30,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.019625,
+          "quote_event_time_utc": "2026-08-14T14:00:04.564048+00:00",
+          "quote_observed_at_utc": "2026-08-14T14:00:04.544423+00:00",
+          "quote_present": true,
+          "symbol": "AMD",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 34.94,
+          "bid": 34.89,
+          "eligible_completed_bar_count": 27,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.008717,
+          "quote_event_time_utc": "2026-08-14T14:00:04.553140+00:00",
+          "quote_observed_at_utc": "2026-08-14T14:00:04.544423+00:00",
+          "quote_present": true,
+          "symbol": "ARKX",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 400.3,
+          "bid": 400.0,
+          "eligible_completed_bar_count": 30,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.00389,
+          "quote_event_time_utc": "2026-08-14T14:00:04.548313+00:00",
+          "quote_observed_at_utc": "2026-08-14T14:00:04.544423+00:00",
+          "quote_present": true,
+          "symbol": "AVGO",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 111.52,
+          "bid": 111.47,
+          "eligible_completed_bar_count": 30,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.062975,
+          "quote_event_time_utc": "2026-08-14T14:00:04.607398+00:00",
+          "quote_observed_at_utc": "2026-08-14T14:00:04.544423+00:00",
+          "quote_present": true,
+          "symbol": "CSCO",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 225.56,
+          "bid": 225.5,
+          "eligible_completed_bar_count": 30,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.061332,
+          "quote_event_time_utc": "2026-08-14T14:00:04.605755+00:00",
+          "quote_observed_at_utc": "2026-08-14T14:00:04.544423+00:00",
+          "quote_present": true,
+          "symbol": "NVDA",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 24.81,
+          "bid": 24.75,
+          "eligible_completed_bar_count": 30,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.008308,
+          "quote_event_time_utc": "2026-08-14T14:00:04.552731+00:00",
+          "quote_observed_at_utc": "2026-08-14T14:00:04.544423+00:00",
+          "quote_present": true,
+          "symbol": "PL",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 80.51,
+          "bid": 80.39,
+          "eligible_completed_bar_count": 30,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.02812,
+          "quote_event_time_utc": "2026-08-14T14:00:04.572543+00:00",
+          "quote_observed_at_utc": "2026-08-14T14:00:04.544423+00:00",
+          "quote_present": true,
+          "symbol": "RKLB",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 587.17,
+          "bid": 586.67,
+          "eligible_completed_bar_count": 30,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.052392,
+          "quote_event_time_utc": "2026-08-14T14:00:04.596815+00:00",
+          "quote_observed_at_utc": "2026-08-14T14:00:04.544423+00:00",
+          "quote_present": true,
+          "symbol": "SMH",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 778.45,
+          "bid": 778.36,
+          "eligible_completed_bar_count": 30,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.062782,
+          "quote_event_time_utc": "2026-08-14T14:00:04.607205+00:00",
+          "quote_observed_at_utc": "2026-08-14T14:00:04.544423+00:00",
+          "quote_present": true,
+          "symbol": "SPY",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 427.0,
+          "bid": 426.48,
+          "eligible_completed_bar_count": 30,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.032429,
+          "quote_event_time_utc": "2026-08-14T14:00:04.576852+00:00",
+          "quote_observed_at_utc": "2026-08-14T14:00:04.544423+00:00",
+          "quote_present": true,
+          "symbol": "TSM",
+          "trade_present": true
+        }
+      ],
+      "old_cross_section_skew_seconds": 8.369308,
+      "planned_symbols": 35,
+      "point": "next_10_00",
+      "primary_exclusion_reason_counts": {
+        "quote_future_vs_collector_clock": 10
+      },
+      "rest_captured_symbols": 25,
+      "scheduled_at_utc": "2026-08-14T14:00:00+00:00",
+      "websocket_symbols_present": 35
+    },
+    {
+      "all_exclusion_reason_counts": {
+        "no_eligible_completed_bar": 35
+      },
+      "missing_symbols": [
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 488.91,
+          "bid": 487.6,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.14689,
+          "quote_event_time_utc": "2026-08-14T13:30:02.795711+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "AMD",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 35.23,
+          "bid": 35.17,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.122286,
+          "quote_event_time_utc": "2026-08-14T13:30:02.820315+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "ARKX",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 71.6,
+          "bid": 71.43,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.166695,
+          "quote_event_time_utc": "2026-08-14T13:30:02.775906+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "ASTS",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 411.93,
+          "bid": 411.23,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.116799,
+          "quote_event_time_utc": "2026-08-14T13:30:02.825802+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "AVGO",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 97.75,
+          "bid": 97.45,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.23906,
+          "quote_event_time_utc": "2026-08-14T13:30:02.703541+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "CCJ",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 102.36,
+          "bid": 102.22,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.267706,
+          "quote_event_time_utc": "2026-08-14T13:30:02.674895+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "CIBR",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 29.33,
+          "bid": 29.2,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.331699,
+          "quote_event_time_utc": "2026-08-14T13:30:02.610902+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "CLOU",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 204.07,
+          "bid": 203.01,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.143236,
+          "quote_event_time_utc": "2026-08-14T13:30:02.799365+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "CRM",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 226.73,
+          "bid": 225.56,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.490175,
+          "quote_event_time_utc": "2026-08-14T13:30:02.452426+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "CRWD",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 112.6,
+          "bid": 112.54,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.107917,
+          "quote_event_time_utc": "2026-08-14T13:30:02.834684+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "CSCO",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 41.08,
+          "bid": 40.94,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.429643,
+          "quote_event_time_utc": "2026-08-14T13:30:02.512958+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "ENPH",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 224.76,
+          "bid": 224.1,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.185319,
+          "quote_event_time_utc": "2026-08-14T13:30:02.757282+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "FSLR",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 165.7,
+          "bid": 165.25,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.279182,
+          "quote_event_time_utc": "2026-08-14T13:30:02.663419+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "FTNT",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 121.95,
+          "bid": 121.31,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 1.364163,
+          "quote_event_time_utc": "2026-08-14T13:30:01.578438+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "HACK",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 18.23,
+          "bid": 18.2,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.507985,
+          "quote_event_time_utc": "2026-08-14T13:30:02.434616+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "ICLN",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 50.15,
+          "bid": 49.8,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.398442,
+          "quote_event_time_utc": "2026-08-14T13:30:02.544159+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "IRDM",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 495.35,
+          "bid": 494.9,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.123395,
+          "quote_event_time_utc": "2026-08-14T13:30:02.819206+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "MSFT",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 118.99,
+          "bid": 118.35,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.272372,
+          "quote_event_time_utc": "2026-08-14T13:30:02.670229+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "NLR",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 128.15,
+          "bid": 127.8,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.231018,
+          "quote_event_time_utc": "2026-08-14T13:30:02.711583+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "NOW",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 227.07,
+          "bid": 226.98,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.127066,
+          "quote_event_time_utc": "2026-08-14T13:30:02.815535+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "NVDA",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 46.5,
+          "bid": 46.3,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.42606,
+          "quote_event_time_utc": "2026-08-14T13:30:02.516541+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "OKLO",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 155.99,
+          "bid": 155.28,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.120242,
+          "quote_event_time_utc": "2026-08-14T13:30:02.822359+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "ORCL",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 397.24,
+          "bid": 395.0,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.366834,
+          "quote_event_time_utc": "2026-08-14T13:30:02.575767+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "PANW",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 25.1,
+          "bid": 25.06,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.81694,
+          "quote_event_time_utc": "2026-08-14T13:30:02.125661+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "PL",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 80.09,
+          "bid": 79.77,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.126268,
+          "quote_event_time_utc": "2026-08-14T13:30:02.816333+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "RKLB",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 9.92,
+          "bid": 9.88,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.110478,
+          "quote_event_time_utc": "2026-08-14T13:30:02.832123+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "RUN",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 169.48,
+          "bid": 168.99,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.410769,
+          "quote_event_time_utc": "2026-08-14T13:30:02.531832+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "SKYY",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 587.87,
+          "bid": 587.23,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.107853,
+          "quote_event_time_utc": "2026-08-14T13:30:02.834748+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "SMH",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 549.2,
+          "bid": 548.44,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.110525,
+          "quote_event_time_utc": "2026-08-14T13:30:02.832076+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "SOXX",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 778.31,
+          "bid": 778.27,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.11838,
+          "quote_event_time_utc": "2026-08-14T13:30:02.824221+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "SPY",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 52.27,
+          "bid": 52.0,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 2.492459,
+          "quote_event_time_utc": "2026-08-14T13:30:00.450142+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "TAN",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 428.49,
+          "bid": 428.24,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.169368,
+          "quote_event_time_utc": "2026-08-14T13:30:02.773233+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "TSM",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 11.26,
+          "bid": 11.21,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 2.460779,
+          "quote_event_time_utc": "2026-08-14T13:30:00.481822+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "UEC",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 48.87,
+          "bid": 48.51,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.513194,
+          "quote_event_time_utc": "2026-08-14T13:30:02.429407+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "UFO",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "no_eligible_completed_bar"
+          ],
+          "ask": 45.27,
+          "bid": 45.2,
+          "eligible_completed_bar_count": 0,
+          "primary_exclusion_reason": "no_eligible_completed_bar",
+          "quote_age_seconds": 0.18673,
+          "quote_event_time_utc": "2026-08-14T13:30:02.755871+00:00",
+          "quote_observed_at_utc": "2026-08-14T13:30:02.942601+00:00",
+          "quote_present": true,
+          "symbol": "URA",
+          "trade_present": true
+        }
+      ],
+      "old_cross_section_skew_seconds": 35.091073,
+      "planned_symbols": 35,
+      "point": "open_snapshot",
+      "primary_exclusion_reason_counts": {
+        "no_eligible_completed_bar": 35
+      },
+      "rest_captured_symbols": 0,
+      "scheduled_at_utc": "2026-08-14T13:30:00+00:00",
+      "websocket_symbols_present": 35
+    },
+    {
+      "all_exclusion_reason_counts": {
+        "quote_future_vs_collector_clock": 6
+      },
+      "missing_symbols": [
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 70.64,
+          "bid": 70.55,
+          "eligible_completed_bar_count": 360,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.07728,
+          "quote_event_time_utc": "2026-08-14T19:30:03.040691+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:30:02.963411+00:00",
+          "quote_present": true,
+          "symbol": "ASTS",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 392.43,
+          "bid": 392.36,
+          "eligible_completed_bar_count": 360,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.080916,
+          "quote_event_time_utc": "2026-08-14T19:30:03.044327+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:30:02.963411+00:00",
+          "quote_present": true,
+          "symbol": "AVGO",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 118.53,
+          "bid": 118.28,
+          "eligible_completed_bar_count": 244,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.048936,
+          "quote_event_time_utc": "2026-08-14T19:30:03.012347+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:30:02.963411+00:00",
+          "quote_present": true,
+          "symbol": "NLR",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 44.74,
+          "bid": 44.7,
+          "eligible_completed_bar_count": 360,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.181977,
+          "quote_event_time_utc": "2026-08-14T19:30:03.145388+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:30:02.963411+00:00",
+          "quote_present": true,
+          "symbol": "OKLO",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 586.26,
+          "bid": 586.1,
+          "eligible_completed_bar_count": 360,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.185144,
+          "quote_event_time_utc": "2026-08-14T19:30:03.148555+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:30:02.963411+00:00",
+          "quote_present": true,
+          "symbol": "SMH",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 548.41,
+          "bid": 548.2,
+          "eligible_completed_bar_count": 360,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.1793,
+          "quote_event_time_utc": "2026-08-14T19:30:03.142711+00:00",
+          "quote_observed_at_utc": "2026-08-14T19:30:02.963411+00:00",
+          "quote_present": true,
+          "symbol": "SOXX",
+          "trade_present": true
+        }
+      ],
+      "old_cross_section_skew_seconds": 0.764166,
+      "planned_symbols": 35,
+      "point": "preclose_snapshot",
+      "primary_exclusion_reason_counts": {
+        "quote_future_vs_collector_clock": 6
+      },
+      "rest_captured_symbols": 29,
+      "scheduled_at_utc": "2026-08-14T19:30:00+00:00",
+      "websocket_symbols_present": 35
+    },
+    {
+      "all_exclusion_reason_counts": {
+        "quote_future_vs_collector_clock": 5
+      },
+      "missing_symbols": [
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 197.25,
+          "bid": 195.32,
+          "eligible_completed_bar_count": 389,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.24496,
+          "quote_event_time_utc": "2026-08-14T20:00:02.656444+00:00",
+          "quote_observed_at_utc": "2026-08-14T20:00:02.411484+00:00",
+          "quote_present": true,
+          "symbol": "CRM",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 495.4,
+          "bid": 494.8,
+          "eligible_completed_bar_count": 389,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.007559,
+          "quote_event_time_utc": "2026-08-14T20:00:02.419043+00:00",
+          "quote_observed_at_utc": "2026-08-14T20:00:02.411484+00:00",
+          "quote_present": true,
+          "symbol": "MSFT",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 225.19,
+          "bid": 224.96,
+          "eligible_completed_bar_count": 389,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.040715,
+          "quote_event_time_utc": "2026-08-14T20:00:02.452199+00:00",
+          "quote_observed_at_utc": "2026-08-14T20:00:02.411484+00:00",
+          "quote_present": true,
+          "symbol": "NVDA",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 776.33,
+          "bid": 776.29,
+          "eligible_completed_bar_count": 390,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.242049,
+          "quote_event_time_utc": "2026-08-14T20:00:02.653533+00:00",
+          "quote_observed_at_utc": "2026-08-14T20:00:02.411484+00:00",
+          "quote_present": true,
+          "symbol": "SPY",
+          "trade_present": true
+        },
+        {
+          "all_exclusion_reasons": [
+            "quote_future_vs_collector_clock"
+          ],
+          "ask": 49.24,
+          "bid": 47.21,
+          "eligible_completed_bar_count": 225,
+          "primary_exclusion_reason": "quote_future_vs_collector_clock",
+          "quote_age_seconds": -0.17732,
+          "quote_event_time_utc": "2026-08-14T20:00:02.588804+00:00",
+          "quote_observed_at_utc": "2026-08-14T20:00:02.411484+00:00",
+          "quote_present": true,
+          "symbol": "UFO",
+          "trade_present": true
+        }
+      ],
+      "old_cross_section_skew_seconds": 0.402333,
+      "planned_symbols": 35,
+      "point": "session_close_diagnostic",
+      "primary_exclusion_reason_counts": {
+        "quote_future_vs_collector_clock": 5
+      },
+      "rest_captured_symbols": 30,
+      "scheduled_at_utc": "2026-08-14T20:00:00+00:00",
+      "websocket_symbols_present": 35
+    }
+  ],
+  "raw_request_id_order": [
+    "quote",
+    "trade",
+    "snapshot",
+    "bar_pages"
+  ],
+  "research_grade": "immutable_offline_forensic_audit",
+  "schema_version": "mso-day-a-capture-forensic-v1",
+  "source_artifacts_modified": false,
+  "source_git_sha": "b59da12e59ac84eb5266e3353f73192b03768af0",
+  "source_release_version": "0.4.3",
+  "source_run_id": "2026-08-14-bc1d37197bc0",
+  "source_run_relative_path": "observations/rehearsals/data-shadow-v0.4.3-8847281b-d53e704c/2026-08-14/2026-08-14-bc1d37197bc0",
+  "source_run_sha256": "1080015a7df6c93ad1287af85774b2bb035d3d9a1751574bc255d1f65f412399"
+}

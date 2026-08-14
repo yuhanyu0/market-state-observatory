@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from .alpaca_adapter import AlpacaSIPAdapter
+from .alpaca_adapter import AlpacaSIPAdapter, PointCapture
 from .alpaca_stream import AlpacaStreamArchive
 from .formal_promotion import REHEARSAL_TASK_NAME, verify_authorization
 from .label_ledger import register_source_snapshot, settle_horizon
@@ -23,12 +23,14 @@ from .observation_freezer import (
     sha256_bytes,
     write_exclusive,
 )
+from .pit_observation import build_point_payload
 from .quality_engine import freeze_quality
 from .recovery import RecoveryState
 from .release_identity import release_root, runtime_identity
+from .runtime_heartbeat import run_heartbeat, write_runtime_status
 from .runtime_lock import RuntimeLock
 from .runtime_paths import RuntimePaths, resolve_runtime_paths
-from .stream_store import BoundedHourlyStreamStore, CrossSectionFreeze
+from .stream_store import BoundedHourlyStreamStore
 
 ET = ZoneInfo("America/New_York")
 
@@ -80,60 +82,6 @@ def membership_payload(universe: dict[str, Any]) -> bytes:
     )
 
 
-def _point_payload(
-    capture: Any,
-    cross_section: CrossSectionFreeze,
-    rest_snapshot_backup_sha256: str,
-) -> dict[str, Any]:
-    now = datetime.now(UTC)
-    symbols = []
-    future_count = 0
-    for row in capture.symbols:
-        event_times = [
-            datetime.fromisoformat(str(row.quote["event_time_utc"])),
-            datetime.fromisoformat(str(row.last_trade["event_time_utc"])),
-            datetime.fromisoformat(str(row.minute_bar["event_time_utc"])),
-        ]
-        future_count += sum(event.astimezone(UTC) > now for event in event_times)
-        symbols.append(
-            {
-                "symbol": row.symbol,
-                "quote": row.quote,
-                "last_trade": row.last_trade,
-                "minute_bar": row.minute_bar,
-                "vwap": row.vwap,
-                "cumulative_volume": row.cumulative_volume,
-                "included_interval_start_utc": row.included_interval_start_utc,
-                "included_interval_end_utc": row.included_interval_end_utc,
-                "quote_age_seconds": row.quote_age_seconds,
-            }
-        )
-    return {
-        "schema_version": "mso-private-observation-point-v2",
-        "observation_point": capture.observation_point,
-        "scheduled_at_utc": cross_section.scheduled_at_utc,
-        "freeze_started_at_utc": cross_section.freeze_started_at_utc,
-        "freeze_completed_at_utc": cross_section.freeze_completed_at_utc,
-        "earliest_event_time_utc": cross_section.earliest_event_time_utc,
-        "latest_event_time_utc": cross_section.latest_event_time_utc,
-        "cross_section_skew_seconds": cross_section.cross_section_skew_seconds,
-        "stream_symbols_requested": cross_section.symbols_requested,
-        "stream_symbols_present": cross_section.symbols_present,
-        "stream_latest_state": cross_section.latest_state,
-        "captured_at_utc": capture.captured_at_utc,
-        "symbols": symbols,
-        "raw_request_ids": [result.collector_request_id for result in capture.raw_results],
-        "rest_snapshot_backup_sha256": rest_snapshot_backup_sha256,
-        "future_timestamp_count": future_count,
-        "backfilled": False,
-        "data_ready_only": True,
-        "model_estimated": False,
-        "decision_eligible": False,
-        "paper_positions_allowed": False,
-        "real_orders_allowed": False,
-    }
-
-
 async def capture_and_freeze(
     *,
     adapter: AlpacaSIPAdapter,
@@ -147,9 +95,20 @@ async def capture_and_freeze(
     ledger_root: Path,
 ) -> str:
     cross_section = await stream_store.freeze_cross_section(symbols, scheduled)
-    capture = await asyncio.to_thread(
-        adapter.capture_exact_point, symbols, point, scheduled, datetime.now(UTC)
-    )
+    rest_error_type: str | None = None
+    try:
+        capture = await asyncio.to_thread(
+            adapter.capture_exact_point, symbols, point, scheduled, datetime.now(UTC)
+        )
+    except Exception as error:
+        rest_error_type = type(error).__name__
+        capture = PointCapture(
+            observation_point=point,
+            scheduled_at_utc=scheduled.astimezone(UTC).isoformat(),
+            captured_at_utc=datetime.now(UTC).isoformat(),
+            symbols=(),
+            raw_results=(),
+        )
     for result in capture.raw_results:
         freeze_provider_response(
             raw_directory=run_directory / "raw" / point,
@@ -158,8 +117,13 @@ async def capture_and_freeze(
             raw_response=result.raw_response,
             metadata=result.metadata(),
         )
-    backup_hash = sha256_bytes(capture.raw_results[2].raw_response)
-    payload = _point_payload(capture, cross_section, backup_hash)
+    backup_hash = (
+        sha256_bytes(capture.raw_results[2].raw_response)
+        if len(capture.raw_results) >= 3
+        else None
+    )
+    payload = build_point_payload(capture, cross_section, backup_hash)
+    payload["rest_error_type"] = rest_error_type
     bundle = canonical_json(payload)
     bundle_hash = sha256_bytes(bundle)
     write_exclusive(
@@ -267,14 +231,6 @@ def latest_recovery(run_directory: Path, trading_date: str) -> RecoveryState:
     return RecoveryState(trading_date=trading_date, completed=completed)
 
 
-def _write_operator_status(paths: RuntimePaths, payload: dict[str, Any]) -> None:
-    path = paths.operator / "runtime_status.json"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(".tmp")
-    temporary.write_bytes(canonical_json(payload))
-    os.replace(temporary, path)
-
-
 async def run_session(mode: str, dry_run: bool = False) -> int:
     now = datetime.now(ET)
     day = now.date()
@@ -331,21 +287,33 @@ async def run_session(mode: str, dry_run: bool = False) -> int:
             run_directory / "manifests" / "websocket",
         )
         stream_task = asyncio.create_task(archive.run(symbols=symbols, stop=stop))
+        heartbeat_stop = asyncio.Event()
+        heartbeat_state: dict[str, Any] = {
+            "runtime_status": "RUNNING",
+            "phase": "INITIALIZING_STREAM",
+            "next_event": None,
+            "next_event_at_utc": None,
+            "last_completed_snapshot": None,
+        }
+        heartbeat_task = asyncio.create_task(
+            run_heartbeat(
+                path=paths.operator / "runtime_status.json",
+                archive=archive,
+                run=run,
+                universe_size=len(symbols),
+                state=heartbeat_state,
+                stop=heartbeat_stop,
+            )
+        )
         await asyncio.sleep(0)
         try:
             for point, scheduled in schedule:
-                _write_operator_status(
-                    paths,
+                heartbeat_state.update(
                     {
-                        "status": "RUNNING",
-                        "run_id": run["run_id"],
-                        "experiment_lane": run["experiment_lane"],
-                        "current_point": point,
-                        "next_event_at_et": scheduled.isoformat(),
-                        "websocket_last_message_at_utc": archive.last_message_at_utc,
-                        "paper_positions": 0,
-                        "real_orders": 0,
-                    },
+                        "phase": "WAITING_FOR_OBSERVATION",
+                        "next_event": point,
+                        "next_event_at_utc": scheduled.astimezone(UTC).isoformat(),
+                    }
                 )
                 if point in recovery.completed or point in recovery.missed:
                     continue
@@ -365,6 +333,7 @@ async def run_session(mode: str, dry_run: bool = False) -> int:
                     )
                     continue
                 try:
+                    heartbeat_state["phase"] = "FREEZING_PIT_OBSERVATION"
                     await capture_and_freeze(
                         adapter=adapter,
                         stream_store=archive.store,
@@ -377,6 +346,7 @@ async def run_session(mode: str, dry_run: bool = False) -> int:
                         ledger_root=paths.label_ledger,
                     )
                     recovery.completed.add(point)
+                    heartbeat_state["last_completed_snapshot"] = point
                 except Exception as error:
                     recovery.missed.add(point)
                     write_exclusive(
@@ -399,12 +369,18 @@ async def run_session(mode: str, dry_run: bool = False) -> int:
                     )
                 recovery.checkpoint(run_directory / "recovery")
         finally:
+            heartbeat_state.update(
+                {"phase": "FINALIZING_STREAM", "next_event": None, "next_event_at_utc": None}
+            )
             stop.set()
             try:
                 await asyncio.wait_for(stream_task, timeout=35)
             except TimeoutError:
                 stream_task.cancel()
                 await asyncio.gather(stream_task, return_exceptions=True)
+            finally:
+                heartbeat_stop.set()
+                await asyncio.gather(heartbeat_task, return_exceptions=True)
         quality_path = freeze_quality(run_directory, universe)
         quality = json.loads(quality_path.read_text(encoding="utf-8"))
         if not quality["data_quality_pass"]:
@@ -415,11 +391,15 @@ async def run_session(mode: str, dry_run: bool = False) -> int:
                 message="The completed run is blocked from publication and gate counting.",
                 run_id=str(run["run_id"]),
             )
-        _write_operator_status(
-            paths,
+        write_runtime_status(
+            paths.operator / "runtime_status.json",
             {
-                "status": "COMPLETE",
+                "schema_version": "mso-private-runtime-heartbeat-v1",
+                "runtime_status": "COMPLETE",
+                "phase": "COMPLETE",
+                "heartbeat_at_utc": datetime.now(UTC).isoformat(),
                 "run_id": run["run_id"],
+                "experiment_lane": run["experiment_lane"],
                 "quality_path": str(quality_path),
                 "data_quality_pass": quality["data_quality_pass"],
                 "publication_eligible": quality["publication_eligible"],

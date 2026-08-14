@@ -160,7 +160,7 @@ def build_release_manifest(
         "membership_sha256": sha256_file(release / "frozen" / "membership_snapshot_v1.json"),
         "config_sha256": sha256_file(release / "config" / "runtime_release_config.json"),
         "quality_policy_sha256": sha256_file(release / "config" / "publication_policy.yml"),
-        "powershell_launcher_version": "0.4.3",
+        "powershell_launcher_version": release_version,
         "powershell_launcher_sha256": sha256_file(release / "runtime_release_launcher.ps1"),
         "process_compat_helper_sha256": sha256_file(release / "lib" / "process_compat.ps1"),
         "scheduler_safety_helper_sha256": sha256_file(

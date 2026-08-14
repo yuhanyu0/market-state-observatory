@@ -36,7 +36,7 @@ def test_required_schema_set_is_present() -> None:
         "validation_result", "experiment", "observer_conflict", "reflexive_memory_entry",
         "public_data_quality", "private_data_quality", "public_themes",
         "public_experiments", "public_roadmap", "public_validation",
-        "formal_data_shadow_authorization", "soak_test_results",
+        "formal_data_shadow_authorization", "soak_test_results", "private_observation_point",
     }
     assert set(schema_names()) == required
 

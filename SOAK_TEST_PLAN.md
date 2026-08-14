@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Prove the frozen v0.4.3 data-only runtime over at least three complete,
+Prove the frozen v0.4.4 data-only runtime over at least three complete,
 scheduler-driven XNYS sessions before any Formal Data Shadow day can be considered.
 
 ## Preconditions
@@ -20,16 +20,21 @@ Capture calendar-derived open, midpoint, close minus 30 minutes, close minus 15
 minutes, and close. Keep the SIP WebSocket connected for the full session. Verify:
 
 - all 35 frozen symbols are present at each atomic cross-section freeze;
-- quote age is at most 60 seconds and event timestamps are not in the future;
+- all planned symbols have explicit PIT rows and all required Direction quotes
+  have freshness age at most 60 seconds;
 - no missed point is reconstructed;
-- hourly chunk and manifest counts remain bounded;
+- each completed UTC hour is immutable before session shutdown and the open hour
+  has a current durable checkpoint;
 - disk use stays below the configured 2 GiB daily budget;
-- REST backup hashes and scheduled snapshot bundles reconstruct each fixed point;
-- cross-section skew is recorded and Transmission is degraded when above limit;
+- REST backup hashes and scheduled snapshot bundles reconstruct each fixed point,
+  with REST disagreement recorded rather than substituted;
+- freeze duration and event-time dispersion remain distinct, and Transmission is
+  degraded only by the relevant decision freeze duration or missing required fields;
 - crash restart resumes only incomplete points and never overwrites evidence;
 - rehearsal fails publication and never advances the 20-day gate;
 - local alerts fire for an intentionally induced disconnect and quality failure;
-- operator console remains reachable only at `127.0.0.1`.
+- the independent heartbeat advances during waits and the operator console remains
+  reachable only at `127.0.0.1`.
 
 ## Failure Injection
 
@@ -44,4 +49,5 @@ quality reproducible, zero future timestamps, backfills, message drops,
 positions, and orders, passing secret/boundary/settlement/publication-isolation
 checks, and a frozen scheduler version. A reviewed `SOAK_TEST_RESULTS.json` must
 reference and hash every immutable rehearsal run and quality file. A single
-failed criterion keeps the system at NO-GO.
+failed criterion keeps the system at NO-GO. The v0.4.3 Day A failure is permanent
+evidence and cannot count as one of the three v0.4.4 PASS dates.

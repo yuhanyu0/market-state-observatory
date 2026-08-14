@@ -6,7 +6,7 @@ import json
 import uuid
 from collections.abc import Awaitable, Callable, Iterable
 from dataclasses import dataclass
-from datetime import UTC, datetime, time
+from datetime import UTC, datetime, time, timedelta
 from email.utils import parsedate_to_datetime
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -61,14 +61,19 @@ class RestResult:
 @dataclass(frozen=True)
 class SymbolCapture:
     symbol: str
-    quote: dict[str, Any]
-    last_trade: dict[str, Any]
-    minute_bar: dict[str, Any]
+    quote: dict[str, Any] | None
+    quote_status: str
+    last_trade: dict[str, Any] | None
+    trade_status: str
+    minute_bar: dict[str, Any] | None
+    bar_status: str
     vwap: float | None
+    vwap_status: str
     cumulative_volume: float
     included_interval_start_utc: str | None
     included_interval_end_utc: str | None
-    quote_age_seconds: float
+    quote_age_seconds: float | None
+    rest_observed_at_utc: str
 
 
 @dataclass(frozen=True)
@@ -96,6 +101,7 @@ class AlpacaSIPAdapter:
         self.timeout_seconds = timeout_seconds
         self.session = requests.Session()
         self.reconnect_count = 0
+        self.websocket_connected = False
 
     @staticmethod
     def readiness() -> dict[str, Any]:
@@ -251,60 +257,93 @@ class AlpacaSIPAdapter:
         quotes = quote_result.body.get("quotes", {})
         trades = trade_result.body.get("trades", {})
         captures: list[SymbolCapture] = []
+        cutoff = scheduled_at.astimezone(UTC)
+        at_exact_open = observation_point == "open_snapshot"
         for symbol in symbol_list:
             quote = quotes.get(symbol)
             trade = trades.get(symbol)
             bars = [
                 bar
                 for bar in bars_by_symbol.get(symbol, [])
-                if parse_utc(str(bar["t"])) <= scheduled_at.astimezone(UTC)
+                if parse_utc(str(bar["t"])) + timedelta(minutes=1) <= cutoff
             ]
-            if not quote or not trade or not bars:
-                continue
             observed = parse_utc(quote_result.observed_at_utc)
-            quote_time = parse_utc(str(quote["t"]))
-            quote_age = (observed - quote_time).total_seconds()
-            bid = float(quote["bp"])
-            ask = float(quote["ap"])
-            mid = (bid + ask) / 2
-            if quote_time > observed or not 0 <= quote_age <= 60:
-                continue
-            if bid <= 0 or ask <= 0 or ask < bid or not bid <= mid <= ask:
-                continue
+            rest_quote: dict[str, Any] | None = None
+            quote_age: float | None = None
+            quote_status = "MISSING"
+            if quote:
+                quote_time = parse_utc(str(quote["t"]))
+                quote_age = (observed - quote_time).total_seconds()
+                bid = float(quote["bp"])
+                ask = float(quote["ap"])
+                mid = (bid + ask) / 2
+                quote_status = (
+                    "READY" if bid > 0 and ask > 0 and ask >= bid else "INVALID_QUOTE"
+                )
+                rest_quote = {
+                    "bid": bid,
+                    "ask": ask,
+                    "mid": mid,
+                    "quoted_spread": ask - bid,
+                    "event_time_utc": quote_time.isoformat(),
+                    "provider_clock_ahead_seconds": max(0.0, -quote_age),
+                }
+            rest_trade = (
+                {
+                    "price": float(trade["p"]),
+                    "event_time_utc": parse_utc(str(trade["t"])).isoformat(),
+                }
+                if trade
+                else None
+            )
             legal_bars = sorted(bars, key=lambda item: str(item["t"]))
             volume = sum(float(item.get("v", 0)) for item in legal_bars)
             numerator = sum(
                 float(item.get("vw", item["c"])) * float(item.get("v", 0))
                 for item in legal_bars
             )
-            latest = legal_bars[-1]
+            latest = legal_bars[-1] if legal_bars else None
+            bar_status = "READY" if latest else ("NOT_YET_DEFINED" if at_exact_open else "MISSING")
+            vwap = numerator / volume if volume > 0 else None
+            vwap_status = "READY" if vwap is not None else (
+                "NOT_YET_DEFINED" if at_exact_open else "MISSING"
+            )
             captures.append(
                 SymbolCapture(
                     symbol=symbol,
-                    quote={
-                        "bid": bid,
-                        "ask": ask,
-                        "mid": mid,
-                        "quoted_spread": ask - bid,
-                        "event_time_utc": quote_time.isoformat(),
-                    },
-                    last_trade={
-                        "price": float(trade["p"]),
-                        "event_time_utc": parse_utc(str(trade["t"])).isoformat(),
-                    },
-                    minute_bar={
-                        "open": float(latest["o"]),
-                        "high": float(latest["h"]),
-                        "low": float(latest["l"]),
-                        "close": float(latest["c"]),
-                        "volume": float(latest["v"]),
-                        "event_time_utc": parse_utc(str(latest["t"])).isoformat(),
-                    },
-                    vwap=numerator / volume if volume > 0 else None,
+                    quote=rest_quote,
+                    quote_status=quote_status,
+                    last_trade=rest_trade,
+                    trade_status="READY" if rest_trade else "MISSING",
+                    minute_bar=(
+                        {
+                            "open": float(latest["o"]),
+                            "high": float(latest["h"]),
+                            "low": float(latest["l"]),
+                            "close": float(latest["c"]),
+                            "volume": float(latest["v"]),
+                            "event_time_utc": parse_utc(str(latest["t"])).isoformat(),
+                            "completed_at_utc": (
+                                parse_utc(str(latest["t"])) + timedelta(minutes=1)
+                            ).isoformat(),
+                        }
+                        if latest
+                        else None
+                    ),
+                    bar_status=bar_status,
+                    vwap=vwap,
+                    vwap_status=vwap_status,
                     cumulative_volume=volume,
-                    included_interval_start_utc=parse_utc(str(legal_bars[0]["t"])).isoformat(),
-                    included_interval_end_utc=parse_utc(str(latest["t"])).isoformat(),
+                    included_interval_start_utc=(
+                        parse_utc(str(legal_bars[0]["t"])).isoformat() if legal_bars else None
+                    ),
+                    included_interval_end_utc=(
+                        (parse_utc(str(latest["t"])) + timedelta(minutes=1)).isoformat()
+                        if latest
+                        else None
+                    ),
                     quote_age_seconds=quote_age,
+                    rest_observed_at_utc=quote_result.observed_at_utc,
                 )
             )
         return PointCapture(
@@ -326,6 +365,7 @@ class AlpacaSIPAdapter:
         symbols: Iterable[str],
         on_message: Callable[[dict[str, Any], bytes], Awaitable[None]],
         stop: asyncio.Event,
+        on_connection_state: Callable[[bool], None] | None = None,
     ) -> None:
         key_id, secret = require_child_process_credentials()
         symbol_list = sorted(set(symbols))
@@ -348,6 +388,9 @@ class AlpacaSIPAdapter:
                             }
                         )
                     )
+                    self.websocket_connected = True
+                    if on_connection_state is not None:
+                        on_connection_state(True)
                     delay = 1.0
                     while not stop.is_set():
                         raw = await asyncio.wait_for(websocket.recv(), timeout=30)
@@ -359,8 +402,14 @@ class AlpacaSIPAdapter:
                             if item.get("T") in {"q", "t", "b"}:
                                 await on_message(item, raw_bytes)
             except TimeoutError:
+                self.websocket_connected = False
+                if on_connection_state is not None:
+                    on_connection_state(False)
                 continue
             except Exception as error:
+                self.websocket_connected = False
+                if on_connection_state is not None:
+                    on_connection_state(False)
                 if stop.is_set():
                     return
                 self.reconnect_count += 1
@@ -368,3 +417,6 @@ class AlpacaSIPAdapter:
                 delay = min(delay * 2, 60.0)
                 if isinstance(error, ProviderError) and "authentication" in str(error):
                     raise
+        self.websocket_connected = False
+        if on_connection_state is not None:
+            on_connection_state(False)

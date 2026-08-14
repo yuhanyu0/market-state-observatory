@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/private_observation_point.schema.json",
+  "title": "PrivatePITObservationPoint",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version", "observation_point", "scheduled_at_utc",
+    "freeze_started_at_utc", "freeze_completed_at_utc", "freeze_duration_seconds",
+    "event_time_dispersion_seconds", "stream_symbols_requested",
+    "stream_symbols_present", "pit_primary_source", "rest_role", "symbols",
+    "future_timestamp_count", "backfilled", "paper_positions_allowed",
+    "real_orders_allowed"
+  ],
+  "properties": {
+    "schema_version": {"const": "mso-private-observation-point-v3"},
+    "observation_point": {"type": "string"},
+    "scheduled_at_utc": {"type": "string", "format": "date-time"},
+    "freeze_started_at_utc": {"type": "string", "format": "date-time"},
+    "freeze_completed_at_utc": {"type": "string", "format": "date-time"},
+    "freeze_duration_seconds": {"type": "number", "minimum": 0},
+    "event_time_dispersion_seconds": {"type": ["number", "null"], "minimum": 0},
+    "stream_symbols_requested": {"type": "integer", "minimum": 0},
+    "stream_symbols_present": {"type": "integer", "minimum": 0},
+    "pit_primary_source": {"const": "websocket_sip"},
+    "rest_role": {"const": "backup_reconciliation_and_derived_features_only"},
+    "symbols": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "symbol", "observation_status", "primary_pit_source", "quote",
+          "last_trade", "minute_bar", "vwap", "rest_reconciliation"
+        ]
+      }
+    },
+    "future_timestamp_count": {"type": "integer", "minimum": 0},
+    "backfilled": {"const": false},
+    "paper_positions_allowed": {"const": false},
+    "real_orders_allowed": {"const": false}
+  }
+}

@@ -12,6 +12,11 @@ $runtimeRoot = Join-Path $env:LOCALAPPDATA 'MarketStateObservatoryRuntime'
 $configPath = Join-Path $runtimeRoot 'runtime_paths.json'
 if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) { throw 'Runtime is not initialized.' }
 $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
+$launcherReleaseRoot = (Resolve-Path -LiteralPath $PSScriptRoot).Path.TrimEnd([char]92)
+$selectedReleaseRoot = [IO.Path]::GetFullPath([string]$config.release_root).TrimEnd([char]92)
+if (-not $launcherReleaseRoot.Equals($selectedReleaseRoot, [StringComparison]::OrdinalIgnoreCase)) {
+    throw 'Selected runtime release does not match this frozen launcher.'
+}
 $runtime = Resolve-MsoRuntimePython -Config $config -RuntimeRoot $runtimeRoot
 
 function Invoke-ReleasePython {

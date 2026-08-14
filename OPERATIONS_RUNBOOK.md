@@ -14,6 +14,8 @@ From the project root in non-elevated PowerShell:
 .\ops\windows\setup_alpaca_credentials.ps1
 .\ops\windows\setup_github_auth.ps1
 .\ops\windows\build_runtime_release.ps1
+.\ops\windows\select_runtime_release.ps1 -ReleaseRoot '<reviewed release path>' -WhatIf
+.\ops\windows\select_runtime_release.ps1 -ReleaseRoot '<reviewed release path>' -Select
 .\ops\windows\install_scheduled_tasks.ps1 -Mode rehearsal -Install -WhatIf
 .\ops\windows\install_scheduled_tasks.ps1 -Mode rehearsal -Install
 ```
@@ -23,8 +25,10 @@ Key ID and a SecureString secret, exports a current-user DPAPI credential, and
 prints only the path plus PRESENT status. The GitHub command never requests or
 displays a token. The release command requires a clean committed tree and freezes
 a wheel, dedicated venv, dependency lock, schemas, universe, membership, and
-runtime config. The scheduler executes only the frozen release launcher and first
-performs an offline dry-run.
+runtime config. Building does not select the release. Release selection is a
+separate explicit step so an existing task cannot silently switch runtime. The
+scheduler executes only the selected frozen release launcher and first performs
+an offline dry-run.
 
 The scheduler defaults to rehearsal. Formal installation is rejected until the
 frozen release has at least three complete scheduler-driven rehearsal sessions

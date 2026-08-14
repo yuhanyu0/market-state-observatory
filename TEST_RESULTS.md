@@ -1,35 +1,30 @@
 # Test Results
 
-Validated locally on 2026-08-13 ET with Python 3.13, Node 22, Vite 6, and
-Playwright Chromium 151.
+Validated locally on 2026-08-14 ET with the v0.4.4 source tree.
 
 | Gate | Result |
 |---|---|
-| Python unit/contract/security | PASS, 68 tests |
+| Python unit/contract/security | PASS, 105 tests |
 | Ruff | PASS |
-| strict mypy | PASS, 43 source files |
-| JSON Schema Draft 2020-12 | PASS, 17 schemas |
-| validated example objects | PASS, 87 objects |
-| Vitest + React Testing Library | PASS, 3 tests |
+| strict mypy | PASS, 52 source files |
+| JSON Schema Draft 2020-12 | PASS, 25 schemas |
+| validated public/example objects | PASS, 101 objects |
+| Vitest + React Testing Library | PASS, 4 tests |
 | Playwright desktop/mobile | PASS, 12 tests |
-| axe serious/critical | PASS, zero on Today desktop/mobile |
 | React production build | PASS |
-| initial JavaScript | 182.30 kB raw, 56.99 kB gzip |
 | route/asset/public JSON check | PASS, 9 routes |
 | publication audit | PASS |
 | credential/secret scan | PASS |
-| PowerShell parser | PASS, 21 scripts |
-| unattended runtime dry-run | PASS, no network call |
-| Task Scheduler `-WhatIf` preview | PASS, no runtime or task created |
-| synthetic scenarios | PASS, 8 scenarios, zero orders |
-| GitHub Actions | PASS, CI, manifest, publication, Pages |
+| Windows PowerShell | PASS, Desktop 5.1.26100.9168 |
+| PowerShell Core | PASS, 7.6.4 |
+| process compatibility and scheduler safety | PASS in both editions |
+| 35-symbol stream load | PASS, 1,000,000/1,000,000 reconstructed |
+| stream loss / duplicate / drop | PASS, 0 / 0 / 0 |
+| stream file bound | PASS, 8 chunks + 8 manifests |
+| crash durability | PASS, finalized hour hash unchanged |
+| v0.4.4 scheduler install | NOT RUN by design |
+| Formal Data Shadow | NO-GO, 0 new PASS dates |
+| paper positions / real orders | 0 / 0 |
 
-Public-safe screenshots:
-
-- `docs/screenshots/today-desktop.png`
-- `docs/screenshots/today-mobile.png`
-- `docs/screenshots/theme-detail-desktop.png`
-
-The host integration gates remain intentionally unrun: no DPAPI credential was
-created, no live SIP request was made from this project, no scheduled task was
-installed, and no formal Data Shadow run was created.
+The immutable v0.4.3 Day A failure was audited offline and was not reclassified.
+The v0.4.4 release must complete three new scheduler-driven PASS trading dates.

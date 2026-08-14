@@ -38,6 +38,7 @@ class AlpacaStreamArchive:
         self.manifest_directory = manifest_directory
         self.reconnect_count = 0
         self.last_message_at_utc: str | None = None
+        self.websocket_connected = False
 
     async def on_message(self, item: dict[str, Any], raw: bytes) -> None:
         await self.store.ingest(item, raw)
@@ -48,9 +49,13 @@ class AlpacaStreamArchive:
     ) -> None:
         provider = adapter or AlpacaSIPAdapter()
         await self.store.start()
+        def connection_state(connected: bool) -> None:
+            self.websocket_connected = connected
+
         try:
-            await provider.stream(symbols, self.on_message, stop)
+            await provider.stream(symbols, self.on_message, stop, connection_state)
         finally:
+            self.websocket_connected = False
             self.reconnect_count = provider.reconnect_count
             await self.store.stop()
             stamp = datetime.now(UTC).strftime("%H%M%S%f")
@@ -87,5 +92,6 @@ def stream_status(archive: AlpacaStreamArchive) -> dict[str, Any]:
         **archive.store.health_payload(),
         "reconnect_count": archive.reconnect_count,
         "last_message_at_utc": archive.last_message_at_utc,
+        "websocket_connected": archive.websocket_connected,
         "private_raw_only": True,
     }

@@ -19,9 +19,10 @@
 
 ## 3. Scheduled task
 
+- [ ] Explicitly select the reviewed frozen release with `select_runtime_release.ps1`.
 - [ ] Review `install_scheduled_tasks.ps1 -WhatIf`.
 - [ ] Run `install_scheduled_tasks.ps1 -Install`.
-- [ ] Confirm offline smoke test PASS, task `MSO-Daily-Runtime`, and next run.
+- [ ] Confirm offline smoke test PASS, task `MSO-Daily-Rehearsal`, and next run.
 - [ ] Keep the host on Eastern Time and logged in for the v1 task.
 
 ## Before the first formal day

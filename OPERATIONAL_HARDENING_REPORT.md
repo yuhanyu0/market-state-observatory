@@ -2,63 +2,60 @@
 
 ## Scope
 
-Version 0.4.1 hardens the existing data-only Observatory. No model, Theme,
-position, order, scientific target, or Formal Data Shadow run was added.
+Version 0.4.4 corrects point-in-time capture semantics and runtime durability
+after the real scheduler-driven v0.4.3 Soak Day A. No model, Theme, scientific
+target, investment action, position, or order capability was added.
 
-## P0 Outcomes
+## Immutable Day A Finding
 
-- WebSocket messages update an in-memory latest-state cache and a bounded queue.
-  The durable stream is hourly `NDJSON.zst` plus one immutable manifest per hour;
-  full-envelope debug storage defaults to false.
-- XNYS sessions come from `exchange-calendars`. Open, midpoint, close minus 30,
-  close minus 15, and close are sorted from the exchange schedule. The 2026-11-27
-  13:00 ET close produces 12:30 and 12:45 preclose points.
-- Each scheduled observation freezes all symbols under one cache lock and records
-  start/completion, earliest/latest event times, skew, and REST backup hash.
-  Skew above five seconds blocks Transmission readiness.
-- Formal execution requires a versioned wheel, dedicated venv, dependency lock,
-  release manifest, and verified hashes. A changed wheel or universe starts a new
-  experiment lane. Scheduled Task no longer invokes mutable source code.
-- Publication requires every formal, process, quality, eligibility, schema,
-  secret, forbidden-path, and zero-position/order gate. It uses a lock, stale
-  worktree cleanup, and bounded push retry. No explicit duplicate Pages dispatch
-  remains.
-- Public operational UI content is loaded from Zod-validated JSON. It displays
-  evidence time/age semantics, stale/degraded/failed state, runtime phase, next
-  event, action required, evidence grade, and rehearsal/formal labels. Unknown
-  contracts display `Public state invalid`.
-- The operator console binds only to `127.0.0.1`. It shows scheduler/runtime/
-  WebSocket/quality/log/lineage/alert state and exposes immutable quality recheck
-  plus fail-closed publication retry.
-- Label settlements append immutable ledger records linked to source run and
-  snapshot hashes; they never mutate the source run and are idempotent.
-- Windows Toast is the preferred best-effort notification path. Every alert is
-  also persisted in a private immutable alert ledger.
-- CI can generate a source zip, Windows bootstrap zip, and `SHA256SUMS`. Packaging
-  uses tracked-file allowlisting, excludes private/runtime/build artifacts, and
-  enforces a source archive below 5 MB. License status remains All rights reserved.
+Run `2026-08-14-bc1d37197bc0` remains `FAIL` at 113/175 (64.57%). Its WebSocket
+archive contained all 35 symbols at every freeze and wrote 13,013,293 messages
+with zero drops. Offline hash-checked raw evidence reproduced all 72 deleted REST
+rows: 35 lacked an eligible completed bar at exact open and 37 had provider quote
+time slightly ahead of the local REST completion clock. No provider call was made
+for the audit and no Day A artifact was changed.
+
+## v0.4.4 Outcomes
+
+- The WebSocket latest-state cache is frozen before REST retrieval and is primary
+  PIT evidence. Every planned symbol receives a row, including when REST fails.
+- Quote, trade, minute bar, and VWAP have separate status, source, event time,
+  observed time, and freshness. REST records reconciliation and derived fields;
+  it cannot silently substitute for frozen primary evidence.
+- Exact open remains 09:30. A completed 09:30 bar and cumulative VWAP are
+  `NOT_YET_DEFINED`, not reasons to delete the quote observation.
+- Quality reports observation, quote, trade, bar, and VWAP readiness separately.
+  Direction and Transmission depend only on their declared input fields.
+- Atomic `freeze_duration_seconds` is distinct from provider
+  `event_time_dispersion_seconds`. Decision Transmission uses the decision freeze
+  and cannot be poisoned by open or next-10:00 event dispersion.
+- Completed UTC stream hours are finalized, fsynced, atomically renamed, and
+  manifested as the next hour starts. The open hour has periodic durable
+  checkpoints and restart truncates only uncheckpointed bytes.
+- An independent heartbeat reports runtime phase, next event/countdown, actual
+  WebSocket connection, last-message age, symbol/message counts, queue/backpressure,
+  drops, disk usage, and last completed snapshot during long waits.
+- Operator-facing JSON uses normalized semantic keys and parses in Windows
+  PowerShell 5.1. Native `T`/`t` keys remain confined to private stream evidence.
 
 ## Acceptance Evidence
 
-- Python: 77 passed.
-- Vitest: 4 passed.
-- Playwright: 12 passed across desktop and mobile; accessibility checks passed.
-- Static checks: Ruff and strict mypy passed.
-- Public JSON: all 101 JSON objects validated against 22 explicit schemas.
-- Security: publication audit and credential/secret scan passed; npm audit found
-  zero vulnerabilities.
-- Stream load: 35 symbols, 1,000,000 messages, 8 chunks, 8 manifests, 16 files,
-  1,000,000 messages reconstructed, zero drops, debug false, no credential match.
-- Backpressure was exercised 99 times with no message loss. Compressed storage was
-  12,659,923 bytes under a 512 MiB test budget.
-- Clean release inspection passed; the final source zip was 2,008,956 bytes,
-  below the 5 MB ceiling, with a separate Windows bootstrap zip and SHA256SUMS.
-- Early close, stale UI, crash-lock cleanup, failed-quality publication rejection,
-  cross-section skew degradation, immutable settlement, and loopback binding are
-  automated tests.
+- Python: 105 tests passed; Ruff and strict mypy passed for 52 source files.
+- Schema/public validation: 25 schemas and 101 public objects passed.
+- Vitest: 4 passed; Playwright desktop/mobile: 12 passed; React production build
+  and nine-route link check passed.
+- Windows PowerShell 5.1.26100.9168 and PowerShell 7.6.4 compatibility/scheduler
+  safety suites passed.
+- Stream load: 35 symbols, 1,000,000 messages, 8 chunks and 8 manifests,
+  1,000,000 reconstructed, zero loss, zero duplicates/drops, 99 backpressure
+  events, 16 files, and 10,592,838 compressed bytes.
+- Automated tests cover early finalization, current-hour checkpoint recovery,
+  immutable finalized-hour hash, heartbeat progression, exact-open semantics,
+  post-freeze rejection, REST disagreement, and decision-scoped Transmission.
+- Publication audit, credential/secret scan, and schema validation passed.
 
 ## Remaining Boundary
 
-The runtime has not completed a full exchange session from the frozen production
-wheel under Windows Task Scheduler. This report therefore does not authorize
-Formal Data Shadow, Model Shadow, paper positions, or real orders.
+The v0.4.4 scheduler is not installed. v0.4.4 has zero scheduler-driven PASS
+trading dates and still requires three. Formal Data Shadow is `NO-GO`, Model
+Shadow remains false, and paper/real position and order counts remain zero.

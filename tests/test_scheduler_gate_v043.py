@@ -28,7 +28,8 @@ def _quality_fixture(tmp_path: Path, *, mode: str, requested_count: bool) -> dic
         payload = {
             "observation_point": point,
             "captured_at_utc": "2026-08-13T15:45:01+00:00",
-            "cross_section_skew_seconds": 1,
+            "freeze_duration_seconds": 0.01,
+            "event_time_dispersion_seconds": 1,
             "future_timestamp_count": 0,
             "backfilled": False,
             "symbols": [

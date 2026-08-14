@@ -51,8 +51,10 @@ def test_stream_store_bounds_files_and_reconstructs_evidence(tmp_path: Path) -> 
         for index in range(3500):
             hour = 13 + index // 500
             symbol = f"S{index % 35:02d}"
+            observed = datetime(2026, 8, 13, hour, 30, tzinfo=UTC)
             await store.ingest(
-                {"T": "q", "S": symbol, "t": f"2026-08-13T{hour:02d}:30:00+00:00", "bp": 1, "ap": 2}
+                {"T": "q", "S": symbol, "t": observed.isoformat(), "bp": 1, "ap": 2},
+                observed_at=observed,
             )
         frozen = await store.freeze_cross_section(
             [f"S{index:02d}" for index in range(35)], datetime(2026, 8, 13, 19, 45, tzinfo=UTC)
@@ -147,7 +149,7 @@ def test_toast_failure_does_not_lose_private_alert(tmp_path: Path, monkeypatch: 
     assert path.is_file()
 
 
-def test_cross_section_skew_degrades_transmission_quality(tmp_path: Path) -> None:
+def test_decision_freeze_duration_degrades_transmission_quality(tmp_path: Path) -> None:
     run = {
         "run_id": "run", "trading_date": "2026-08-13", "status": "FORMAL_DATA_SHADOW",
         "mode": "formal", "production_release": True, "membership_snapshot_frozen": True,
@@ -158,7 +160,9 @@ def test_cross_section_skew_degrades_transmission_quality(tmp_path: Path) -> Non
     for point in ("open_snapshot", "midpoint_snapshot", "preclose_snapshot", "decision_snapshot", "session_close_diagnostic"):
         payload = {
             "observation_point": point, "scheduled_at_utc": "2026-08-13T19:45:00+00:00",
-            "captured_at_utc": "2026-08-13T19:45:01+00:00", "cross_section_skew_seconds": 9,
+            "captured_at_utc": "2026-08-13T19:45:01+00:00",
+            "freeze_duration_seconds": 9 if point == "decision_snapshot" else 0.01,
+            "event_time_dispersion_seconds": 35 if point == "open_snapshot" else 1,
             "symbols": [{"symbol": symbol, "quote_age_seconds": 1, "vwap": 100} for symbol in symbols],
             "future_timestamp_count": 0, "backfilled": False,
         }
@@ -172,4 +176,4 @@ def test_cross_section_skew_degrades_transmission_quality(tmp_path: Path) -> Non
     quality = evaluate_run_quality(tmp_path, universe)
     assert quality["themes"][0]["direction_ready"] is True
     assert quality["themes"][0]["transmission_ready"] is False
-    assert "cross_section_skew_above_5_seconds" in quality["themes"][0]["blocking_reasons"]
+    assert "decision_freeze_duration_above_5_seconds" in quality["themes"][0]["blocking_reasons"]

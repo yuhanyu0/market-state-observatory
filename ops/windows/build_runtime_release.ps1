@@ -1,5 +1,8 @@
 [CmdletBinding(SupportsShouldProcess)]
-param([string]$PythonExecutable = 'python')
+param(
+    [string]$PythonExecutable = 'python',
+    [switch]$ActivateRuntime
+)
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'lib\process_compat.ps1')
@@ -47,9 +50,14 @@ try {
         effective_start = $universe.frozen_at_utc; themes = $universe.themes
     } | ConvertTo-Json -Depth 12 | Set-Content (Join-Path $staging 'frozen\membership_snapshot_v1.json') -Encoding utf8
     [ordered]@{
-        schema_version = 'mso-runtime-release-config-v3'; queue_size = 10000
+        schema_version = 'mso-runtime-release-config-v4'; queue_size = 10000
         stream_disk_budget_bytes = 2147483648; full_stream_debug = $false
-        cross_section_skew_limit_seconds = 5; paper_positions_allowed = $false
+        stream_checkpoint_message_interval = 10000; stream_checkpoint_seconds = 10
+        freeze_duration_limit_seconds = 5
+        event_time_dispersion_diagnostic_only = $true
+        pit_primary_source = 'websocket_sip'
+        rest_role = 'backup_reconciliation_and_derived_features_only'
+        paper_positions_allowed = $false
         real_orders_allowed = $false
         minimum_windows_powershell_version = '5.1'
         process_compat_version = '0.4.3'
@@ -76,18 +84,17 @@ try {
     $wheelHash = $manifest.wheel_sha256
     if ($PSCmdlet.ShouldProcess($releaseRoot, 'Freeze production wheel and dedicated venv')) {
         Move-Item -LiteralPath $staging -Destination $releaseRoot
-        $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
-        $config | Add-Member -Force NoteProperty release_root $releaseRoot
-        $config | Add-Member -Force NoteProperty release_python (Join-Path $releaseRoot 'venv\Scripts\python.exe')
-        $config | Add-Member -Force NoteProperty release_launcher (Join-Path $releaseRoot 'runtime_release_launcher.ps1')
-        $config | Add-Member -Force NoteProperty release_version $version
-        $config | Add-Member -Force NoteProperty release_experiment_lane $manifest.experiment_lane
-        $config | Add-Member -Force NoteProperty bootstrap_python $PythonExecutable
-        $config | ConvertTo-Json | Set-Content -LiteralPath $configPath -Encoding utf8
+        if ($ActivateRuntime) {
+            & (Join-Path $PSScriptRoot 'select_runtime_release.ps1') `
+                -ReleaseRoot $releaseRoot -Select
+            if ($LASTEXITCODE -ne 0) { throw 'Frozen release selection failed.' }
+        }
         Write-Output "RELEASE_ROOT=$releaseRoot"
         Write-Output "RELEASE_VERSION=$version"
         Write-Output "WHEEL_SHA256=$wheelHash"
         Write-Output "EXPERIMENT_LANE=$($manifest.experiment_lane)"
+        Write-Output "RUNTIME_CONFIG_ACTIVATED=$($ActivateRuntime.ToString().ToLowerInvariant())"
+        Write-Output 'SCHEDULER_CHANGED=false'
         Write-Output 'FORMAL_DATA_SHADOW_STARTED=false'
     }
 }

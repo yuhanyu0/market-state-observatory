@@ -76,3 +76,26 @@ def test_v043_release_manifest_rejects_modified_process_helper(
 
     with pytest.raises(ProductionReleaseRequired, match="process_compat_helper_sha256"):
         load_release_manifest(required=True)
+
+
+def test_v044_release_build_does_not_silently_activate_runtime() -> None:
+    root = Path(__file__).resolve().parents[1]
+    script = (root / "ops" / "windows" / "build_runtime_release.ps1").read_text(
+        encoding="utf-8"
+    )
+    selector = (root / "ops" / "windows" / "select_runtime_release.ps1").read_text(
+        encoding="utf-8"
+    )
+    assert "[switch]$ActivateRuntime" in script
+    assert "RUNTIME_CONFIG_ACTIVATED=" in script
+    assert "if ($ActivateRuntime)" in script
+    assert "Disable or remove the existing MSO scheduler" in selector
+
+
+def test_v044_frozen_launcher_rejects_selected_release_mismatch() -> None:
+    root = Path(__file__).resolve().parents[1]
+    launcher = (root / "ops" / "windows" / "runtime_release_launcher.ps1").read_text(
+        encoding="utf-8"
+    )
+    assert "$launcherReleaseRoot" in launcher
+    assert "Selected runtime release does not match this frozen launcher" in launcher
