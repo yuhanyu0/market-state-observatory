@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.5 - 2026-08-17
+
+- Put every scheduled runtime process tree in a named Windows Job Object with
+  `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`, using suspended child creation so Job
+  assignment completes before Python executes.
+- Added PID creation-time, release, task, Job, launcher, runtime, and run ownership
+  evidence; operator state now separates scheduler state from verified process truth.
+- Added identity-scoped `stop_runtime.ps1`, live-process and lock-aware release
+  selection/start gates, and append-only abort control markers for incomplete runs.
+- Preserved the interrupted 2026-08-17 v0.4.3 rehearsal without backfill or a PASS,
+  and restarted the three-session soak requirement in a new v0.4.5 lane.
+
 ## 0.4.4 - 2026-08-14
 
 - Replaced bundled REST completeness with one explicit PIT observation row per

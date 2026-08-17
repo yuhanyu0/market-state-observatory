@@ -22,12 +22,18 @@ foreach ($path in @($manifestPath, $pythonPath, $launcherPath)) {
     }
 }
 $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-$probe = Invoke-MsoChildProcess -FileName $pythonPath -WorkingDirectory $resolvedRelease `
+$baseProperty = $manifest.PSObject.Properties['base_python_path']
+$probePython = if ($baseProperty -and $baseProperty.Value) { [string]$baseProperty.Value } else { $pythonPath }
+$probeEnvironment = @{
+    MSO_RUNTIME_ROOT = $runtimeRoot
+    MSO_RELEASE_ROOT = $resolvedRelease
+}
+if (-not $probePython.Equals($pythonPath, [StringComparison]::OrdinalIgnoreCase)) {
+    $probeEnvironment.__PYVENV_LAUNCHER__ = $pythonPath
+}
+$probe = Invoke-MsoChildProcess -FileName $probePython -WorkingDirectory $resolvedRelease `
     -ArgumentList @('-I', '-m', 'market_state_observatory.runtime.release_identity', '--verify-release') `
-    -ChildEnvironment @{
-        MSO_RUNTIME_ROOT = $runtimeRoot
-        MSO_RELEASE_ROOT = $resolvedRelease
-    } `
+    -ChildEnvironment $probeEnvironment `
     -RemoveEnvironment @('PYTHONPATH', 'PYTHONHOME')
 if ($probe.ExitCode -ne 0 -or $probe.Stdout -notmatch 'RELEASE_INTEGRITY=PASS') {
     throw 'Frozen release selection failed integrity verification.'
@@ -52,20 +58,10 @@ if ($PSCmdlet.ShouldProcess($resolvedRelease, 'Select frozen runtime release')) 
         throw 'Runtime is not initialized.'
     }
     $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
-    $changingRelease = -not ([IO.Path]::GetFullPath([string]$config.release_root).TrimEnd([char]92)).Equals(
-        $resolvedRelease,
-        [StringComparison]::OrdinalIgnoreCase
-    )
-    if ($changingRelease) {
-        foreach ($taskName in @('MSO-Daily-Rehearsal', 'MSO-Daily-Formal')) {
-            $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
-            if ($task -and [string]$task.State -ne 'Disabled') {
-                throw 'Disable or remove the existing MSO scheduler before selecting a different release.'
-            }
-        }
-    }
+    Assert-MsoReleaseSelectionSafe -RuntimeRoot $runtimeRoot
     $config | Add-Member -Force NoteProperty release_root $resolvedRelease
     $config | Add-Member -Force NoteProperty release_python $pythonPath
+    $config | Add-Member -Force NoteProperty release_base_python $manifest.base_python_path
     $config | Add-Member -Force NoteProperty release_launcher $launcherPath
     $config | Add-Member -Force NoteProperty release_version $manifest.release_version
     $config | Add-Member -Force NoteProperty release_experiment_lane $manifest.experiment_lane

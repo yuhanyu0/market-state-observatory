@@ -6,6 +6,15 @@ param(
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'lib\process_compat.ps1')
+
+function Get-MsoPowerShellIdentity {
+    [CmdletBinding()]
+    param([Parameter(Mandatory = $true)][string]$FileName)
+    $identityScript = '$PSVersionTable.PSEdition + '' '' + $PSVersionTable.PSVersion.ToString()'
+    $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($identityScript))
+    return (& $FileName -NoProfile -NonInteractive -EncodedCommand $encoded).Trim()
+}
+
 $repository = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 if (@(& git -C $repository status --porcelain).Count -gt 0) {
     throw 'A production release must be built from a clean committed working tree.'
@@ -42,15 +51,18 @@ try {
     Copy-Item (Join-Path $repository 'config\publication_policy.yml') (Join-Path $staging 'config\publication_policy.yml')
     Copy-Item (Join-Path $repository 'schemas\*.json') (Join-Path $staging 'schemas')
     Copy-Item (Join-Path $PSScriptRoot 'runtime_release_launcher.ps1') (Join-Path $staging 'runtime_release_launcher.ps1')
+    Copy-Item (Join-Path $PSScriptRoot 'stop_runtime.ps1') (Join-Path $staging 'stop_runtime.ps1')
     Copy-Item (Join-Path $PSScriptRoot 'lib\process_compat.ps1') (Join-Path $staging 'lib\process_compat.ps1')
     Copy-Item (Join-Path $PSScriptRoot 'lib\scheduler_safety.ps1') (Join-Path $staging 'lib\scheduler_safety.ps1')
+    Copy-Item (Join-Path $PSScriptRoot 'lib\job_object.ps1') (Join-Path $staging 'lib\job_object.ps1')
+    Copy-Item (Join-Path $PSScriptRoot 'lib\runtime_process.ps1') (Join-Path $staging 'lib\runtime_process.ps1')
     $universe = Get-Content (Join-Path $staging 'frozen\runtime_universe_v1.json') -Raw | ConvertFrom-Json
     [ordered]@{
         schema_version = 'mso-frozen-membership-v1'; source = 'runtime_universe_v1'
         effective_start = $universe.frozen_at_utc; themes = $universe.themes
     } | ConvertTo-Json -Depth 12 | Set-Content (Join-Path $staging 'frozen\membership_snapshot_v1.json') -Encoding utf8
     [ordered]@{
-        schema_version = 'mso-runtime-release-config-v4'; queue_size = 10000
+        schema_version = 'mso-runtime-release-config-v5'; queue_size = 10000
         stream_disk_budget_bytes = 2147483648; full_stream_debug = $false
         stream_checkpoint_message_interval = 10000; stream_checkpoint_seconds = 10
         freeze_duration_limit_seconds = 5
@@ -60,7 +72,11 @@ try {
         paper_positions_allowed = $false
         real_orders_allowed = $false
         minimum_windows_powershell_version = '5.1'
-        process_compat_version = '0.4.3'
+        process_compat_version = '0.4.5'
+        job_object_version = '0.4.5'
+        runtime_process_ownership_version = '0.4.5'
+        process_tree_ownership = 'windows_job_object_kill_on_close'
+        child_creation = 'create_suspended_assign_then_resume'
         scheduler_default_mode = 'rehearsal'
         formal_promotion_required = $true
         minimum_scheduler_rehearsal_sessions = 3
@@ -68,22 +84,26 @@ try {
     $testedShells = @()
     $windowsPowerShell = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
     if (Test-Path -LiteralPath $windowsPowerShell -PathType Leaf) {
-        $desktopIdentity = (& $windowsPowerShell -NoProfile -NonInteractive -Command `
-            '$PSVersionTable.PSEdition + " " + $PSVersionTable.PSVersion.ToString()').Trim()
+        $desktopIdentity = Get-MsoPowerShellIdentity -FileName $windowsPowerShell
         if ($desktopIdentity) { $testedShells += $desktopIdentity }
     }
     $testedShells += "$($PSVersionTable.PSEdition) $($PSVersionTable.PSVersion.ToString())"
     $pwsh = Get-Command pwsh -ErrorAction SilentlyContinue
     if ($pwsh) {
-        $pwshIdentity = (& $pwsh.Source -NoProfile -Command '$PSVersionTable.PSEdition + " " + $PSVersionTable.PSVersion.ToString()').Trim()
+        $pwshIdentity = Get-MsoPowerShellIdentity -FileName $pwsh.Source
         if ($pwshIdentity) { $testedShells += $pwshIdentity }
     }
     $testedShells = @($testedShells | Sort-Object -Unique)
+    $basePython = (& $releasePython -I -c 'import sys; print(sys._base_executable)').Trim()
+    if (-not (Test-Path -LiteralPath $basePython -PathType Leaf)) {
+        throw 'Frozen release base Python could not be resolved.'
+    }
     $manifestArguments = @(
         '-I', '-m', 'market_state_observatory.runtime.release_identity',
         '--build-manifest', '--release', $staging, '--repository', $repository,
         '--git-sha', $gitSha, '--release-version', $version,
-        '--output', (Join-Path $staging 'release_manifest.json')
+        '--output', (Join-Path $staging 'release_manifest.json'),
+        '--base-python', $basePython
     )
     foreach ($shell in $testedShells) { $manifestArguments += @('--tested-shell', $shell) }
     & $releasePython @manifestArguments

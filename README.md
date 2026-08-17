@@ -90,6 +90,16 @@ produce a release-bound GO promotion artifact. An authorized successful formal
 day then publishes only derived, redacted state to
 `public-data`; rehearsal and failed-quality runs never publish.
 
+Use the identity-scoped lifecycle command before release changes or maintenance:
+
+```powershell
+.\ops\windows\stop_runtime.ps1 -TaskName MSO-Daily-Rehearsal
+```
+
+The v0.4.5 launcher owns the frozen Python tree through a Windows Job Object. A
+Task Scheduler stop or launcher crash closes the Job and terminates every runtime
+descendant; the stop command never targets Python by process name.
+
 Private operator state is available only on loopback:
 
 ```powershell

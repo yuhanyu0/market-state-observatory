@@ -61,6 +61,9 @@ if (Test-Path -LiteralPath $authorizationPath -PathType Leaf) {
         if ($verification.ExitCode -eq 0) { $promotionStatus = 'AUTHORIZED' }
     } catch { $promotionStatus = 'INVALID' }
 }
+$liveOwned = @(Get-MsoLiveOwnedProcesses -RuntimeRoot $runtimeRoot)
+$lockState = Get-MsoRuntimeLockState -RuntimeRoot $runtimeRoot
+$processState = if ($liveOwned.Count -gt 0) { 'ACTIVE_VERIFIED' } elseif ($lockState.State -eq 'ABSENT') { 'INACTIVE' } else { 'STALE_OR_INCONSISTENT' }
 
 Write-Output "REHEARSAL_TASK=$($rehearsal.Display)"
 Write-Output "FORMAL_TASK=$($formal.Display)"
@@ -72,6 +75,9 @@ Write-Output "NEXT_RUN=$(if($selected -and $selected.NextRun){$selected.NextRun.
 Write-Output "LAST_RUN=$(if($selected -and $selected.LastRun){$selected.LastRun.ToString('o')}else{'NONE'})"
 Write-Output "LAST_RESULT=$(if($selected -and $null -ne $selected.LastResult){$selected.LastResult}else{'NONE'})"
 Write-Output "PROMOTION_STATUS=$promotionStatus"
+Write-Output "RUNTIME_PROCESS_STATE=$processState"
+Write-Output "LIVE_OWNED_PROCESS_COUNT=$($liveOwned.Count)"
+Write-Output "RUNTIME_LOCK_STATE=$($lockState.State)"
 if ($activeMode -eq 'ERROR_BOTH_ACTIVE') {
     $alertPath = Join-Path $runtimeRoot "alerts\scheduler-both-active-$([Guid]::NewGuid().ToString('N')).json"
     [ordered]@{

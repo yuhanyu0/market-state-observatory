@@ -1,6 +1,9 @@
 Set-StrictMode -Version 2.0
 
-$script:MsoProcessCompatVersion = '0.4.3'
+$script:MsoProcessCompatVersion = '0.4.5'
+
+. (Join-Path $PSScriptRoot 'job_object.ps1')
+. (Join-Path $PSScriptRoot 'runtime_process.ps1')
 
 function ConvertTo-WindowsCommandLineArgument {
     [CmdletBinding()]
@@ -114,17 +117,33 @@ function Invoke-MsoChildProcess {
         [hashtable]$ChildEnvironment = @{},
         [string[]]$RemoveEnvironment = @()
     )
-    $startInfoParameters = @{
-        FileName = $FileName
-        WorkingDirectory = $WorkingDirectory
-        ArgumentList = $ArgumentList
-        ChildEnvironment = $ChildEnvironment
-        RemoveEnvironment = $RemoveEnvironment
+    $arguments = if ($PSBoundParameters.ContainsKey('RawArguments')) {
+        $RawArguments
+    } else {
+        ConvertTo-WindowsCommandLine -ArgumentList $ArgumentList
     }
-    if ($PSBoundParameters.ContainsKey('RawArguments')) {
-        $startInfoParameters.RawArguments = $RawArguments
+    if ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT) {
+        $owned = $null
+        try {
+            $owned = New-MsoOwnedProcess -FileName $FileName -WorkingDirectory $WorkingDirectory `
+                -RawArguments $arguments -ChildEnvironment $ChildEnvironment `
+                -RemoveEnvironment $RemoveEnvironment `
+                -JobName "Local\MSO-Child-$([Guid]::NewGuid().ToString('N'))"
+            $owned.Resume()
+            $result = $owned.WaitForExit()
+            return [pscustomobject]@{
+                ExitCode = $result.ExitCode
+                Stdout = $result.Stdout
+                Stderr = $result.Stderr
+            }
+        }
+        finally {
+            if ($owned) { $owned.Dispose() }
+        }
     }
-    $startInfo = New-MsoProcessStartInfo @startInfoParameters
+    $startInfo = New-MsoProcessStartInfo -FileName $FileName `
+        -WorkingDirectory $WorkingDirectory -RawArguments $arguments `
+        -ChildEnvironment $ChildEnvironment -RemoveEnvironment $RemoveEnvironment
     try {
         $process = New-Object System.Diagnostics.Process
         $process.StartInfo = $startInfo
@@ -142,6 +161,75 @@ function Invoke-MsoChildProcess {
         foreach ($name in $ChildEnvironment.Keys) {
             Remove-MsoChildEnvironmentVariable -StartInfo $startInfo -Name $name
         }
+    }
+}
+
+function Invoke-MsoOwnedChildProcess {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)][string]$FileName,
+        [Parameter(Mandatory = $true)][string]$WorkingDirectory,
+        [AllowEmptyCollection()][string[]]$ArgumentList = @(),
+        [hashtable]$ChildEnvironment = @{},
+        [string[]]$RemoveEnvironment = @(),
+        [Parameter(Mandatory = $true)][string]$RuntimeRoot,
+        [Parameter(Mandatory = $true)][string]$ReleaseVersion,
+        [Parameter(Mandatory = $true)][string]$ReleaseRoot,
+        [string]$ReleasePython,
+        [Parameter(Mandatory = $true)][ValidateSet('rehearsal', 'formal')][string]$Mode,
+        [string]$SchedulerTaskName
+    )
+    $ownershipId = [Guid]::NewGuid().ToString('N')
+    $jobName = "Local\MSO-Runtime-$ownershipId"
+    $ownershipPath = Join-Path $RuntimeRoot "operator\process-ownership\$ownershipId.json"
+    $environment = @{}
+    foreach ($name in $ChildEnvironment.Keys) { $environment[$name] = $ChildEnvironment[$name] }
+    $environment.MSO_PROCESS_OWNERSHIP_ID = $ownershipId
+    $environment.MSO_PROCESS_OWNERSHIP_PATH = $ownershipPath
+    $environment.MSO_LAUNCHER_PID = [string]$PID
+    $environment.MSO_PROCESS_EXECUTABLE = $FileName
+    if ($ReleasePython -and -not $FileName.Equals($ReleasePython, [StringComparison]::OrdinalIgnoreCase)) {
+        $environment.__PYVENV_LAUNCHER__ = $ReleasePython
+    }
+    $rawArguments = ConvertTo-WindowsCommandLine -ArgumentList $ArgumentList
+    $owned = $null
+    $ownership = $null
+    try {
+        $owned = New-MsoOwnedProcess -FileName $FileName -WorkingDirectory $WorkingDirectory `
+            -RawArguments $rawArguments -ChildEnvironment $environment `
+            -RemoveEnvironment $RemoveEnvironment -JobName $jobName
+        $ownership = New-MsoProcessOwnershipRecord -RuntimeRoot $RuntimeRoot `
+            -OwnershipId $ownershipId -RuntimePid $owned.ProcessId -JobName $jobName `
+            -ReleaseVersion $ReleaseVersion -ReleaseRoot $ReleaseRoot `
+            -ReleasePython $(if($ReleasePython){$ReleasePython}else{$FileName}) `
+            -ProcessExecutable $FileName `
+            -Mode $Mode -SchedulerTaskName $SchedulerTaskName
+        $record = $ownership.Record
+        $record.status = 'RUNNING'
+        $record.updated_at_utc = [DateTime]::UtcNow.ToString('o')
+        Write-MsoAtomicJson -Path $ownership.Path -Value $record
+        $owned.Resume()
+        $result = $owned.WaitForExit()
+        Set-MsoOwnershipExit -Path $ownership.Path -Status 'EXITED' -ExitCode $result.ExitCode
+        return [pscustomobject]@{
+            ExitCode = $result.ExitCode
+            Stdout = $result.Stdout
+            Stderr = $result.Stderr
+            RuntimePid = $owned.ProcessId
+            OwnershipId = $ownershipId
+            OwnershipPath = $ownership.Path
+            JobName = $jobName
+        }
+    }
+    catch {
+        if ($ownership) {
+            Set-MsoOwnershipExit -Path $ownership.Path -Status 'LAUNCHER_TERMINATED_RUNTIME' -ExitCode $null
+        }
+        throw
+    }
+    finally {
+        if ($owned) { $owned.Dispose() }
+        foreach ($name in @($environment.Keys)) { $environment[$name] = $null }
     }
 }
 
@@ -207,7 +295,16 @@ function Resolve-MsoRuntimePython {
         MSO_RUNTIME_ROOT = $RuntimeRoot
         MSO_RELEASE_ROOT = $releaseRoot
     }
-    $integrity = Invoke-MsoChildProcess -FileName $releasePython -WorkingDirectory $releaseRoot `
+    $probePython = $releasePython
+    $baseProperty = $Config.PSObject.Properties['release_base_python']
+    if ($baseProperty -and $baseProperty.Value) {
+        $probePython = [IO.Path]::GetFullPath([string]$baseProperty.Value)
+        if (-not (Test-Path -LiteralPath $probePython -PathType Leaf)) {
+            throw 'Frozen base Python executable does not exist.'
+        }
+        $environment.__PYVENV_LAUNCHER__ = $releasePython
+    }
+    $integrity = Invoke-MsoChildProcess -FileName $probePython -WorkingDirectory $releaseRoot `
         -ArgumentList @('-I', '-m', 'market_state_observatory.runtime.release_identity', '--verify-release') `
         -ChildEnvironment $environment -RemoveEnvironment @('PYTHONPATH', 'PYTHONHOME')
     if ($integrity.ExitCode -ne 0 -or $integrity.Stdout -notmatch 'RELEASE_INTEGRITY=PASS') {
@@ -218,7 +315,7 @@ import json, sys
 import market_state_observatory as module
 print(json.dumps({"executable": sys.executable, "module_file": module.__file__}))
 '@
-    $identityResult = Invoke-MsoChildProcess -FileName $releasePython -WorkingDirectory $releaseRoot `
+    $identityResult = Invoke-MsoChildProcess -FileName $probePython -WorkingDirectory $releaseRoot `
         -ArgumentList @('-I', '-c', $identityCode) -ChildEnvironment $environment `
         -RemoveEnvironment @('PYTHONPATH', 'PYTHONHOME')
     if ($identityResult.ExitCode -ne 0) { throw 'Frozen Python identity probe failed.' }
@@ -231,8 +328,23 @@ print(json.dumps({"executable": sys.executable, "module_file": module.__file__})
     if (-not $modulePath.StartsWith($releaseRoot + [char]92, [StringComparison]::OrdinalIgnoreCase)) {
         throw 'market_state_observatory was imported outside the frozen release.'
     }
+    $baseResult = Invoke-MsoChildProcess -FileName $probePython -WorkingDirectory $releaseRoot `
+        -ArgumentList @('-I', '-c', 'import sys; print(sys._base_executable)') `
+        -ChildEnvironment $environment -RemoveEnvironment @('PYTHONPATH', 'PYTHONHOME')
+    if ($baseResult.ExitCode -ne 0) { throw 'Frozen base Python identity probe failed.' }
+    $basePython = [IO.Path]::GetFullPath($baseResult.Stdout.Trim())
+    if (-not (Test-Path -LiteralPath $basePython -PathType Leaf)) {
+        throw 'Frozen base Python executable does not exist.'
+    }
+    if ($baseProperty -and $baseProperty.Value -and -not $basePython.Equals(
+        [IO.Path]::GetFullPath([string]$baseProperty.Value),
+        [StringComparison]::OrdinalIgnoreCase
+    )) {
+        throw 'Frozen base Python does not match selected runtime configuration.'
+    }
     return [pscustomobject]@{
         Python = $releasePython
+        BasePython = $basePython
         ReleaseRoot = $releaseRoot
         ModulePath = $modulePath
         IntegrityOutput = $integrity.Stdout.Trim()

@@ -5,9 +5,10 @@
   "bootstrap_python": "C:\\absolute\\path\\to\\python.exe",
   "mode": "DATA_CAPTURE_ONLY",
   "timezone": "America/New_York",
-  "release_root": "%LOCALAPPDATA%\\MarketStateObservatoryRuntime\\releases\\v0.4.4-01234567",
-  "release_python": "%LOCALAPPDATA%\\MarketStateObservatoryRuntime\\releases\\v0.4.4-01234567\\venv\\Scripts\\python.exe",
-  "release_launcher": "%LOCALAPPDATA%\\MarketStateObservatoryRuntime\\releases\\v0.4.4-01234567\\runtime_release_launcher.ps1",
-  "release_version": "0.4.4",
-  "release_experiment_lane": "data-shadow-v0.4.4-example"
+  "release_root": "%LOCALAPPDATA%\\MarketStateObservatoryRuntime\\releases\\v0.4.5-01234567",
+  "release_python": "%LOCALAPPDATA%\\MarketStateObservatoryRuntime\\releases\\v0.4.5-01234567\\venv\\Scripts\\python.exe",
+  "release_base_python": "%LOCALAPPDATA%\\Programs\\Python\\Python313\\python.exe",
+  "release_launcher": "%LOCALAPPDATA%\\MarketStateObservatoryRuntime\\releases\\v0.4.5-01234567\\runtime_release_launcher.ps1",
+  "release_version": "0.4.5",
+  "release_experiment_lane": "data-shadow-v0.4.5-example"
 }

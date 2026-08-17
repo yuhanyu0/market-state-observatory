@@ -12,5 +12,5 @@
 - [x] Create and push `yuhanyu0/market-state-observatory`.
 - [x] Enable GitHub Pages Actions and verify the deployed URL returns HTTP 200.
 - [x] Initialize the local DPAPI runtime credential.
-- [ ] Install only `MSO-Daily-Rehearsal` for the reviewed v0.4.4 release.
+- [ ] Install only `MSO-Daily-Rehearsal` for the reviewed v0.4.5 release.
 - [ ] Complete three new scheduler-driven PASS trading dates before Formal Data Shadow.

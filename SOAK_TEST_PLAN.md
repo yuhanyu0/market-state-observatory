@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Prove the frozen v0.4.4 data-only runtime over at least three complete,
+Prove the frozen v0.4.5 data-only runtime over at least three complete,
 scheduler-driven XNYS sessions before any Formal Data Shadow day can be considered.
 
 ## Preconditions
@@ -13,6 +13,8 @@ scheduler-driven XNYS sessions before any Formal Data Shadow day can be consider
    hashes from `release_manifest.json`.
 3. Install only `MSO-Daily-Rehearsal` and run its registered-action smoke test.
 4. Keep every session in rehearsal mode; positions and orders remain zero.
+5. Confirm the launcher, base interpreter, and all descendants share the named
+   `KILL_ON_JOB_CLOSE` Job before accepting the first observation.
 
 ## Full-Day Rehearsal
 
@@ -35,6 +37,8 @@ minutes, and close. Keep the SIP WebSocket connected for the full session. Verif
 - local alerts fire for an intentionally induced disconnect and quality failure;
 - the independent heartbeat advances during waits and the operator console remains
   reachable only at `127.0.0.1`.
+- stopping the scheduled action leaves zero launcher/runtime descendants, and a
+  launcher crash produces an append-only abort marker rather than stale `RUNNING`.
 
 ## Failure Injection
 
@@ -49,5 +53,6 @@ quality reproducible, zero future timestamps, backfills, message drops,
 positions, and orders, passing secret/boundary/settlement/publication-isolation
 checks, and a frozen scheduler version. A reviewed `SOAK_TEST_RESULTS.json` must
 reference and hash every immutable rehearsal run and quality file. A single
-failed criterion keeps the system at NO-GO. The v0.4.3 Day A failure is permanent
-evidence and cannot count as one of the three v0.4.4 PASS dates.
+failed criterion keeps the system at NO-GO. The v0.4.3 Day A failure and the
+interrupted 2026-08-17 v0.4.3 run are permanent evidence and cannot count as one
+of the three v0.4.5 PASS dates. The v0.4.5 count starts at zero.

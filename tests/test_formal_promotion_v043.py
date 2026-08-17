@@ -36,6 +36,9 @@ def _release(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[Path, dic
     _write(release / "runtime_release_launcher.ps1", "# launcher\n")
     _write(release / "lib" / "process_compat.ps1", "# helper\n")
     _write(release / "lib" / "scheduler_safety.ps1", "# scheduler helper\n")
+    _write(release / "lib" / "job_object.ps1", "# job helper\n")
+    _write(release / "lib" / "runtime_process.ps1", "# runtime process helper\n")
+    _write(release / "stop_runtime.ps1", "# safe stop\n")
     _write(repository / "src" / "market_state_observatory" / "runtime" / "module.py", "x=1\n")
     manifest = build_release_manifest(
         release=release,

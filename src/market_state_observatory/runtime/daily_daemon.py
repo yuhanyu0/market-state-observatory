@@ -24,6 +24,7 @@ from .observation_freezer import (
     write_exclusive,
 )
 from .pit_observation import build_point_payload
+from .process_ownership import claim_run, ownership_identity
 from .quality_engine import freeze_quality
 from .recovery import RecoveryState
 from .release_identity import release_root, runtime_identity
@@ -271,11 +272,17 @@ async def run_session(mode: str, dry_run: bool = False) -> int:
         membership=membership,
         production_required=mode == "formal",
     )
-    lock = RuntimeLock(paths.locks / "daily-runtime.lock")
+    lock = RuntimeLock(
+        paths.locks / "daily-runtime.lock",
+        ownership=ownership_identity(),
+        release_python=sys.executable,
+        process_executable=os.environ.get("MSO_PROCESS_EXECUTABLE", sys.executable),
+    )
     with lock:
         run_directory, run, resumed = open_or_create_run(
             mode=mode, day=day, identity=identity, universe=universe, paths=paths
         )
+        claim_run(str(run["run_id"]))
         recovery = latest_recovery(run_directory, day.isoformat())
         adapter = AlpacaSIPAdapter()
         skew = adapter.clock_skew_seconds()

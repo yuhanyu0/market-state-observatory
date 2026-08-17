@@ -14,6 +14,7 @@ from typing import Any, cast
 
 from .notifications import load_recent_alerts
 from .observation_freezer import canonical_json, write_exclusive
+from .process_ownership import process_truth
 from .quality_engine import evaluate_run_quality
 from .runtime_paths import RuntimePaths, resolve_runtime_paths
 
@@ -50,11 +51,13 @@ def _scheduler_status() -> dict[str, object]:
 def operator_state(paths: RuntimePaths) -> dict[str, Any]:
     runtime_status = _load_json(_latest_file(paths.operator, "runtime_status*.json")) or {}
     quality_path = _latest_file(paths.data_shadow, "DATA_QUALITY.json")
+    process_state = process_truth(paths.operator)
     return {
         "schema_version": "mso-private-operator-state-v1",
         "observed_at_utc": datetime.now(UTC).isoformat(),
         "scheduler": _scheduler_status(),
         "runtime": runtime_status,
+        "runtime_process": process_state,
         "current_quality": _load_json(quality_path),
         "current_quality_path": str(quality_path) if quality_path else None,
         "alerts": load_recent_alerts(paths.alerts),

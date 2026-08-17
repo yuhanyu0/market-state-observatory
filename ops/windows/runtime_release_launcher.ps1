@@ -18,9 +18,21 @@ if (-not $launcherReleaseRoot.Equals($selectedReleaseRoot, [StringComparison]::O
     throw 'Selected runtime release does not match this frozen launcher.'
 }
 $runtime = Resolve-MsoRuntimePython -Config $config -RuntimeRoot $runtimeRoot
+$launcherMutex = New-Object System.Threading.Mutex($false, 'Local\MarketStateObservatoryRuntime-Daily-v1')
+$launcherMutexOwned = $false
+try {
+    $launcherMutexOwned = $launcherMutex.WaitOne(0)
+} catch [System.Threading.AbandonedMutexException] {
+    $launcherMutexOwned = $true
+}
+if (-not $launcherMutexOwned) {
+    throw 'RUNTIME_START_REJECTED: another launcher owns the runtime mutex.'
+}
+Assert-MsoRuntimeStartSafe -RuntimeRoot $runtimeRoot -Config $config -Mode $Mode `
+    -ScheduledTaskName $ScheduledTaskName
 
 function Invoke-ReleasePython {
-    param([string[]]$Arguments, [switch]$WithCredential)
+    param([string[]]$Arguments, [switch]$WithCredential, [switch]$OwnedRuntime)
     $credential = $null
     $plainKeyId = $null
     $plainSecret = $null
@@ -44,9 +56,18 @@ function Invoke-ReleasePython {
             $environment.ALPACA_DATA_FEED = 'sip'
         }
         $isolatedArguments = @('-I') + $Arguments
-        $result = Invoke-MsoChildProcess -FileName $runtime.Python `
-            -WorkingDirectory $runtime.ReleaseRoot -ArgumentList $isolatedArguments `
-            -ChildEnvironment $environment -RemoveEnvironment @('PYTHONPATH', 'PYTHONHOME')
+        if ($OwnedRuntime) {
+            $result = Invoke-MsoOwnedChildProcess -FileName $runtime.BasePython `
+                -WorkingDirectory $runtime.ReleaseRoot -ArgumentList $isolatedArguments `
+                -ChildEnvironment $environment -RemoveEnvironment @('PYTHONPATH', 'PYTHONHOME') `
+                -RuntimeRoot $runtimeRoot -ReleaseVersion $config.release_version `
+                -ReleaseRoot $runtime.ReleaseRoot -ReleasePython $runtime.Python `
+                -Mode $Mode -SchedulerTaskName $ScheduledTaskName
+        } else {
+            $result = Invoke-MsoChildProcess -FileName $runtime.Python `
+                -WorkingDirectory $runtime.ReleaseRoot -ArgumentList $isolatedArguments `
+                -ChildEnvironment $environment -RemoveEnvironment @('PYTHONPATH', 'PYTHONHOME')
+        }
         if ($WithCredential) {
             Assert-MsoCredentialSafeOutput -Stdout $result.Stdout -Stderr $result.Stderr `
                 -KeyId $plainKeyId -Secret $plainSecret
@@ -76,7 +97,8 @@ Write-Output "MSO_MODULE_PATH=$($runtime.ModulePath)"
 $arguments = @('-m', 'market_state_observatory.runtime.daily_daemon', '--mode', $Mode)
 if ($DryRun) { $arguments += '--dry-run' }
 try {
-    $result = Invoke-ReleasePython -Arguments $arguments -WithCredential:(-not $DryRun)
+    $result = Invoke-ReleasePython -Arguments $arguments -WithCredential:(-not $DryRun) `
+        -OwnedRuntime
 }
 catch {
     $kind = if ($_.Exception.Message -match 'credential') { 'credential_invalid' } else { 'task_not_started' }
@@ -93,7 +115,11 @@ if ($result.ExitCode -ne 0) {
     Send-MsoAlert -Kind 'quality_failed' -Title 'MSO runtime failed' `
         -Message 'The runtime exited nonzero. No public state was updated.'
 }
-if ($result.ExitCode -ne 0 -or $DryRun -or $Mode -ne 'formal') { exit $result.ExitCode }
+if ($result.ExitCode -ne 0 -or $DryRun -or $Mode -ne 'formal') {
+    if ($launcherMutexOwned) { $launcherMutex.ReleaseMutex(); $launcherMutexOwned = $false }
+    $launcherMutex.Dispose()
+    exit $result.ExitCode
+}
 
 $etNow = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId(
     [DateTime]::UtcNow,
@@ -117,4 +143,6 @@ if ($publish.ExitCode -ne 0) {
     Send-MsoAlert -Kind 'publication_failed' -Title 'MSO publication failed' `
         -Message 'Fail-closed publication rejected or could not publish the run.'
 }
+if ($launcherMutexOwned) { $launcherMutex.ReleaseMutex(); $launcherMutexOwned = $false }
+$launcherMutex.Dispose()
 exit $publish.ExitCode

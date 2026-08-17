@@ -6,9 +6,11 @@ The scheduler-driven v0.4.3 Soak Day A completed all five core points and wrote
 13,013,293 WebSocket messages with zero drops, but its immutable quality result is
 `FAIL` (113/175, 64.57%). Offline forensics found that the old REST bundling rule
 deleted rows when an exact-open completed bar did not yet exist or when provider
-event time was milliseconds ahead of the collector clock. v0.4.4 corrects those
-semantics in a new release lane, but it has completed zero of the three required
-new scheduler-driven PASS dates. Formal Data Shadow remains stopped.
+event time was milliseconds ahead of the collector clock. v0.4.4 corrected those
+semantics, but an interrupted v0.4.3 run on 2026-08-17 then exposed a separate
+Windows scheduler process-lifecycle defect. v0.4.5 fixes process-tree ownership
+in a new release lane, but it has completed zero of the three required new
+scheduler-driven PASS dates. Formal Data Shadow remains stopped.
 
 ## Passed
 
@@ -25,8 +27,8 @@ new scheduler-driven PASS dates. Formal Data Shadow remains stopped.
 
 ## Blocking Conditions
 
-1. Build and review the immutable v0.4.4 wheel/venv without changing v0.4.3 evidence.
-2. Install only the v0.4.4 rehearsal task after explicit operator approval.
+1. Build and review the immutable v0.4.5 wheel/venv without changing v0.4.3 evidence.
+2. Install only the v0.4.5 rehearsal task after explicit operator approval.
 3. Complete three new scheduler-driven full-day PASS rehearsals and the failure-injection checklist in
    `SOAK_TEST_PLAN.md`.
 4. Review Scheduler start, WebSocket continuity, PIT-row and required-field completeness, disk

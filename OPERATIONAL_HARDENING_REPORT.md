@@ -1,5 +1,35 @@
 # Operational Hardening Report
 
+## v0.4.5 Lifecycle Patch
+
+The 2026-08-17 v0.4.3 rehearsal proved that stopping or disabling a Scheduled
+Task did not establish ownership of the already-launched Python tree. The task
+became Disabled while the venv redirector and actual interpreter continued.
+
+v0.4.5 creates the actual base interpreter suspended, assigns it to a named
+Windows Job configured with `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`, writes the
+launcher/runtime ownership record, and only then resumes its first instruction.
+Using the base interpreter avoids the Windows venv redirector escaping the Job;
+`__PYVENV_LAUNCHER__` preserves the frozen venv prefix and installed wheel.
+
+The new safe-stop path verifies PID creation time, executable, release, task,
+and launcher command hash. It stops only the named task/Job/tree and never kills
+Python by process name. Release selection and runtime startup reject live owned
+processes or unresolved locks. Operator state reports scheduler and process truth
+separately.
+
+The interrupted run `2026-08-17-d70f2c06cb27` retains its original immutable
+run and open snapshot. An append-only control marker records
+`ABORTED_INCOMPLETE_CRASHED`; no observation was backfilled and no quality PASS
+was created. The stale legacy lock was removed only after PID reuse was detected
+and its prior SHA256 was archived.
+
+Real Windows tests passed under Windows PowerShell 5.1 and PowerShell 7: task
+stop killed launcher/runtime/grandchild with zero orphans, launcher termination
+killed its Job tree, Disabled state did not hide a live process, a live daemon
+blocked release selection, clean stop allowed selection, and unrelated Python
+survived. Formal remains NO-GO; positions and orders remain zero.
+
 ## Scope
 
 Version 0.4.4 corrects point-in-time capture semantics and runtime durability

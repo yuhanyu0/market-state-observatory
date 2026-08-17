@@ -30,6 +30,9 @@ def _release_fixture(tmp_path: Path) -> tuple[Path, Path]:
     _write(release / "runtime_release_launcher.ps1", "# launcher 0.4.3\n")
     _write(release / "lib" / "process_compat.ps1", "# compatibility helper\n")
     _write(release / "lib" / "scheduler_safety.ps1", "# scheduler helper\n")
+    _write(release / "lib" / "job_object.ps1", "# job helper\n")
+    _write(release / "lib" / "runtime_process.ps1", "# runtime process helper\n")
+    _write(release / "stop_runtime.ps1", "# safe stop\n")
     _write(repository / "src" / "market_state_observatory" / "runtime" / "module.py", "x = 1\n")
     return release, repository
 
@@ -57,6 +60,13 @@ def test_v043_release_manifest_locks_scheduler_launcher_policy_and_helper(
     assert loaded["release_python_path_class"] == "release_root_venv"
     assert loaded["quality_policy_sha256"]
     assert loaded["scheduler_safety_helper_sha256"]
+    assert loaded["job_object_helper_sha256"]
+    assert loaded["runtime_process_helper_sha256"]
+    assert loaded["safe_stop_sha256"]
+    assert loaded["base_python_path"]
+    assert loaded["base_python_sha256"]
+    assert loaded["job_object_ownership"] == "JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE"
+    assert loaded["child_creation_order"] == "CREATE_SUSPENDED_ASSIGN_JOB_RESUME_THREAD"
 
 
 def test_v043_release_manifest_rejects_modified_process_helper(
@@ -91,7 +101,8 @@ def test_v044_release_build_does_not_silently_activate_runtime() -> None:
     assert "if ($ActivateRuntime)" in script
     assert "WindowsPowerShell\\v1.0\\powershell.exe" in script
     assert "Sort-Object -Unique" in script
-    assert "Disable or remove the existing MSO scheduler" in selector
+    assert "-EncodedCommand" in script
+    assert "Assert-MsoReleaseSelectionSafe" in selector
 
 
 def test_v044_frozen_launcher_rejects_selected_release_mismatch() -> None:

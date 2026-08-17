@@ -6,6 +6,7 @@ import importlib.metadata
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -72,6 +73,11 @@ def load_release_manifest(*, required: bool) -> dict[str, Any] | None:
         "powershell_launcher_sha256",
         "process_compat_helper_sha256",
         "scheduler_safety_helper_sha256",
+        "job_object_helper_sha256",
+        "runtime_process_helper_sha256",
+        "safe_stop_sha256",
+        "base_python_path",
+        "base_python_sha256",
         "minimum_windows_powershell_version",
         "tested_shells",
         "release_python_path_class",
@@ -90,6 +96,10 @@ def load_release_manifest(*, required: bool) -> dict[str, Any] | None:
         "powershell_launcher_sha256": root / "runtime_release_launcher.ps1",
         "process_compat_helper_sha256": root / "lib" / "process_compat.ps1",
         "scheduler_safety_helper_sha256": root / "lib" / "scheduler_safety.ps1",
+        "job_object_helper_sha256": root / "lib" / "job_object.ps1",
+        "runtime_process_helper_sha256": root / "lib" / "runtime_process.ps1",
+        "safe_stop_sha256": root / "stop_runtime.ps1",
+        "base_python_sha256": Path(str(payload.get("base_python_path", ""))),
     }
     for field, path in checks.items():
         if not path.exists():
@@ -139,12 +149,18 @@ def build_release_manifest(
     git_sha: str,
     release_version: str,
     tested_shells: list[str],
+    base_python: Path | None = None,
 ) -> dict[str, Any]:
     wheels = list((release / "wheel").glob("*.whl"))
     if len(wheels) != 1:
         raise ProductionReleaseRequired("Release must contain exactly one wheel")
     wheel_hash = sha256_file(wheels[0])
     universe_hash = sha256_file(release / "frozen" / "runtime_universe_v1.json")
+    resolved_base_python = (
+        base_python or Path(getattr(sys, "_base_executable", sys.executable))
+    ).resolve()
+    if not resolved_base_python.is_file():
+        raise ProductionReleaseRequired("Base Python executable is missing")
     return {
         "schema_version": "mso-production-release-v1",
         "git_sha": git_sha,
@@ -166,6 +182,15 @@ def build_release_manifest(
         "scheduler_safety_helper_sha256": sha256_file(
             release / "lib" / "scheduler_safety.ps1"
         ),
+        "job_object_helper_sha256": sha256_file(release / "lib" / "job_object.ps1"),
+        "runtime_process_helper_sha256": sha256_file(
+            release / "lib" / "runtime_process.ps1"
+        ),
+        "safe_stop_sha256": sha256_file(release / "stop_runtime.ps1"),
+        "base_python_path": str(resolved_base_python),
+        "base_python_sha256": sha256_file(resolved_base_python),
+        "job_object_ownership": "JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE",
+        "child_creation_order": "CREATE_SUSPENDED_ASSIGN_JOB_RESUME_THREAD",
         "minimum_windows_powershell_version": "5.1",
         "tested_shells": tested_shells,
         "tested_powershell_editions": sorted(
@@ -191,6 +216,7 @@ def main() -> None:
     parser.add_argument("--release-version")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--tested-shell", action="append", default=[])
+    parser.add_argument("--base-python", type=Path)
     args = parser.parse_args()
     if args.verify_release:
         manifest = load_release_manifest(required=True)
@@ -215,6 +241,7 @@ def main() -> None:
         git_sha=args.git_sha,
         release_version=args.release_version,
         tested_shells=args.tested_shell,
+        base_python=args.base_python,
     )
     args.output.write_bytes(canonical_json(payload))
 
