@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import os
+import sys
 from pathlib import Path
 from typing import Any, cast
 
@@ -8,7 +10,19 @@ SCHEMA_SUFFIX = ".schema.json"
 
 
 def repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+    candidates = []
+    if release_root := os.environ.get("MSO_RELEASE_ROOT"):
+        candidates.append(Path(release_root).resolve())
+    candidates.extend(
+        (
+            Path(__file__).resolve().parents[2],
+            Path(sys.prefix).resolve().parent,
+        )
+    )
+    for candidate in candidates:
+        if (candidate / "schemas").is_dir():
+            return candidate
+    return candidates[0]
 
 
 def schema_path(name: str, root: Path | None = None) -> Path:

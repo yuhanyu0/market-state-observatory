@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from market_state_observatory import schemas
 from market_state_observatory.analysis.candidate_stack import (
     EpisodeObservation,
     build_direction_candidates,
@@ -65,6 +66,26 @@ def test_execution_modes_fail_closed() -> None:
         authorize_mode(ExecutionMode.MODEL_SHADOW)
     with pytest.raises(AuthorizationError, match="unavailable"):
         authorize_mode(ExecutionMode.PAPER_LIVE)
+
+
+def test_schema_root_resolves_frozen_release_layout(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    release = tmp_path / "release"
+    (release / "schemas").mkdir(parents=True)
+    installed_module = (
+        release
+        / "venv"
+        / "Lib"
+        / "site-packages"
+        / "market_state_observatory"
+        / "schemas.py"
+    )
+    monkeypatch.delenv("MSO_RELEASE_ROOT", raising=False)
+    monkeypatch.setattr(schemas, "__file__", str(installed_module))
+    monkeypatch.setattr(schemas.sys, "prefix", str(release / "venv"))
+
+    assert schemas.repo_root() == release
 
 
 def test_818_acceptance_report_is_blocked_and_descriptive(tmp_path: Path) -> None:
