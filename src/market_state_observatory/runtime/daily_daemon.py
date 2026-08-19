@@ -292,6 +292,8 @@ async def run_session(mode: str, dry_run: bool = False) -> int:
         archive = AlpacaStreamArchive(
             run_directory / "raw" / "websocket",
             run_directory / "manifests" / "websocket",
+            release_version=str(run["release_version"]),
+            run_id=str(run["run_id"]),
         )
         stream_task = asyncio.create_task(archive.run(symbols=symbols, stop=stop))
         heartbeat_stop = asyncio.Event()

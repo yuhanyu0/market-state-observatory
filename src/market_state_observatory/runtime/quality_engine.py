@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
 from .market_calendar import schedule_as_utc
 from .observation_freezer import canonical_json, write_exclusive
+from .websocket_incidents import read_connection_events
 
 CORE_POINTS = (
     "open_snapshot",
@@ -39,7 +40,7 @@ def _quote_ready(row: dict[str, Any]) -> bool:
 
 def _quote_age(row: dict[str, Any]) -> float | None:
     quote = row.get("quote")
-    if isinstance(quote, dict) and quote.get("status") == "READY":
+    if isinstance(quote, dict):
         value = quote.get("freshness_age_seconds")
         return float(value) if value is not None else None
     value = row.get("quote_age_seconds")
@@ -105,7 +106,19 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
     trade_ready = sum(_trade_ready(row) for row in core_rows)
     bar_ready = sum(_bar_ready(row) for row in core_rows)
     vwap_ready = sum(_vwap_ready(row) for row in core_rows)
-    quote_ages = [age for row in core_rows if (age := _quote_age(row)) is not None]
+    observed_quote_ages = [age for row in core_rows if (age := _quote_age(row)) is not None]
+    ready_quote_ages = [
+        age
+        for row in core_rows
+        if _quote_ready(row) and (age := _quote_age(row)) is not None
+    ]
+    stale_quote_count_by_point = {
+        point: sum(
+            row.get("quote", {}).get("status") == "STALE"
+            for row in payload.get("symbols", [])
+        )
+        for point, payload in by_point.items()
+    }
     future_timestamps = sum(int(payload.get("future_timestamp_count", 0)) for payload in points)
     backfill_count = sum(int(bool(payload.get("backfilled", False))) for payload in points)
     freeze_durations = {
@@ -197,7 +210,29 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
         )
 
     observation_capture_rate = _rate(captured, planned)
-    max_quote_age = max(quote_ages) if quote_ages else None
+    observed_quote_age_max = max(observed_quote_ages) if observed_quote_ages else None
+    ready_quote_age_max = max(ready_quote_ages) if ready_quote_ages else None
+    incident_path = run_directory / "manifests" / "websocket" / "WEBSOCKET_CONNECTION_EVENTS.ndjson"
+    connection_events = read_connection_events(incident_path)
+    completed_gaps = [
+        row
+        for row in connection_events
+        if row.get("gap_duration_seconds") is not None
+    ]
+    gap_overlap_by_point: dict[str, bool] = {}
+    for point, payload in by_point.items():
+        scheduled = payload.get("scheduled_at_utc")
+        if not scheduled:
+            gap_overlap_by_point[point] = False
+            continue
+        instant = datetime.fromisoformat(str(scheduled).replace("Z", "+00:00"))
+        gap_overlap_by_point[point] = any(
+            datetime.fromisoformat(str(row["gap_started_at_utc"]).replace("Z", "+00:00"))
+            <= instant
+            <= datetime.fromisoformat(str(row["gap_ended_at_utc"]).replace("Z", "+00:00"))
+            for row in completed_gaps
+            if row.get("gap_started_at_utc") and row.get("gap_ended_at_utc")
+        )
     required_points_present = all(point in by_point for point in CORE_POINTS)
     schedule = dict(schedule_as_utc(date.fromisoformat(str(run["trading_date"]))))
     timeline = [
@@ -213,8 +248,8 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
         required_points_present
         and observation_capture_rate >= 0.95
         and all(theme["direction_ready"] for theme in theme_quality)
-        and max_quote_age is not None
-        and max_quote_age <= 60
+        and ready_quote_age_max is not None
+        and ready_quote_age_max <= 60
         and future_timestamps == 0
         and backfill_count == 0
     )
@@ -255,7 +290,16 @@ def evaluate_run_quality(run_directory: Path, universe: dict[str, Any]) -> dict[
         "bar_ready_rate": _rate(bar_ready, planned),
         "vwap_ready_rate": _rate(vwap_ready, planned),
         "capture_rate": observation_capture_rate,
-        "quote_age_seconds_max": max_quote_age,
+        "quote_age_seconds_max": ready_quote_age_max,
+        "observed_quote_age_max": observed_quote_age_max,
+        "ready_quote_age_max": ready_quote_age_max,
+        "stale_quote_count_by_point": stale_quote_count_by_point,
+        "connection_gap_count": len(completed_gaps),
+        "connection_gap_seconds_max": max(
+            (float(row["gap_duration_seconds"]) for row in completed_gaps),
+            default=None,
+        ),
+        "connection_gap_overlap_by_observation_point": gap_overlap_by_point,
         "future_timestamp_count": future_timestamps,
         "backfill_count": backfill_count,
         "websocket_reconnect_count": int(stream_health.get("reconnect_count", 0)),

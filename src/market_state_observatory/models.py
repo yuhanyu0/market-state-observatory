@@ -7,7 +7,6 @@ DecisionStatus = Literal[
     "DATA_BLOCKED_NO_DECISION",
     "WAIT",
     "MODEL_SHADOW_ONLY",
-    "PAPER_ELIGIBLE",
 ]
 
 

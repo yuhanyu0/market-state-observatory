@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/websocket_connection_event.schema.json",
+  "title": "WebSocketConnectionEventV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "event_id", "event_time_utc", "observed_at_utc", "event_type", "safe_exception_type", "safe_close_code", "safe_reason_hash", "reconnect_attempt_number", "gap_started_at_utc", "gap_ended_at_utc", "gap_duration_seconds", "last_message_before_gap", "first_message_after_gap", "symbols_seen_after_reconnect", "release_version", "run_id"],
+  "properties": {
+    "schema_version": {"const": "mso-websocket-connection-event-v1"}, "event_id": {"type": "string"},
+    "event_time_utc": {"type": "string", "format": "date-time"}, "observed_at_utc": {"type": "string", "format": "date-time"},
+    "event_type": {"enum": ["connecting", "authenticated", "subscribed", "disconnected", "timeout", "exception", "reconnect_scheduled", "reconnect_attempt", "reauthenticated", "resubscribed", "first_message_after_reconnect", "connection_closed"]},
+    "safe_exception_type": {"type": ["string", "null"]}, "safe_close_code": {"type": ["integer", "string", "null"]}, "safe_reason_hash": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+    "reconnect_attempt_number": {"type": ["integer", "null"], "minimum": 0}, "gap_started_at_utc": {"type": ["string", "null"], "format": "date-time"}, "gap_ended_at_utc": {"type": ["string", "null"], "format": "date-time"},
+    "gap_duration_seconds": {"type": ["number", "null"], "minimum": 0}, "last_message_before_gap": {"type": ["string", "null"], "format": "date-time"}, "first_message_after_gap": {"type": ["string", "null"], "format": "date-time"},
+    "symbols_seen_after_reconnect": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}, "release_version": {"type": "string"}, "run_id": {"type": "string"}
+  }
+}

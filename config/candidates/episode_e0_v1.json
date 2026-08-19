@@ -1,0 +1,6 @@
+{
+  "arm": "E0_INTERPRETABLE_STATE_MACHINE",
+  "minimum_history": 3,
+  "sequential_only": true,
+  "version": "episode-e0-v1"
+}

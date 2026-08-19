@@ -1,5 +1,7 @@
 # Market State Observatory
 
+> Development candidate: `v0.5.0-rc1` Observation-to-Decision Foundation. The active capture runtime remains frozen at `v0.4.5`.
+
 **Auditable evidence-state infrastructure for incomplete market observers.**
 
 Market State Observatory is an independent public research product. It does **not** replace or modify
@@ -105,6 +107,19 @@ Private operator state is available only on loopback:
 ```powershell
 .\ops\windows\run_operator_console.ps1
 ```
+
+## Private completed-run analysis
+
+The release candidate can build a deterministic sidecar without modifying its source run:
+
+```powershell
+python -m market_state_observatory build-daily-report `
+  --run C:\path\to\completed-run `
+  --output C:\private\analysis\run-id `
+  --mode OBSERVATION_ONLY
+```
+
+`CANDIDATE_REPLAY` is retrospective and unvalidated. `MODEL_SHADOW` requires a separate promotion artifact, and paper/live execution remains unavailable. See [`OBSERVATION_TO_DECISION_FOUNDATION.md`](OBSERVATION_TO_DECISION_FOUNDATION.md).
 
 ## Validation
 

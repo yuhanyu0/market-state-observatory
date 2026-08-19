@@ -6,8 +6,11 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
+from .analysis.daily_report import build_daily_report
+from .analysis.experiment_runner import write_default_registry
 from .disagreement import detect_conflicts
 from .evidence_graph import build_evidence_graph
+from .execution_modes import ExecutionMode
 from .experiments import run_synthetic_demo
 from .models import ObserverEstimate
 from .next_probe import recommend_next_probe
@@ -126,6 +129,19 @@ def build_parser() -> argparse.ArgumentParser:
     serve.add_argument("--site", type=Path, default=Path("dist/web"))
     serve.add_argument("--port", type=int, default=8000)
 
+    daily_report = sub.add_parser("build-daily-report")
+    daily_report.add_argument("--run", type=Path, required=True)
+    daily_report.add_argument("--output", type=Path, required=True)
+    daily_report.add_argument(
+        "--mode",
+        choices=[ExecutionMode.OBSERVATION_ONLY.value, ExecutionMode.CANDIDATE_REPLAY.value],
+        default=ExecutionMode.OBSERVATION_ONLY.value,
+    )
+
+    registry = sub.add_parser("register-candidate-experiments")
+    registry.add_argument("--output", type=Path, required=True)
+    registry.add_argument("--registered-at-utc", required=True)
+
     return parser
 
 
@@ -186,3 +202,8 @@ def main() -> None:
         print(json.dumps({"status": summary["status"], "scenario_count": summary["scenario_count"], "real_orders_created": 0}))
     elif args.command == "serve-site":
         _serve(args.site.resolve(), args.port)
+    elif args.command == "build-daily-report":
+        print(json.dumps(build_daily_report(args.run, args.output, mode=args.mode), sort_keys=True))
+    elif args.command == "register-candidate-experiments":
+        rows = write_default_registry(args.output, registered_at_utc=args.registered_at_utc)
+        print(json.dumps({"status": "REGISTERED", "arms": len(rows), "output": str(args.output)}, sort_keys=True))

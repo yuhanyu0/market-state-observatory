@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/observation_report.schema.json",
+  "title": "ObservationReportV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "trading_date", "release_version", "experiment_lane", "headline", "execution_mode", "evidence_grade", "sections"],
+  "properties": {
+    "schema_version": {"const": "mso-observation-report-v1"},
+    "run_id": {"type": "string"},
+    "trading_date": {"type": "string", "format": "date"},
+    "release_version": {"type": "string"},
+    "experiment_lane": {"type": "string"},
+    "headline": {"type": "string"},
+    "execution_mode": {"enum": ["OBSERVATION_ONLY", "CANDIDATE_REPLAY", "MODEL_SHADOW"]},
+    "evidence_grade": {"type": "string"},
+    "sections": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["A_evidence_validity", "B_observed_market_facts", "C_descriptive_theme_structure", "D_candidate_inference_status", "E_unknown_blocked_claims", "F_next_useful_observation", "G_system_health", "H_authorization_boundary"],
+      "properties": {
+        "A_evidence_validity": {"type": "object"},
+        "B_observed_market_facts": {"type": "object"},
+        "C_descriptive_theme_structure": {"type": "object"},
+        "D_candidate_inference_status": {"type": "object"},
+        "E_unknown_blocked_claims": {"type": "array", "items": {"type": "string"}},
+        "F_next_useful_observation": {"type": "string"},
+        "G_system_health": {"type": "object"},
+        "H_authorization_boundary": {"type": "object"}
+      }
+    }
+  }
+}

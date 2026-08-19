@@ -1,0 +1,19 @@
+{
+  "schema_version": "mso-experiment-protocol-v1",
+  "arms": ["D0", "D1", "D2", "D1+T", "D1+T+E0", "D1+T+E1", "D1+T+E+P"],
+  "authorization": "RETROSPECTIVE_REPLAY_ONLY",
+  "frozen_at_utc": "2026-08-19T19:00:00+00:00",
+  "strict_as_of": true,
+  "split": "nested_expanding_walk_forward",
+  "purge_observations": 1,
+  "embargo_observations": 1,
+  "threshold_selection": "train_only",
+  "bootstraps": ["theme_clustered", "time_block", "episode_clustered"],
+  "metrics": ["brier_score", "log_loss", "signed_accuracy", "conditional_return", "drawdown", "turnover", "coverage", "concentration"],
+  "cost_grid_bps": [0, 5, 10, 15, 25, 50],
+  "rehearsal_dates_count_as_official_strategy_evidence": false,
+  "validated_model": false,
+  "decision_eligible": false,
+  "paper_positions_allowed": false,
+  "real_orders_allowed": false
+}

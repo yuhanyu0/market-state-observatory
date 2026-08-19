@@ -36,7 +36,7 @@ if (Test-Path -LiteralPath $releaseRoot) { throw "Immutable release already exis
 if (Test-Path -LiteralPath $staging) { throw "Stale release staging exists: $staging" }
 
 try {
-    New-Item -ItemType Directory -Path $staging,(Join-Path $staging 'wheel'),(Join-Path $staging 'config'),(Join-Path $staging 'schemas'),(Join-Path $staging 'frozen'),(Join-Path $staging 'lib') | Out-Null
+    New-Item -ItemType Directory -Path $staging,(Join-Path $staging 'wheel'),(Join-Path $staging 'config'),(Join-Path $staging 'config\candidates'),(Join-Path $staging 'schemas'),(Join-Path $staging 'frozen'),(Join-Path $staging 'lib') | Out-Null
     & $PythonExecutable -m build --wheel --outdir (Join-Path $staging 'wheel') $repository
     if ($LASTEXITCODE -ne 0) { throw 'Wheel build failed.' }
     $wheels = @(Get-ChildItem (Join-Path $staging 'wheel') -Filter *.whl -File)
@@ -49,9 +49,12 @@ try {
     (& $releasePython -m pip freeze | Sort-Object) | Set-Content -LiteralPath (Join-Path $staging 'dependency.lock') -Encoding ascii
     Copy-Item (Join-Path $repository 'config\runtime_universe_v1.json') (Join-Path $staging 'frozen\runtime_universe_v1.json')
     Copy-Item (Join-Path $repository 'config\publication_policy.yml') (Join-Path $staging 'config\publication_policy.yml')
+    Copy-Item (Join-Path $repository 'config\candidates\*.json') (Join-Path $staging 'config\candidates')
+    Copy-Item (Join-Path $repository 'config\experiment_protocol_v1.json') (Join-Path $staging 'config\experiment_protocol_v1.json')
     Copy-Item (Join-Path $repository 'schemas\*.json') (Join-Path $staging 'schemas')
     Copy-Item (Join-Path $PSScriptRoot 'runtime_release_launcher.ps1') (Join-Path $staging 'runtime_release_launcher.ps1')
     Copy-Item (Join-Path $PSScriptRoot 'stop_runtime.ps1') (Join-Path $staging 'stop_runtime.ps1')
+    Copy-Item (Join-Path $PSScriptRoot 'run_daily_report.ps1') (Join-Path $staging 'run_daily_report.ps1')
     Copy-Item (Join-Path $PSScriptRoot 'lib\process_compat.ps1') (Join-Path $staging 'lib\process_compat.ps1')
     Copy-Item (Join-Path $PSScriptRoot 'lib\scheduler_safety.ps1') (Join-Path $staging 'lib\scheduler_safety.ps1')
     Copy-Item (Join-Path $PSScriptRoot 'lib\job_object.ps1') (Join-Path $staging 'lib\job_object.ps1')

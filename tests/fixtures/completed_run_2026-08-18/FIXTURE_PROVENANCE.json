@@ -1,0 +1,101 @@
+{
+  "artifacts": [
+    {
+      "included": true,
+      "relative_path": "manifests/points/decision_snapshot.json",
+      "source_sha256": "600933db6aaa74d5a73c4f682a451bc1a9ee07e046bc3c214451c0e9c5a25f69"
+    },
+    {
+      "included": true,
+      "relative_path": "manifests/points/midpoint_snapshot.json",
+      "source_sha256": "f3455534a4a01a6af5df686966f6eeffb9f155d2175ff6dec7752079377de54e"
+    },
+    {
+      "included": true,
+      "relative_path": "manifests/points/next_10_00.json",
+      "source_sha256": "1e3d5ab9c9c0b43bd5ad1872321d29d24f9093bfe6493b49a75c6698309639e3"
+    },
+    {
+      "included": true,
+      "relative_path": "manifests/points/open_snapshot.json",
+      "source_sha256": "e58396c8f71ba9160072d3693c5742ff5c886fe94b0f7d77b7db42c769553070"
+    },
+    {
+      "included": true,
+      "relative_path": "manifests/points/preclose_snapshot.json",
+      "source_sha256": "21737228ad3097ed82da4c03bf4602bd3f39cc6ee3f3030114ef57385ee0894b"
+    },
+    {
+      "included": true,
+      "relative_path": "manifests/points/session_close_diagnostic.json",
+      "source_sha256": "bc69c623e15029c724f67974e82b78ac20f1fc41921b42943408c0de658fa12c"
+    },
+    {
+      "included": true,
+      "relative_path": "manifests/websocket/stream-health-200020787214.json",
+      "source_sha256": "112cce1ea8427abcc2f98acc4bc719df04f1e82e263432bc56fa98602dc651cd"
+    },
+    {
+      "included": true,
+      "relative_path": "quality/DATA_QUALITY.json",
+      "source_sha256": "646a79b5e2b00f7d55fab52f88181c3b32ea25a83b78a3df512eaa62f2ad102d"
+    },
+    {
+      "included": false,
+      "relative_path": "raw/websocket/stream-20260818T13.ndjson.zst",
+      "source_sha256": "43b293f673dc34b09b36d049624b0e1f133a455b519d1b1f53c92146ac214e1d"
+    },
+    {
+      "included": false,
+      "relative_path": "raw/websocket/stream-20260818T14.ndjson.zst",
+      "source_sha256": "6433306cb82a4ff3c6b639cc38f7df1483c6561c5df7b970c529ace518243e8f"
+    },
+    {
+      "included": false,
+      "relative_path": "raw/websocket/stream-20260818T15.ndjson.zst",
+      "source_sha256": "3fd6d55cc2b5a691595508b0742aa216e12d686815c749e6c4cf4050c079f947"
+    },
+    {
+      "included": false,
+      "relative_path": "raw/websocket/stream-20260818T16.ndjson.zst",
+      "source_sha256": "7e4eb59bb6ff6eae5320ce0cb44cd2a099cd69e60dd5d5e8b7841b77c3fb2cae"
+    },
+    {
+      "included": false,
+      "relative_path": "raw/websocket/stream-20260818T17.ndjson.zst",
+      "source_sha256": "7986c85e0b324e15459e95a29609ab2ad9943f3dc1e141d46ec5230bbc6bcdde"
+    },
+    {
+      "included": false,
+      "relative_path": "raw/websocket/stream-20260818T18.ndjson.zst",
+      "source_sha256": "0187d186af97f4e35f7105fef7a7613d8a2001b0d98360499f375c09565330a8"
+    },
+    {
+      "included": false,
+      "relative_path": "raw/websocket/stream-20260818T19.ndjson.zst",
+      "source_sha256": "955178217bfb6772445bded8c6605d2f59d74f9d4b86bee6c86017e1d0397a1f"
+    },
+    {
+      "included": false,
+      "relative_path": "raw/websocket/stream-20260818T20.ndjson.zst",
+      "source_sha256": "0a228622a6581ed37d4a95b61c2609a6f10e8c9b84ebfa3b1d0611d81bb9ad5b"
+    },
+    {
+      "included": true,
+      "relative_path": "reference/membership_snapshot.json",
+      "source_sha256": "efbeacb1adc8240ae33e63450fe43bbc88b8e41ff7698f670278a4fa1d7516ac"
+    },
+    {
+      "included": true,
+      "relative_path": "RUN.json",
+      "source_sha256": "62b5b3261a4749b77ba0e15ee68b62ce210418c23aa6c4e3ec08bf381507b66e"
+    }
+  ],
+  "fixture_redactions": [
+    "base_python_path",
+    "wheel_file"
+  ],
+  "schema_version": "mso-acceptance-fixture-v1",
+  "source_path_private": true,
+  "source_run_id": "2026-08-18-b17ddccc6b2c"
+}

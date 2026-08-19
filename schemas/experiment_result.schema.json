@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/experiment_result.schema.json", "title": "ExperimentResultV1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "experiment_id", "arm", "manifest_sha256", "evidence_grade", "metrics", "failure_slices", "validated_model", "decision_eligible", "paper_positions", "real_orders"],
+  "properties": {"schema_version": {"const": "mso-experiment-result-v1"}, "experiment_id": {"type": "string"}, "arm": {"type": "string"}, "manifest_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "evidence_grade": {"type": "string"}, "metrics": {"type": "object"}, "failure_slices": {"type": "array"}, "validated_model": {"const": false}, "decision_eligible": {"const": false}, "paper_positions": {"const": 0}, "real_orders": {"const": 0}}
+}

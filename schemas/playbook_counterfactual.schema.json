@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/playbook_counterfactual.schema.json", "title": "PlaybookCounterfactualV1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "counterfactual_id", "run_id", "theme_id", "as_of_utc", "playbook", "previous_certificate_status", "currently_held_counterfactual", "state_transition", "reason", "invalidation", "vehicle_eligibility_candidate", "torque_disqualification_reason", "counterfactual_only", "model_shadow_authorized", "paper_positions", "real_orders"],
+  "properties": {
+    "schema_version": {"const": "mso-playbook-counterfactual-v1"}, "counterfactual_id": {"type": "string"}, "run_id": {"type": "string"}, "theme_id": {"type": "string"}, "as_of_utc": {"type": "string", "format": "date-time"}, "playbook": {"enum": ["A_transition_breakout", "B_retest_continuation", "D_wait_unresolved", "F_overextended_no_chase", "NoScript"]}, "previous_certificate_status": {"type": ["string", "null"]}, "currently_held_counterfactual": {"type": "boolean"}, "state_transition": {"enum": ["entry", "hold", "exit", "reduce", "re-entry", "wait"]}, "reason": {"type": "string"}, "invalidation": {"type": "array", "items": {"type": "string"}}, "vehicle_eligibility_candidate": {"type": "object", "additionalProperties": {"type": "boolean"}}, "torque_disqualification_reason": {"type": "string"}, "counterfactual_only": {"const": true}, "model_shadow_authorized": {"const": false}, "paper_positions": {"const": 0}, "real_orders": {"const": 0}
+  }
+}

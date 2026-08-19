@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/direction_candidate.schema.json", "title": "DirectionCandidateV1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "candidate_id", "arm", "config_version", "config_sha256", "theme_id", "as_of_utc", "candidate_state", "calibration_status", "data_ready", "candidate_estimated", "validated_model", "decision_eligible", "score", "probability_positive", "uncertainty", "inputs", "blocking_reasons", "invalidation", "evidence_grade"],
+  "properties": {
+    "schema_version": {"const": "mso-direction-candidate-v1"}, "candidate_id": {"type": "string"}, "arm": {"enum": ["D0_SIMPLE_RELATIVE", "D1_TRANSPARENT_MULTI_FEATURE", "D2_CALIBRATED_PROBABILISTIC"]}, "config_version": {"type": "string"}, "config_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "theme_id": {"type": "string"}, "as_of_utc": {"type": "string", "format": "date-time"},
+    "candidate_state": {"enum": ["positive", "negative", "unresolved"]}, "calibration_status": {"enum": ["NOT_CALIBRATED", "CALIBRATING", "CALIBRATED"]}, "data_ready": {"type": "boolean"}, "candidate_estimated": {"type": "boolean"}, "validated_model": {"const": false}, "decision_eligible": {"const": false},
+    "score": {"type": ["number", "null"]}, "probability_positive": {"type": ["number", "null"], "minimum": 0, "maximum": 1}, "uncertainty": {"type": ["number", "null"], "minimum": 0, "maximum": 1}, "inputs": {"type": "object"}, "blocking_reasons": {"type": "array", "items": {"type": "string"}}, "invalidation": {"type": "array", "items": {"type": "string"}}, "evidence_grade": {"const": "retrospective_unvalidated"}
+  }
+}

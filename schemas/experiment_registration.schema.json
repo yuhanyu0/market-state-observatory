@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/experiment_registration.schema.json", "title": "ExperimentRegistrationV1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "experiment_id", "arm", "registered_at_utc", "manifest_sha256", "strict_as_of", "frozen_folds", "rehearsal_is_official_evidence", "status", "paper_positions_allowed", "real_orders_allowed"],
+  "properties": {"schema_version": {"const": "mso-experiment-registration-v1"}, "experiment_id": {"type": "string"}, "arm": {"enum": ["D0", "D1", "D2", "D1+T", "D1+T+E0", "D1+T+E1", "D1+T+E+P"]}, "registered_at_utc": {"type": "string", "format": "date-time"}, "manifest_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "strict_as_of": {"const": true}, "frozen_folds": {"type": "array"}, "rehearsal_is_official_evidence": {"const": false}, "status": {"enum": ["REGISTERED", "REPLAY_ONLY", "BLOCKED"]}, "paper_positions_allowed": {"const": false}, "real_orders_allowed": {"const": false}}
+}

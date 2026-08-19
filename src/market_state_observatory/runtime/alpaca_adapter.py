@@ -366,18 +366,23 @@ class AlpacaSIPAdapter:
         on_message: Callable[[dict[str, Any], bytes], Awaitable[None]],
         stop: asyncio.Event,
         on_connection_state: Callable[[bool], None] | None = None,
+        on_connection_event: Callable[[str, BaseException | None], None] | None = None,
     ) -> None:
         key_id, secret = require_child_process_credentials()
         symbol_list = sorted(set(symbols))
         delay = 1.0
         while not stop.is_set():
             try:
+                if on_connection_event is not None:
+                    on_connection_event("connecting" if self.reconnect_count == 0 else "reconnect_attempt", None)
                 async with websockets.connect(STREAM_ENDPOINT) as websocket:
                     await websocket.send(json.dumps({"action": "auth", "key": key_id, "secret": secret}))
                     auth_raw = await websocket.recv()
                     auth = json.loads(auth_raw)
                     if not any(row.get("T") == "success" for row in auth):
                         raise ProviderError("Alpaca SIP WebSocket authentication failed")
+                    if on_connection_event is not None:
+                        on_connection_event("authenticated" if self.reconnect_count == 0 else "reauthenticated", None)
                     await websocket.send(
                         json.dumps(
                             {
@@ -389,6 +394,8 @@ class AlpacaSIPAdapter:
                         )
                     )
                     self.websocket_connected = True
+                    if on_connection_event is not None:
+                        on_connection_event("subscribed" if self.reconnect_count == 0 else "resubscribed", None)
                     if on_connection_state is not None:
                         on_connection_state(True)
                     delay = 1.0
@@ -403,20 +410,33 @@ class AlpacaSIPAdapter:
                                 await on_message(item, raw_bytes)
             except TimeoutError:
                 self.websocket_connected = False
+                if on_connection_event is not None:
+                    on_connection_event("timeout", None)
                 if on_connection_state is not None:
                     on_connection_state(False)
+                self.reconnect_count += 1
+                if on_connection_event is not None:
+                    on_connection_event("reconnect_scheduled", None)
+                await asyncio.sleep(delay)
+                delay = min(delay * 2, 60.0)
                 continue
             except Exception as error:
                 self.websocket_connected = False
+                if on_connection_event is not None:
+                    on_connection_event("exception", error)
                 if on_connection_state is not None:
                     on_connection_state(False)
                 if stop.is_set():
                     return
                 self.reconnect_count += 1
+                if on_connection_event is not None:
+                    on_connection_event("reconnect_scheduled", None)
                 await asyncio.sleep(delay)
                 delay = min(delay * 2, 60.0)
                 if isinstance(error, ProviderError) and "authentication" in str(error):
                     raise
         self.websocket_connected = False
+        if on_connection_event is not None:
+            on_connection_event("connection_closed", None)
         if on_connection_state is not None:
             on_connection_state(False)

@@ -50,16 +50,46 @@ def _scheduler_status() -> dict[str, object]:
 
 def operator_state(paths: RuntimePaths) -> dict[str, Any]:
     runtime_status = _load_json(_latest_file(paths.operator, "runtime_status*.json")) or {}
-    quality_path = _latest_file(paths.data_shadow, "DATA_QUALITY.json")
+    quality_candidates = [
+        path
+        for root in (paths.data_shadow, paths.observations)
+        if root.exists()
+        for path in root.rglob("DATA_QUALITY.json")
+    ]
+    quality_path = max(quality_candidates, key=lambda path: path.stat().st_mtime) if quality_candidates else None
+    report_path = _latest_file(paths.root / "analysis", "OBSERVATION_REPORT.json")
+    incident_path = _latest_file(paths.root / "analysis", "INCIDENT_SUMMARY.json")
+    report = _load_json(report_path) or {}
+    quality = _load_json(quality_path) or {}
     process_state = process_truth(paths.operator)
+    formal_quality = [
+        _load_json(path) or {}
+        for path in paths.data_shadow.rglob("DATA_QUALITY.json")
+    ] if paths.data_shadow.exists() else []
+    rehearsal_quality = [
+        _load_json(path) or {}
+        for path in paths.observations.rglob("DATA_QUALITY.json")
+    ] if paths.observations.exists() else []
     return {
-        "schema_version": "mso-private-operator-state-v1",
+        "schema_version": "mso-private-operator-state-v2",
         "observed_at_utc": datetime.now(UTC).isoformat(),
         "scheduler": _scheduler_status(),
         "runtime": runtime_status,
         "runtime_process": process_state,
-        "current_quality": _load_json(quality_path),
+        "current_quality": quality or None,
         "current_quality_path": str(quality_path) if quality_path else None,
+        "latest_completed_run_date": quality.get("trading_date"),
+        "latest_completed_run_id": quality.get("run_id"),
+        "latest_report": report or None,
+        "latest_report_path": str(report_path) if report_path else None,
+        "latest_incidents": _load_json(incident_path),
+        "candidate_authorization": "CANDIDATE_ONLY_NOT_VALIDATED",
+        "soak_progress": {
+            "rehearsal_completed": len(rehearsal_quality),
+            "formal_valid_days": sum(bool(row.get("counts_toward_20_day_gate")) for row in formal_quality),
+            "formal_required_days": 20,
+        },
+        "model_shadow_status": "NOT_AUTHORIZED",
         "alerts": load_recent_alerts(paths.alerts),
         "logs": [str(path) for path in sorted(paths.logs.glob("*"), reverse=True)[:25]],
         "private_lineage": [
@@ -115,15 +145,31 @@ def retry_publication(paths: RuntimePaths) -> str:
     return "PUBLICATION_RETRY_COMPLETE"
 
 
-HTML = """<!doctype html><html><head><meta charset='utf-8'><title>MSO Operator</title>
-<style>body{font:14px system-ui;margin:24px;max-width:1200px;color:#17202a}button{margin-right:8px;padding:8px 12px}
-pre{background:#f4f6f7;padding:16px;overflow:auto;border:1px solid #ccd1d1}</style></head><body>
-<h1>Private Operator Console</h1><p>Localhost only. Private runtime state is never published.</p>
-<button onclick="act('/api/retry-quality')">Re-run quality</button><button onclick="act('/api/retry-publication')">Retry publication</button><button onclick="load()">Refresh</button>
-<pre id='state'>Loading</pre><script>async function load(){const r=await fetch('/api/status');
-document.querySelector('#state').textContent=JSON.stringify(await r.json(),null,2)}
-async function act(p){const r=await fetch(p,{method:'POST'});alert(JSON.stringify(await r.json()));load()}load()</script>
-</body></html>"""
+HTML = """<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>MSO Private Operator</title>
+<style>:root{color-scheme:light;--ink:#13221d;--muted:#607069;--line:#d9e1dd;--paper:#f7f9f8;--accent:#1e6650;--bad:#9d2f2f;--warn:#8a5b05}*{box-sizing:border-box}body{margin:0;font:14px system-ui;color:var(--ink);background:#fff}header{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:2}header h1{font-size:17px;margin:0}nav{display:flex;gap:4px;overflow:auto;padding:10px 20px;border-bottom:1px solid var(--line)}nav button{white-space:nowrap;border:0;background:transparent;padding:8px 10px;color:var(--muted)}nav button[aria-pressed=true]{color:var(--accent);border-bottom:2px solid var(--accent)}main{max-width:1220px;margin:auto;padding:24px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card{min-width:0;border:1px solid var(--line);padding:14px;background:#fff}.card h2{font-size:13px;color:var(--muted);margin:0 0 10px}.value{font-size:21px;font-weight:650;overflow-wrap:anywhere}.badge{display:inline-block;font-size:11px;font-weight:700;border:1px solid currentColor;padding:3px 6px;margin:2px 4px 2px 0}.observed{color:#245f4c}.candidate{color:#705400}.blocked{color:var(--bad)}.disabled{color:#68736e}section[hidden]{display:none}.themes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}pre{background:var(--paper);padding:14px;overflow:auto;border:1px solid var(--line);max-height:60vh}.toolbar{display:flex;gap:8px;margin:14px 0}.toolbar button{padding:8px 11px;border:1px solid var(--line);background:#fff}.reason{color:var(--bad);font-weight:650}.skip{position:absolute;left:-9999px}.skip:focus{left:10px;top:10px;background:#fff;padding:8px;z-index:10}@media(max-width:760px){header{align-items:flex-start}.grid,.themes{grid-template-columns:1fr 1fr}main{padding:16px}}@media(max-width:460px){.grid,.themes{grid-template-columns:1fr}}</style></head><body>
+<a class='skip' href='#content'>Skip to content</a><header><h1>Market State Observatory <span class='badge candidate'>PRIVATE OPERATOR</span></h1><span class='private'>127.0.0.1 only</span></header>
+<nav aria-label='Operator pages' id='nav'></nav><main id='content' tabindex='-1'><div id='loading' role='status'>Loading private evidence</div><div id='app' hidden></div></main>
+<script>
+const pages=['Today','Yesterday','Themes','Observation Report','State Certificates','Evidence','Incidents','Experiments','Promotion Gates','Settings'];let state;
+function esc(v){return String(v??'not available').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function badge(label,kind='disabled'){return `<span class="badge ${kind}">${esc(label)}</span>`}
+function card(title,value,detail=''){return `<article class="card"><h2>${esc(title)}</h2><div class="value">${esc(value)}</div><p>${esc(detail)}</p></article>`}
+function themes(){const rows=state.latest_report?.sections?.C_descriptive_theme_structure?.themes||[];return `<div class="themes">${rows.map(t=>`<article class="card"><h2>${esc(t.display_name)} · ${esc(t.theme_etf)}</h2>${badge('OBSERVED','observed')} ${badge(t.candidate_outputs?'CANDIDATE':'DESCRIPTIVE',t.candidate_outputs?'candidate':'observed')} ${t.data_incident_exposure?.decision_quote_stale?badge('DATA_BLOCKED','blocked'):''}<p>${esc((t.descriptive_findings||[]).join(' '))}</p></article>`).join('')}</div>`}
+function render(page){document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-pressed',String(b.textContent===page)));const q=state.current_quality||{},r=state.latest_report||{},inc=state.latest_incidents||{};let html='';
+if(page==='Today')html=`<h2>Latest completed evidence</h2><p class="reason">${esc(r.headline||'NO COMPLETED REPORT')}</p><div class="grid">${card('Run date',state.latest_completed_run_date)}${card('Capture coverage',q.observation_capture_rate==null?'not available':(q.observation_capture_rate*100).toFixed(1)+'%')}${card('Feed health',q.data_quality_pass?'PASS':'BLOCKED')}${card('Reconnect / gap',q.websocket_reconnect_count??'not available',inc.connection_gap_seconds_max==null?'duration unavailable':'max '+inc.connection_gap_seconds_max+'s')}${card('Candidate authorization',state.candidate_authorization)}${card('Soak progress',state.soak_progress.rehearsal_completed+' rehearsals')}${card('Formal progress',state.soak_progress.formal_valid_days+'/'+state.soak_progress.formal_required_days)}${card('Positions / orders','0 / 0')}</div>${themes()}`;
+else if(page==='Themes')html=`<h2>Six-theme descriptive state</h2>${themes()}`;
+else if(page==='Observation Report')html=`<h2>Observation Report</h2>${badge(r.evidence_grade||'NOT AVAILABLE','observed')}<pre>${esc(JSON.stringify(r,null,2))}</pre>`;
+else if(page==='State Certificates')html=`<h2>Candidate certificates</h2><p>All certificates remain retrospective, unvalidated, and decision ineligible.</p>${themes()}`;
+else if(page==='Incidents')html=`<h2>Connection and freshness incidents</h2><pre>${esc(JSON.stringify(inc,null,2))}</pre>`;
+else if(page==='Experiments')html=`<h2>Experiment registry</h2>${badge('REPLAY ONLY','candidate')}${badge('NOT CALIBRATED','candidate')}${badge('MODEL_SHADOW_ONLY','disabled')}${badge('DISABLED','disabled')}<p>Rehearsal dates are excluded from official strategy evidence.</p>`;
+else if(page==='Promotion Gates')html=`<h2>Authorization gates</h2><div class="grid">${card('Formal Data Shadow',state.soak_progress.formal_valid_days+'/'+state.soak_progress.formal_required_days)}${card('Model Shadow',state.model_shadow_status)}${card('Paper / live','UNAVAILABLE')}${card('Positions / orders','0 / 0')}</div>`;
+else if(page==='Settings')html=`<h2>Private settings and controls</h2><div class="toolbar"><button onclick="act('/api/retry-quality')">Re-run quality</button><button onclick="act('/api/retry-publication')">Retry eligible publication</button><button onclick="load()">Refresh</button></div><pre>${esc(JSON.stringify({scheduler:state.scheduler,runtime_process:state.runtime_process,current_quality_path:state.current_quality_path,latest_report_path:state.latest_report_path},null,2))}</pre>`;
+else html=`<h2>${esc(page)}</h2><pre>${esc(JSON.stringify(page==='Evidence'?{quality:q,report_path:state.latest_report_path}:state,null,2))}</pre>`;
+document.querySelector('#app').innerHTML=html}
+async function load(){const response=await fetch('/api/status');state=await response.json();document.querySelector('#loading').hidden=true;document.querySelector('#app').hidden=false;render(location.hash.slice(1)||'Today')}
+async function act(path){const response=await fetch(path,{method:'POST'});const value=await response.json();alert(value.status||value.reason||'complete');await load()}
+const nav=document.querySelector('#nav');pages.forEach(page=>{const b=document.createElement('button');b.textContent=page;b.onclick=()=>{location.hash=page;render(page)};b.setAttribute('aria-pressed','false');nav.appendChild(b)});addEventListener('hashchange',()=>state&&render(decodeURIComponent(location.hash.slice(1))||'Today'));load();
+</script></body></html>"""
 
 
 def make_handler(paths: RuntimePaths) -> type[BaseHTTPRequestHandler]:

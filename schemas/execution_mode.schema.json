@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/execution_mode.schema.json",
+  "title": "ExecutionModeAuthorizationV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["mode", "may_read_completed_runs", "may_run_candidates", "may_run_validated_models", "may_emit_actions", "paper_positions_allowed", "real_orders_allowed", "evidence_grade", "promotion_sha256"],
+  "properties": {
+    "mode": {"enum": ["OBSERVATION_ONLY", "CANDIDATE_REPLAY", "MODEL_SHADOW"]},
+    "may_read_completed_runs": {"type": "boolean"},
+    "may_run_candidates": {"type": "boolean"},
+    "may_run_validated_models": {"type": "boolean"},
+    "may_emit_actions": {"type": "boolean"},
+    "paper_positions_allowed": {"type": "boolean"},
+    "real_orders_allowed": {"const": false},
+    "evidence_grade": {"type": "string"},
+    "promotion_sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}
+  }
+}

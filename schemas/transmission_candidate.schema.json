@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/transmission_candidate.schema.json", "title": "TransmissionCandidateV1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "candidate_id", "arm", "config_version", "config_sha256", "theme_id", "as_of_utc", "transmission_input_readiness", "candidate_transmission_state", "validated_transmission_state", "candidate_estimated", "validated_model", "decision_eligible", "inputs", "blocking_reasons", "uncertainty", "invalidation", "evidence_grade"],
+  "properties": {
+    "schema_version": {"const": "mso-transmission-candidate-v1"}, "candidate_id": {"type": "string"}, "arm": {"const": "T0_TRANSPARENT_TRANSMISSION"}, "config_version": {"type": "string"}, "config_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "theme_id": {"type": "string"}, "as_of_utc": {"type": "string", "format": "date-time"},
+    "transmission_input_readiness": {"type": "boolean"}, "candidate_transmission_state": {"enum": ["broad_confirmed", "narrow_only", "absent", "negative_coherence", "not_estimable"]}, "validated_transmission_state": {"type": "null"}, "candidate_estimated": {"type": "boolean"}, "validated_model": {"const": false}, "decision_eligible": {"const": false}, "inputs": {"type": "object"}, "blocking_reasons": {"type": "array", "items": {"type": "string"}}, "uncertainty": {"type": ["number", "null"]}, "invalidation": {"type": "array", "items": {"type": "string"}}, "evidence_grade": {"const": "retrospective_unvalidated"}
+  }
+}

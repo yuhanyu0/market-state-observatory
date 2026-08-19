@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/incident_summary.schema.json",
+  "title": "IncidentSummaryV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "connection_gap_count", "connection_gap_seconds_max", "connection_gap_overlap_by_observation_point", "stale_quote_count_by_point", "observed_quote_age_max_by_point", "ready_quote_age_max_by_point", "decision_primary_quote_count", "decision_stale_quote_count", "stream_message_count", "stream_message_drop_count", "stream_chunk_count", "safe_summary", "paper_positions", "real_orders"],
+  "properties": {
+    "schema_version": {"const": "mso-incident-summary-v1"}, "run_id": {"type": "string"},
+    "connection_gap_count": {"type": "integer", "minimum": 0}, "connection_gap_seconds_max": {"type": ["number", "null"], "minimum": 0},
+    "connection_gap_overlap_by_observation_point": {"type": "object", "additionalProperties": {"type": ["boolean", "string"]}},
+    "stale_quote_count_by_point": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+    "observed_quote_age_max_by_point": {"type": "object", "additionalProperties": {"type": ["number", "null"]}},
+    "ready_quote_age_max_by_point": {"type": "object", "additionalProperties": {"type": ["number", "null"]}},
+    "decision_primary_quote_count": {"type": "integer", "minimum": 0}, "decision_stale_quote_count": {"type": "integer", "minimum": 0},
+    "stream_message_count": {"type": "integer", "minimum": 0}, "stream_message_drop_count": {"type": "integer", "minimum": 0}, "stream_chunk_count": {"type": "integer", "minimum": 0},
+    "safe_summary": {"type": "string"}, "paper_positions": {"const": 0}, "real_orders": {"const": 0}
+  }
+}

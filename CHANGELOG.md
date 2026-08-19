@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0-rc1 - 2026-08-19
+
+- Added deterministic completed-run observation feature, provenance, quality, incident, report, and candidate-certificate sidecars.
+- Added fail-closed execution modes, frozen candidate stacks, strict replay experiments, and counterfactual-only playbooks.
+- Added a sanitized append-only WebSocket connection ledger, private Operator Console, and reviewed-WhatIf daily report task.
+- Kept the selected `v0.4.5` runtime and Scheduler unchanged.
+
 ## 0.4.5 - 2026-08-17
 
 - Put every scheduled runtime process tree in a named Windows Job Object with

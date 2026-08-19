@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/feature_provenance.schema.json",
+  "title": "FeatureProvenanceV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "feature_set_version", "compiler", "compiler_sha256", "source_artifacts", "original_run_mutated"],
+  "properties": {
+    "schema_version": {"const": "mso-feature-provenance-v1"},
+    "run_id": {"type": "string"},
+    "feature_set_version": {"const": "observation-features-v1"},
+    "compiler": {"type": "string"},
+    "compiler_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "source_artifacts": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["relative_path", "sha256"], "properties": {"relative_path": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}}},
+    "original_run_mutated": {"const": false}
+  }
+}

@@ -9,6 +9,7 @@ from typing import Any
 from .alpaca_adapter import PROVIDER, AlpacaSIPAdapter
 from .observation_freezer import canonical_json, write_exclusive
 from .stream_store import BoundedHourlyStreamStore
+from .websocket_incidents import WebSocketIncidentLedger
 
 
 class AlpacaStreamArchive:
@@ -22,6 +23,8 @@ class AlpacaStreamArchive:
         queue_size: int = 10_000,
         disk_budget_bytes: int = 2 * 1024 * 1024 * 1024,
         full_stream_debug: bool | None = None,
+        release_version: str = "unknown",
+        run_id: str = "unknown",
     ) -> None:
         debug = (
             os.environ.get("MSO_FULL_STREAM_DEBUG", "false").lower() == "true"
@@ -39,10 +42,24 @@ class AlpacaStreamArchive:
         self.reconnect_count = 0
         self.last_message_at_utc: str | None = None
         self.websocket_connected = False
+        self.incidents = WebSocketIncidentLedger(
+            manifest_directory / "WEBSOCKET_CONNECTION_EVENTS.ndjson",
+            release_version=release_version,
+            run_id=run_id,
+        )
+        self._awaiting_first_message_after_reconnect = False
 
     async def on_message(self, item: dict[str, Any], raw: bytes) -> None:
         await self.store.ingest(item, raw)
         self.last_message_at_utc = datetime.now(UTC).isoformat()
+        if self._awaiting_first_message_after_reconnect:
+            self.incidents.append(
+                "first_message_after_reconnect",
+                event_time_utc=self.last_message_at_utc,
+                symbols_seen=[str(item.get("S"))] if item.get("S") else [],
+            )
+            self._awaiting_first_message_after_reconnect = False
+        self.incidents.note_message(str(item.get("t") or self.last_message_at_utc))
 
     async def run(
         self, *, symbols: list[str], stop: asyncio.Event, adapter: AlpacaSIPAdapter | None = None
@@ -52,8 +69,19 @@ class AlpacaStreamArchive:
         def connection_state(connected: bool) -> None:
             self.websocket_connected = connected
 
+        def connection_event(event_type: str, error: BaseException | None) -> None:
+            self.incidents.append(event_type, exception=error)
+            if event_type == "resubscribed":
+                self._awaiting_first_message_after_reconnect = True
+
         try:
-            await provider.stream(symbols, self.on_message, stop, connection_state)
+            await provider.stream(
+                symbols,
+                self.on_message,
+                stop,
+                connection_state,
+                connection_event,
+            )
         finally:
             self.websocket_connected = False
             self.reconnect_count = provider.reconnect_count

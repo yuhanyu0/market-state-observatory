@@ -1,0 +1,7 @@
+{
+  "arm": "D2_CALIBRATED_PROBABILISTIC",
+  "calibration_status": "NOT_CALIBRATED",
+  "feature_set_version": "observation-features-v1",
+  "minimum_calibration_observations": 60,
+  "version": "direction-d2-v1"
+}

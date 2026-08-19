@@ -101,6 +101,13 @@ def load_release_manifest(*, required: bool) -> dict[str, Any] | None:
         "safe_stop_sha256": root / "stop_runtime.ps1",
         "base_python_sha256": Path(str(payload.get("base_python_path", ""))),
     }
+    optional_checks = {
+        "analysis_bundle_sha256": root / "wheel",
+        "candidate_config_sha256": root / "config" / "candidates",
+        "experiment_protocol_sha256": root / "config" / "experiment_protocol_v1.json",
+        "daily_report_launcher_sha256": root / "run_daily_report.ps1",
+    }
+    checks.update({field: path for field, path in optional_checks.items() if field in payload})
     for field, path in checks.items():
         if not path.exists():
             raise ProductionReleaseRequired(f"Frozen release artifact is missing: {path.name}")
@@ -118,7 +125,7 @@ def development_identity(repository: Path, universe_path: Path, membership: byte
     universe_hash = sha256_file(universe_path)
     membership_hash = hashlib.sha256(membership).hexdigest()
     config_hash = universe_hash
-    return {
+    payload: dict[str, Any] = {
         "git_sha": source_git_sha(repository),
         "release_version": version,
         "wheel_sha256": "DEVELOPMENT_EDITABLE_NOT_PRODUCTION",
@@ -131,6 +138,7 @@ def development_identity(repository: Path, universe_path: Path, membership: byte
         "experiment_lane": f"rehearsal-v{version}-{collector_hash[:8]}",
         "production_release": False,
     }
+    return payload
 
 
 def runtime_identity(
@@ -161,7 +169,7 @@ def build_release_manifest(
     ).resolve()
     if not resolved_base_python.is_file():
         raise ProductionReleaseRequired("Base Python executable is missing")
-    return {
+    payload: dict[str, Any] = {
         "schema_version": "mso-production-release-v1",
         "git_sha": git_sha,
         "release_version": release_version,
@@ -204,6 +212,16 @@ def build_release_manifest(
         "paper_positions": 0,
         "real_orders": 0,
     }
+    optional_release_evidence = {
+        "analysis_bundle_sha256": release / "wheel",
+        "candidate_config_sha256": release / "config" / "candidates",
+        "experiment_protocol_sha256": release / "config" / "experiment_protocol_v1.json",
+        "daily_report_launcher_sha256": release / "run_daily_report.ps1",
+    }
+    for field, path in optional_release_evidence.items():
+        if path.exists():
+            payload[field] = sha256_tree(path) if path.is_dir() else sha256_file(path)
+    return payload
 
 
 def main() -> None:

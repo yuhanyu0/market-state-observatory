@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/feature_quality.schema.json",
+  "title": "FeatureQualityV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "feature_set_version", "feature_count", "availability_counts", "open_not_yet_defined_excluded_from_readiness", "decision_primary_quote_count", "decision_stale_quote_count", "observed_quote_age_max", "ready_quote_age_max", "future_timestamp_count", "backfill_count", "paper_positions", "real_orders"],
+  "properties": {
+    "schema_version": {"const": "mso-feature-quality-v1"},
+    "run_id": {"type": "string"},
+    "feature_set_version": {"const": "observation-features-v1"},
+    "feature_count": {"type": "integer", "minimum": 1},
+    "availability_counts": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+    "open_not_yet_defined_excluded_from_readiness": {"const": true},
+    "decision_primary_quote_count": {"type": "integer", "minimum": 0},
+    "decision_stale_quote_count": {"type": "integer", "minimum": 0},
+    "observed_quote_age_max": {"type": ["number", "null"], "minimum": 0},
+    "ready_quote_age_max": {"type": ["number", "null"], "minimum": 0},
+    "future_timestamp_count": {"type": "integer", "minimum": 0},
+    "backfill_count": {"type": "integer", "minimum": 0},
+    "paper_positions": {"const": 0},
+    "real_orders": {"const": 0}
+  }
+}

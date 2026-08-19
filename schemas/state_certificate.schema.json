@@ -23,7 +23,7 @@
     "next_probe": {"type": ["object", "null"]},
     "eligible_playbooks": {"type": "array", "items": {"enum": ["A_transition_breakout", "B_retest_continuation", "D_wait_unresolved", "F_overextended_no_chase", "NoScript"]}, "minItems": 1},
     "vehicle_eligibility": {"type": "object", "required": ["Theme_ETF", "Theme_Basket", "Torque_Overlay"], "properties": {"Theme_ETF": {"type": "boolean"}, "Theme_Basket": {"type": "boolean"}, "Torque_Overlay": {"type": "boolean"}}, "additionalProperties": false},
-    "decision_status": {"enum": ["DATA_BLOCKED_NO_DECISION", "WAIT", "MODEL_SHADOW_ONLY", "PAPER_ELIGIBLE"]}
+    "decision_status": {"enum": ["DATA_BLOCKED_NO_DECISION", "WAIT", "MODEL_SHADOW_ONLY"]}
   },
   "$defs": {
     "observerState": {"type": "object", "additionalProperties": false, "required": ["state", "eligible", "data_ready", "model_estimated", "decision_eligible", "uncertainty", "evidence_refs", "metrics", "invalidation"], "properties": {"state": {"type": "string"}, "eligible": {"type": "boolean"}, "data_ready": {"type": "boolean"}, "model_estimated": {"type": "boolean"}, "decision_eligible": {"type": "boolean"}, "uncertainty": {"type": ["number", "null"], "minimum": 0, "maximum": 1}, "evidence_refs": {"type": "array", "items": {"type": "string"}}, "metrics": {"type": "object"}, "invalidation": {"type": ["string", "null"]}}},

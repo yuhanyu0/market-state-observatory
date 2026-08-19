@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/episode_candidate.schema.json", "title": "EpisodeCandidateV1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "candidate_id", "arm", "config_version", "config_sha256", "theme_id", "as_of_utc", "history_observations", "minimum_history", "sequential_only", "state", "candidate_estimated", "validated_model", "decision_eligible", "uncertainty", "transition_probabilities", "invalidation", "blocking_reasons", "evidence_grade"],
+  "properties": {
+    "schema_version": {"const": "mso-episode-candidate-v1"}, "candidate_id": {"type": "string"}, "arm": {"enum": ["E0_INTERPRETABLE_STATE_MACHINE", "E1_BOCPD_CANDIDATE", "E2_HSMM_CANDIDATE"]}, "config_version": {"type": "string"}, "config_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "theme_id": {"type": "string"}, "as_of_utc": {"type": "string", "format": "date-time"}, "history_observations": {"type": "integer", "minimum": 0}, "minimum_history": {"type": "integer", "minimum": 1}, "sequential_only": {"const": true}, "state": {"enum": ["onset", "expansion", "retest", "mature", "exhaustion", "reversal", "not_estimable"]}, "candidate_estimated": {"type": "boolean"}, "validated_model": {"const": false}, "decision_eligible": {"const": false}, "uncertainty": {"type": ["number", "null"]}, "transition_probabilities": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1}}, "invalidation": {"type": "array", "items": {"type": "string"}}, "blocking_reasons": {"type": "array", "items": {"type": "string"}}, "evidence_grade": {"const": "retrospective_unvalidated"}
+  }
+}

@@ -16,7 +16,7 @@
     "previous_state": {"type": ["string", "null"]},
     "vehicle": {"type": ["string", "null"]},
     "invalidation": {"type": "array", "items": {"type": "string"}},
-    "decision_status": {"enum": ["DATA_BLOCKED_NO_DECISION", "WAIT", "MODEL_SHADOW_ONLY", "PAPER_ELIGIBLE"]},
+    "decision_status": {"enum": ["DATA_BLOCKED_NO_DECISION", "WAIT", "MODEL_SHADOW_ONLY"]},
     "paper_only": {"const": true},
     "real_order_created": {"const": false}
   }

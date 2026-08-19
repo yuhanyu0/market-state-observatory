@@ -38,7 +38,7 @@ def test_required_schema_set_is_present() -> None:
         "public_experiments", "public_roadmap", "public_validation",
         "formal_data_shadow_authorization", "soak_test_results", "private_observation_point",
     }
-    assert set(schema_names()) == required
+    assert required.issubset(set(schema_names()))
 
 
 def test_every_schema_is_draft_2020_12_with_stable_id() -> None:

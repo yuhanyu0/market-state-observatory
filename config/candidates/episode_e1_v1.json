@@ -1,0 +1,7 @@
+{
+  "arm": "E1_BOCPD_CANDIDATE",
+  "hazard_probability": 0.05,
+  "minimum_history": 20,
+  "sequential_only": true,
+  "version": "episode-e1-v1"
+}
