@@ -12,6 +12,14 @@ INCIDENT_TYPES = {
     "INSUFFICIENT_HISTORY",
 }
 
+PROBE_TYPE_BY_INCIDENT = {
+    "MISSING_POINT": "WAIT_FOR_NEXT_LEGAL_SCHEDULED_POINT",
+    "STALE_PRIMARY_FEED": "WAIT_FOR_NEXT_LEGAL_FRESH_DECISION_POINT",
+    "MEMBERSHIP_UNAVAILABLE": "WAIT_FOR_NEXT_POINT_IN_TIME_MEMBERSHIP",
+    "EVENT_PROVENANCE_UNAVAILABLE": "WAIT_FOR_NEXT_KNOWN_AT_EVENT_PROVENANCE",
+    "INSUFFICIENT_HISTORY": "WAIT_FOR_MINIMUM_SEQUENTIAL_HISTORY",
+}
+
 
 def incident_next_probe(
     theme_id: str,
@@ -56,7 +64,8 @@ def incident_next_probe(
     return {
         "probe_id": f"{theme_id}-{incident_type.lower()}",
         "theme_id": theme_id,
-        "probe_type": incident_type,
+        "probe_type": PROBE_TYPE_BY_INCIDENT[incident_type],
+        "incident_type": incident_type,
         "question": question,
         "acquire": acquire,
         "distinguishes": ["evidence restored", "evidence remains blocked"],

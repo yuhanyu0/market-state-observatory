@@ -30,7 +30,11 @@ from market_state_observatory.execution_modes import (
     ExecutionMode,
     authorize_mode,
 )
-from market_state_observatory.next_probe import INCIDENT_TYPES, incident_next_probe
+from market_state_observatory.next_probe import (
+    INCIDENT_TYPES,
+    PROBE_TYPE_BY_INCIDENT,
+    incident_next_probe,
+)
 from market_state_observatory.observer_registry import ObserverRegistry
 from market_state_observatory.runtime.quality_engine import evaluate_run_quality
 from market_state_observatory.runtime.websocket_incidents import WebSocketIncidentLedger
@@ -163,7 +167,8 @@ def test_818_acceptance_report_is_blocked_and_descriptive(tmp_path: Path) -> Non
     assert all(not row["validated_observer_conflicts"] for row in themes.values())
 
     probe = report["sections"]["F_next_useful_observation"]
-    assert probe["probe_type"] == "STALE_PRIMARY_FEED"
+    assert probe["probe_type"] == "WAIT_FOR_NEXT_LEGAL_FRESH_DECISION_POINT"
+    assert probe["incident_type"] == "STALE_PRIMARY_FEED"
     assert probe["question"] == (
         "Will the next preregistered decision snapshot restore fresh primary evidence "
         "across the required universe?"
@@ -329,7 +334,8 @@ def test_all_incident_types_have_structured_non_backfill_probes() -> None:
         probe = incident_next_probe(
             "semiconductors", incident_type, "2026-08-18T19:45:00+00:00"
         )
-        assert probe["probe_type"] == incident_type
+        assert probe["incident_type"] == incident_type
+        assert probe["probe_type"] == PROBE_TYPE_BY_INCIDENT[incident_type]
         assert probe["past_point_reconstruction_allowed"] is False
         validate_payload(probe, "next_probe")
 

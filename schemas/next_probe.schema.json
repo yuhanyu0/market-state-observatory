@@ -9,7 +9,8 @@
     "probe_id": {"type": "string", "minLength": 1},
     "theme_id": {"type": "string", "minLength": 1},
     "question": {"type": "string", "minLength": 1},
-    "probe_type": {"enum": ["MISSING_POINT", "STALE_PRIMARY_FEED", "MEMBERSHIP_UNAVAILABLE", "EVENT_PROVENANCE_UNAVAILABLE", "INSUFFICIENT_HISTORY"]},
+    "probe_type": {"enum": ["WAIT_FOR_NEXT_LEGAL_SCHEDULED_POINT", "WAIT_FOR_NEXT_LEGAL_FRESH_DECISION_POINT", "WAIT_FOR_NEXT_POINT_IN_TIME_MEMBERSHIP", "WAIT_FOR_NEXT_KNOWN_AT_EVENT_PROVENANCE", "WAIT_FOR_MINIMUM_SEQUENTIAL_HISTORY"]},
+    "incident_type": {"enum": ["MISSING_POINT", "STALE_PRIMARY_FEED", "MEMBERSHIP_UNAVAILABLE", "EVENT_PROVENANCE_UNAVAILABLE", "INSUFFICIENT_HISTORY"]},
     "acquire": {
       "oneOf": [
         {"type": "string", "minLength": 1},
