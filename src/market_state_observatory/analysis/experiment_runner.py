@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from hashlib import sha256
 from pathlib import Path
-from statistics import mean
+from statistics import mean, median
 from typing import Any
 
 ARMS = ("D0", "D1", "D2", "D1+T", "D1+T+E0", "D1+T+E1", "D1+T+E+P")
@@ -25,6 +25,52 @@ class ReplayRecord:
     predicted_sign: int | None
     realized_return: float
     cost_bps: float
+    selected_ticker: str | None = None
+    benchmark_return: float | None = None
+
+
+def _maximum_drawdown(values: list[float]) -> float | None:
+    if not values:
+        return None
+    equity = peak = 1.0
+    maximum = 0.0
+    for value in values:
+        equity *= max(0.0, 1.0 + value)
+        peak = max(peak, equity)
+        maximum = min(maximum, equity / peak - 1.0)
+    return maximum
+
+
+def _calibration_curve(pairs: list[tuple[float, float]]) -> list[dict[str, float | int | None]]:
+    bins: dict[int, list[tuple[float, float]]] = defaultdict(list)
+    for probability, outcome in pairs:
+        bins[min(9, max(0, int(probability * 10)))].append((probability, outcome))
+    return [
+        {
+            "bin": index,
+            "lower": index / 10,
+            "upper": (index + 1) / 10,
+            "observations": len(group),
+            "mean_probability": mean(item[0] for item in group) if group else None,
+            "observed_positive_rate": mean(item[1] for item in group) if group else None,
+        }
+        for index in range(10)
+        if (group := bins.get(index, []))
+    ]
+
+
+def _correlation(left: list[float], right: list[float]) -> float | None:
+    if len(left) != len(right) or len(left) < 2:
+        return None
+    left_mean, right_mean = mean(left), mean(right)
+    numerator = sum(
+        (x - left_mean) * (y - right_mean) for x, y in zip(left, right, strict=True)
+    )
+    denominator = math.sqrt(
+        sum((value - left_mean) ** 2 for value in left)
+        * sum((value - right_mean) ** 2 for value in right)
+    )
+    return numerator / denominator if denominator else None
 
 
 def frozen_walk_forward_folds(
@@ -136,6 +182,90 @@ def run_registered_replay(
         for probability, outcome in probabilities
     ) if probabilities else None
     signed_accuracy = mean(float(row.predicted_sign == (1 if row.realized_return > 0 else -1)) for row in predicted) if predicted else None
+    states = [row.selected_ticker or str(row.predicted_sign) for row in rows]
+    turnover = (
+        mean(float(states[index] != states[index - 1]) for index in range(1, len(states)))
+        if len(states) > 1
+        else None
+    )
+    theme_absolute: dict[str, float] = defaultdict(float)
+    for row, value in zip(rows, net, strict=True):
+        theme_absolute[row.theme_id] += abs(value)
+    total_absolute = sum(theme_absolute.values())
+    concentration = {
+        "top_theme_absolute_pnl_share": (
+            max(theme_absolute.values()) / total_absolute if total_absolute else None
+        ),
+        "top_observation_absolute_pnl_share": (
+            max((abs(value) for value in net), default=0.0) / total_absolute
+            if total_absolute
+            else None
+        ),
+    }
+    conditional_return = {
+        "predicted_positive": (
+            mean(row.realized_return for row in predicted if row.predicted_sign == 1)
+            if any(row.predicted_sign == 1 for row in predicted)
+            else None
+        ),
+        "predicted_negative": (
+            mean(row.realized_return for row in predicted if row.predicted_sign == -1)
+            if any(row.predicted_sign == -1 for row in predicted)
+            else None
+        ),
+    }
+    paired = [
+        (row.realized_return - row.cost_bps / 10_000, row.benchmark_return)
+        for row in rows
+        if row.benchmark_return is not None
+    ]
+    differences = [value - float(benchmark) for value, benchmark in paired]
+    ablation = (
+        {
+            "status": "complete_same_record_pairing",
+            "observations": len(differences),
+            "paired_mean_difference": mean(differences),
+            "paired_median_difference": median(differences),
+            "pairwise_win_rate": mean(float(value > 0) for value in differences),
+            "return_correlation": _correlation(
+                [value for value, _ in paired],
+                [float(benchmark) for _, benchmark in paired],
+            ),
+        }
+        if differences
+        else {"status": "not_available_no_paired_benchmark", "observations": 0}
+    )
+    failure_slices: list[dict[str, Any]] = []
+    for theme in sorted({row.theme_id for row in rows}):
+        values = [
+            row.realized_return - row.cost_bps / 10_000
+            for row in rows
+            if row.theme_id == theme
+        ]
+        failure_slices.append(
+            {
+                "slice": f"theme:{theme}",
+                "observations": len(values),
+                "mean_net_return": mean(values),
+                "median_net_return": median(values),
+                "maximum_drawdown": _maximum_drawdown(values),
+            }
+        )
+    for month in sorted({row.as_of_utc[:7] for row in rows}):
+        values = [
+            row.realized_return - row.cost_bps / 10_000
+            for row in rows
+            if row.as_of_utc.startswith(month)
+        ]
+        failure_slices.append(
+            {
+                "slice": f"month:{month}",
+                "observations": len(values),
+                "mean_net_return": mean(values),
+                "median_net_return": median(values),
+                "maximum_drawdown": _maximum_drawdown(values),
+            }
+        )
     seed = int(str(registration["manifest_sha256"])[:8], 16)
     metrics = {
         "observations": len(rows),
@@ -144,17 +274,17 @@ def run_registered_replay(
         "brier_score": brier,
         "log_loss": log_loss,
         "signed_accuracy": signed_accuracy,
-        "turnover": None,
-        "maximum_drawdown": None,
+        "turnover": turnover,
+        "maximum_drawdown": _maximum_drawdown(net),
         "theme_clustered_bootstrap": _cluster_bootstrap(rows, "theme", iterations=1000, seed=seed),
         "time_block_bootstrap": _cluster_bootstrap(rows, "time", iterations=1000, seed=seed + 1),
         "episode_clustered_bootstrap": _cluster_bootstrap(rows, "episode", iterations=1000, seed=seed + 2),
         "theme_fixed_effects": {theme: mean([row.realized_return for row in rows if row.theme_id == theme]) for theme in sorted({row.theme_id for row in rows})},
-        "calibration_curve": [],
-        "conditional_return": {},
+        "calibration_curve": _calibration_curve(probabilities),
+        "conditional_return": conditional_return,
         "cost_grid_bps": [0, 5, 10, 15, 25, 50],
-        "concentration": None,
-        "ablation": {},
+        "concentration": concentration,
+        "ablation": ablation,
     }
     return {
         "schema_version": "mso-experiment-result-v1",
@@ -163,7 +293,7 @@ def run_registered_replay(
         "manifest_sha256": registration["manifest_sha256"],
         "evidence_grade": "retrospective_unvalidated",
         "metrics": metrics,
-        "failure_slices": [],
+        "failure_slices": failure_slices,
         "validated_model": False,
         "decision_eligible": False,
         "paper_positions": 0,

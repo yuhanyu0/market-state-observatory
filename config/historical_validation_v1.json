@@ -1,0 +1,52 @@
+{
+  "schema_version": "mso-historical-validation-preregistration-v1",
+  "research_branch": "research/v0.5.0-historical-validation-lab",
+  "frozen_parent_commit": "b91308d70d318567697dd4019648d47dc81c61de",
+  "retrospective_unvalidated": true,
+  "decision_eligible": false,
+  "paper_positions": 0,
+  "real_orders": 0,
+  "evidence_lanes": {
+    "H1_EXACT_PIT": "Complete event, observation, data-max, and point-in-time membership provenance.",
+    "H2_HISTORICAL_RECONSTRUCTED_DAILY": "Raw unadjusted daily reconstruction; no same-day close execution claim.",
+    "H3_THEME_RADAR_ATTENTION": "Unsigned structural-attention benchmark only; cannot determine Direction sign.",
+    "SYNTHETIC": "Correctness evidence only; excluded from accuracy claims."
+  },
+  "horizons": [
+    "close_to_next_open",
+    "next_open_to_next_close",
+    "close_to_next_close",
+    "close_to_3d_close",
+    "close_to_5d_close"
+  ],
+  "cost_grid_bps": [0, 5, 10, 15, 25, 50],
+  "walk_forward": {
+    "method": "nested_expanding_walk_forward",
+    "minimum_train_dates": 504,
+    "test_dates": 126,
+    "purge_dates": 1,
+    "embargo_dates": 1,
+    "threshold_selection": "train_only",
+    "random_split": false
+  },
+  "threshold_candidates": {
+    "return_score": [0.0, 0.001, 0.0025, 0.005],
+    "probability_score": [0.5, 0.525, 0.55, 0.6]
+  },
+  "interpretation_gates": [
+    "confidence_interval",
+    "median",
+    "concentration",
+    "best_episode_removal",
+    "holdout_stability",
+    "baseline_superiority",
+    "cost_sensitivity",
+    "evidence_lane"
+  ],
+  "theme_radar_contract": {
+    "signed": false,
+    "may_determine_direction": false,
+    "may_select_theme_for_source_native_arms": false,
+    "may_gate_source_native_arms": false
+  }
+}

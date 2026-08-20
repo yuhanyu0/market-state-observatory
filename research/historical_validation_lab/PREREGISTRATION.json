@@ -1,0 +1,521 @@
+{
+  "cost_grid_bps": [
+    0,
+    5,
+    10,
+    15,
+    25,
+    50
+  ],
+  "current_constituent_lookback_used": false,
+  "decision_eligible": false,
+  "evidence_lanes": {
+    "H1_EXACT_PIT": "Complete event, observation, data-max, and point-in-time membership provenance.",
+    "H2_HISTORICAL_RECONSTRUCTED_DAILY": "Raw unadjusted daily reconstruction; no same-day close execution claim.",
+    "H3_THEME_RADAR_ATTENTION": "Unsigned structural-attention benchmark only; cannot determine Direction sign.",
+    "SYNTHETIC": "Correctness evidence only; excluded from accuracy claims."
+  },
+  "exact_pit_root": "C:\\Users\\Chinajushiusa\\AppData\\Local\\MarketStateObservatoryRuntime\\observations\\rehearsals",
+  "frozen_evaluation_folds": [
+    {
+      "embargoed_dates": [
+        "2013-06-06"
+      ],
+      "fold_id": "lab-wf-001",
+      "fold_sha256": "6a2023ffec354e346680d12ad51597181991e246b284e8327fc3dd26584e22ec",
+      "purged_dates": [
+        "2013-05-31"
+      ],
+      "test_dates": 126,
+      "test_end": "2013-12-09",
+      "test_start": "2013-06-07",
+      "train_dates": 503,
+      "train_end": "2013-05-30",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2013-12-10"
+      ],
+      "fold_id": "lab-wf-002",
+      "fold_sha256": "f6dc2119c6b96d58ad409747062d61225355df0d9c2b079363cdfc95f1f2e5d9",
+      "purged_dates": [
+        "2013-12-09"
+      ],
+      "test_dates": 126,
+      "test_end": "2014-06-17",
+      "test_start": "2013-12-11",
+      "train_dates": 630,
+      "train_end": "2013-12-03",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2014-06-18"
+      ],
+      "fold_id": "lab-wf-003",
+      "fold_sha256": "2504150afb24c50e435df836f9fc3c7f241c309d382ebbb696f43529c7b3efc4",
+      "purged_dates": [
+        "2014-06-17"
+      ],
+      "test_dates": 126,
+      "test_end": "2014-12-19",
+      "test_start": "2014-06-19",
+      "train_dates": 757,
+      "train_end": "2014-06-16",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2014-12-22"
+      ],
+      "fold_id": "lab-wf-004",
+      "fold_sha256": "54bb68161cfb73a29b84bfeb21704bc63d44d30517ee73378c1269eb79df93a3",
+      "purged_dates": [
+        "2014-12-19"
+      ],
+      "test_dates": 126,
+      "test_end": "2015-06-29",
+      "test_start": "2014-12-23",
+      "train_dates": 884,
+      "train_end": "2014-12-18",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2015-06-30"
+      ],
+      "fold_id": "lab-wf-005",
+      "fold_sha256": "51acec9a07bf54617595b40a0c8a38f50278833c13d0caa4c85856d1aac9fae6",
+      "purged_dates": [
+        "2015-06-29"
+      ],
+      "test_dates": 126,
+      "test_end": "2016-01-04",
+      "test_start": "2015-07-01",
+      "train_dates": 1011,
+      "train_end": "2015-06-26",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2016-01-05"
+      ],
+      "fold_id": "lab-wf-006",
+      "fold_sha256": "999568be7e888ee07fcd1fa41525c61149b6345a7b7245a7a46d314b5598a89d",
+      "purged_dates": [
+        "2016-01-04"
+      ],
+      "test_dates": 126,
+      "test_end": "2016-07-11",
+      "test_start": "2016-01-06",
+      "train_dates": 1138,
+      "train_end": "2015-12-31",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2016-07-12"
+      ],
+      "fold_id": "lab-wf-007",
+      "fold_sha256": "354413acd33c359e886b0507552efa32df465f93a51c531b245278733a853c71",
+      "purged_dates": [
+        "2016-07-11"
+      ],
+      "test_dates": 126,
+      "test_end": "2017-01-13",
+      "test_start": "2016-07-13",
+      "train_dates": 1265,
+      "train_end": "2016-07-08",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2017-01-17"
+      ],
+      "fold_id": "lab-wf-008",
+      "fold_sha256": "82c6965e9bef2df41c5577d125d4937cbd1fd06921392fe853a343d9f700a499",
+      "purged_dates": [
+        "2017-01-13"
+      ],
+      "test_dates": 126,
+      "test_end": "2017-07-21",
+      "test_start": "2017-01-18",
+      "train_dates": 1392,
+      "train_end": "2017-01-12",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2017-07-24"
+      ],
+      "fold_id": "lab-wf-009",
+      "fold_sha256": "d902b5e4a927ae2d32152ea7b308b7a674bd4237dccb0593705922ee7635f80c",
+      "purged_dates": [
+        "2017-07-21"
+      ],
+      "test_dates": 126,
+      "test_end": "2018-01-26",
+      "test_start": "2017-07-25",
+      "train_dates": 1519,
+      "train_end": "2017-07-20",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2018-01-29"
+      ],
+      "fold_id": "lab-wf-010",
+      "fold_sha256": "82eab0baef585dc7d43b53d1408d3eb2bd993c5a04ef0a9c4d4fd62c2e65d338",
+      "purged_dates": [
+        "2018-01-26"
+      ],
+      "test_dates": 126,
+      "test_end": "2018-08-02",
+      "test_start": "2018-01-30",
+      "train_dates": 1646,
+      "train_end": "2018-01-25",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2018-08-03"
+      ],
+      "fold_id": "lab-wf-011",
+      "fold_sha256": "190dec91f3057bd0d7a2e8187b6c2ad526c779e8585ceaa12dfb96ded85b472d",
+      "purged_dates": [
+        "2018-08-02"
+      ],
+      "test_dates": 126,
+      "test_end": "2019-02-08",
+      "test_start": "2018-08-06",
+      "train_dates": 1773,
+      "train_end": "2018-08-01",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2019-02-11"
+      ],
+      "fold_id": "lab-wf-012",
+      "fold_sha256": "25610248b0d085414cb4a879688c522f4892863e1c1796eb11ad739a9717a33b",
+      "purged_dates": [
+        "2019-02-08"
+      ],
+      "test_dates": 126,
+      "test_end": "2019-08-15",
+      "test_start": "2019-02-12",
+      "train_dates": 1900,
+      "train_end": "2019-02-07",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2019-08-16"
+      ],
+      "fold_id": "lab-wf-013",
+      "fold_sha256": "ea90381aa7e3d3c70ab674bd16eb073acf64817ee3cb3648b91bc6e8bd8e041e",
+      "purged_dates": [
+        "2019-08-15"
+      ],
+      "test_dates": 126,
+      "test_end": "2020-02-21",
+      "test_start": "2019-08-19",
+      "train_dates": 2027,
+      "train_end": "2019-08-14",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2020-02-24"
+      ],
+      "fold_id": "lab-wf-014",
+      "fold_sha256": "6642bf699654f9100cd646c19d436e582b8f6e6d2c1baacb5d5d16a9a07eaac6",
+      "purged_dates": [
+        "2020-02-21"
+      ],
+      "test_dates": 126,
+      "test_end": "2020-08-26",
+      "test_start": "2020-02-25",
+      "train_dates": 2154,
+      "train_end": "2020-02-20",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2020-08-27"
+      ],
+      "fold_id": "lab-wf-015",
+      "fold_sha256": "500ebb6ca0e2b73cfdb9d5f4b9787768f953b9f628ae8ae88b17cc3e92ceaa96",
+      "purged_dates": [
+        "2020-08-26"
+      ],
+      "test_dates": 126,
+      "test_end": "2021-03-04",
+      "test_start": "2020-08-28",
+      "train_dates": 2281,
+      "train_end": "2020-08-25",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2021-03-05"
+      ],
+      "fold_id": "lab-wf-016",
+      "fold_sha256": "46a7d2d3986c2466e8cf983f752363fde8d0916210d9c85995a8ac38652e5374",
+      "purged_dates": [
+        "2021-03-04"
+      ],
+      "test_dates": 126,
+      "test_end": "2021-09-08",
+      "test_start": "2021-03-08",
+      "train_dates": 2408,
+      "train_end": "2021-03-03",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2021-09-09"
+      ],
+      "fold_id": "lab-wf-017",
+      "fold_sha256": "197b0a76602c948d2bebed5ef552d22903ec542be5ab33b0c199e6effe2c1dc9",
+      "purged_dates": [
+        "2021-09-08"
+      ],
+      "test_dates": 126,
+      "test_end": "2022-03-15",
+      "test_start": "2021-09-10",
+      "train_dates": 2535,
+      "train_end": "2021-09-07",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2022-03-16"
+      ],
+      "fold_id": "lab-wf-018",
+      "fold_sha256": "2d6d3b58f834ff816ea253096d15241004fc52c6b9a868745605702dbbb9adcc",
+      "purged_dates": [
+        "2022-03-15"
+      ],
+      "test_dates": 126,
+      "test_end": "2022-09-20",
+      "test_start": "2022-03-17",
+      "train_dates": 2662,
+      "train_end": "2022-03-14",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2022-09-21"
+      ],
+      "fold_id": "lab-wf-019",
+      "fold_sha256": "341c1103cd6eca9dde8a0d0952e5524fdf0d8e344997964d4ba7df90a1886a69",
+      "purged_dates": [
+        "2022-09-20"
+      ],
+      "test_dates": 126,
+      "test_end": "2023-03-28",
+      "test_start": "2022-09-22",
+      "train_dates": 2789,
+      "train_end": "2022-09-19",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2023-03-29"
+      ],
+      "fold_id": "lab-wf-020",
+      "fold_sha256": "101ea863f6db50b46013a3631681578325b5a4a3744150a2d1d486c9565bd5d5",
+      "purged_dates": [
+        "2023-03-28"
+      ],
+      "test_dates": 126,
+      "test_end": "2023-10-03",
+      "test_start": "2023-03-30",
+      "train_dates": 2916,
+      "train_end": "2023-03-27",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2023-10-04"
+      ],
+      "fold_id": "lab-wf-021",
+      "fold_sha256": "a7a67d2189eacb28faf1b24a4442727cfb895e07bf10d335333677f1f23d184e",
+      "purged_dates": [
+        "2023-10-03"
+      ],
+      "test_dates": 126,
+      "test_end": "2024-04-10",
+      "test_start": "2023-10-05",
+      "train_dates": 3043,
+      "train_end": "2023-10-02",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2024-04-11"
+      ],
+      "fold_id": "lab-wf-022",
+      "fold_sha256": "cb1f5cc75d90fbdd0858ed30828caab2d540d626cd8688762f3a377aee378c48",
+      "purged_dates": [
+        "2024-04-10"
+      ],
+      "test_dates": 126,
+      "test_end": "2024-10-15",
+      "test_start": "2024-04-12",
+      "train_dates": 3170,
+      "train_end": "2024-04-09",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2024-10-16"
+      ],
+      "fold_id": "lab-wf-023",
+      "fold_sha256": "2d738e598648cf0fc9342aeb5a5c5fccef2de7ca84cbaff0c63f3f835a4ff4eb",
+      "purged_dates": [
+        "2024-10-15"
+      ],
+      "test_dates": 126,
+      "test_end": "2025-04-24",
+      "test_start": "2024-10-17",
+      "train_dates": 3297,
+      "train_end": "2024-10-14",
+      "train_start": "2011-05-17"
+    },
+    {
+      "embargoed_dates": [
+        "2025-04-25"
+      ],
+      "fold_id": "lab-wf-024",
+      "fold_sha256": "027af4bd77f6e0545921afe90a36e1e726beeec15127b572a68634c73b1390b1",
+      "purged_dates": [
+        "2025-04-24"
+      ],
+      "test_dates": 126,
+      "test_end": "2025-10-29",
+      "test_start": "2025-04-28",
+      "train_dates": 3424,
+      "train_end": "2025-04-23",
+      "train_start": "2011-05-17"
+    }
+  ],
+  "frozen_parent_commit": "b91308d70d318567697dd4019648d47dc81c61de",
+  "generated_at_utc": "2026-08-20T20:04:47.242396+00:00",
+  "historical_prediction_source_note": "Imported D1/D2 predictions were generated by the existing stricter 3/3 nested walk-forward. This lab freezes separate 1/1 expanding evaluation folds for train-only action thresholds.",
+  "horizons": [
+    "close_to_next_open",
+    "next_open_to_next_close",
+    "close_to_next_close",
+    "close_to_3d_close",
+    "close_to_5d_close"
+  ],
+  "input_hashes": {
+    "config/source_native_universe_v1.json": "e6aaee4dce8855f4f536045ebe2bf97c91a43f0c31984653e04d4e452d1cb98d",
+    "data/source_native_historical_daily/CIBR.csv": "f838f374c96123efd54d34cb2c5d41db850fb93363b3c418bb1a7769702f1b2d",
+    "data/source_native_historical_daily/SKYY.csv": "ef8fb96b57652b8918b376212a164fdcaec02eef579a0592e6489d1ce50041f8",
+    "data/source_native_historical_daily/SMH.csv": "85fb2322fedd3805944afbcb8fbc6659a170e4aae2ac32bca03d73809e215fc1",
+    "data/source_native_historical_daily/SPY.csv": "c27457a4f2241df662dbbc352ea1a9dc75dfd13e5a8bc5a8859f180bc2fb9962",
+    "data/source_native_historical_daily/TAN.csv": "4cce3b4ea552f66b19b01a253142a61f60434168c30dc2076603d5b164142184",
+    "data/source_native_historical_daily/UFO.csv": "b2521ad356ceacc27c62880de8ec96ee81e68250e298270d6adf0af73e35e29f",
+    "data/source_native_historical_daily/URA.csv": "21d73cdfe3e7e3fdee34aea087ed9eb9daa10307f4bf0cb8791154cf067ddd1d",
+    "output/direction_historical_walkforward.csv": "b1dc120e71ccc29d587cb79140e198011c4331ac3cda8efc0bb790923caab1cd",
+    "output/historical_daily_calibration.csv": "a30d26958221c0e0ee15bbbc226177b08158a25adc959b27664219fece560b6c",
+    "output/historical_daily_summary.csv": "f9157bc14438d675cd4b5975e777fb8df84117b4e07570f9dffa8375a33cba96",
+    "output/historical_daily_trades.csv": "65ca94c91d68f8db36c18cec646d050c477cac319d3400b564c634ec49b7b628",
+    "output/s5_episode_summary.csv": "5150f3ae14474e73e39ab7d73472d7043f9eff8ea5159d48e713460529ddf61b",
+    "output/s5_episode_trades.csv": "8e7b32e3a1e20a773eb3371b36da36a500398e778010c36759014f2c15c7fe79",
+    "output/signal_snapshots.csv": "078e06d23040c7fe49d489ba5162e1c50d606e839754d3f276892035341e3492",
+    "output/theme_state_daily.csv": "bbc750a24575a0aea941e0d63a0d37e90acf0b66b643a5772b693caf36a9fac4"
+  },
+  "interpretation_gates": [
+    "confidence_interval",
+    "median",
+    "concentration",
+    "best_episode_removal",
+    "holdout_stability",
+    "baseline_superiority",
+    "cost_sensitivity",
+    "evidence_lane"
+  ],
+  "paper_positions": 0,
+  "real_orders": 0,
+  "research_branch": "research/v0.5.0-historical-validation-lab",
+  "retrospective_unvalidated": true,
+  "same_day_close_execution_claim": false,
+  "schema_version": "mso-historical-validation-preregistration-v1",
+  "source_import_audit": {
+    "H1_EXACT_PIT": {
+      "complete_provenance_runs": 3,
+      "labeled_outcome_records": 0,
+      "official_strategy_evidence_runs": 0,
+      "quality_pass_runs": 1,
+      "run_count": 3,
+      "theme_run_records": 18
+    },
+    "H2_HISTORICAL_RECONSTRUCTED_DAILY": {
+      "adjusted_sensitivity_used_as_primary": false,
+      "evaluation_label_records": 93515,
+      "historical_membership_backfill_used": false,
+      "raw_unadjusted_main": true,
+      "source_direction_rows_raw_main": 37406,
+      "source_original_fold_count": 29,
+      "source_theme_date_records": 18703,
+      "source_unique_dates": 3654,
+      "transmission_status": "not_available_no_historical_point_in_time_holdings"
+    },
+    "H3_THEME_RADAR_ATTENTION": {
+      "attention_labeled_rows": 119,
+      "attention_signal_rows": 120,
+      "episodes": 11,
+      "same_day_pre_entry_rows": 113,
+      "shifted_rows": 7,
+      "snapshot_dates": 172,
+      "snapshot_rows": 253,
+      "snapshot_sessions": {
+        "midday": 49,
+        "postclose": 55,
+        "premarket": 64,
+        "weekend_nontrading": 85
+      },
+      "unsigned_attention_only": true
+    },
+    "SYNTHETIC": {
+      "accuracy_evidence": false,
+      "records": 8
+    }
+  },
+  "source_root": "C:\\Users\\Chinajushiusa\\Documents\\Codex\\2026-06-08\\yuhanyu0-theme-radar-log-https-github\\work\\theme-radar-backtest\\backtest",
+  "theme_radar_contract": {
+    "may_determine_direction": false,
+    "may_gate_source_native_arms": false,
+    "may_select_theme_for_source_native_arms": false,
+    "signed": false
+  },
+  "threshold_candidates": {
+    "probability_score": [
+      0.5,
+      0.525,
+      0.55,
+      0.6
+    ],
+    "return_score": [
+      0.0,
+      0.001,
+      0.0025,
+      0.005
+    ]
+  },
+  "transmission_backfill_used": false,
+  "walk_forward": {
+    "embargo_dates": 1,
+    "method": "nested_expanding_walk_forward",
+    "minimum_train_dates": 504,
+    "purge_dates": 1,
+    "random_split": false,
+    "test_dates": 126,
+    "threshold_selection": "train_only"
+  }
+}
