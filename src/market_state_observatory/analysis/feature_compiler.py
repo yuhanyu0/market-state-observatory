@@ -11,7 +11,7 @@ from pathlib import Path
 from statistics import median, pstdev
 from typing import Any
 
-FEATURE_SET_VERSION = "observation-features-v1"
+FEATURE_SET_VERSION = "observation-features-v2"
 POINT_ORDER = (
     "open_snapshot",
     "next_10_00",
@@ -29,6 +29,7 @@ FEATURE_IDS = (
     "constituent_positive_breadth",
     "constituent_negative_breadth",
     "residual_breadth",
+    "volume_coverage",
     "volume_breadth",
     "single_name_concentration",
     "leader_rest_gap",
@@ -46,6 +47,42 @@ FEATURE_IDS = (
     "primary_feed_gap",
     "rest_reconciliation_summary",
 )
+
+EVIDENCE_QUALITIES = {
+    "VALID",
+    "STALE_SOURCE",
+    "INCOMPLETE_SOURCE",
+    "BASELINE_ONLY",
+    "NOT_APPLICABLE",
+}
+
+OPEN_BASELINE_FEATURES = {
+    "etf_intraday_return",
+    "relative_to_spy_return",
+    "relative_to_industry_return",
+    "basket_mean_return",
+    "basket_median_return",
+}
+
+OPEN_NOT_APPLICABLE_FEATURES = {
+    "constituent_positive_breadth",
+    "constituent_negative_breadth",
+    "residual_breadth",
+    "volume_coverage",
+    "volume_breadth",
+    "single_name_concentration",
+    "leader_rest_gap",
+    "etf_basket_agreement",
+    "return_dispersion",
+}
+
+RECONCILIATION_STATUSES = {
+    "MATCH_WITHIN_TOLERANCE",
+    "ASYNC_EXPECTED",
+    "MATERIAL_DIFFERENCE",
+    "PRIMARY_NOT_READY",
+    "REST_UNAVAILABLE",
+}
 
 
 def canonical_json(payload: Any) -> bytes:
@@ -89,6 +126,19 @@ def _trade_age(row: dict[str, Any] | None) -> float | None:
         return None
     value = row.get("last_trade", {}).get("freshness_age_seconds")
     return float(value) if value is not None else None
+
+
+def _normalized_reconciliation_status(value: object) -> str:
+    status = str(value or "REST_UNAVAILABLE")
+    if status in RECONCILIATION_STATUSES:
+        return status
+    if status == "MATCH":
+        return "MATCH_WITHIN_TOLERANCE"
+    if status == "DIFFERENT":
+        return "ASYNC_EXPECTED"
+    if status in {"REST_MISSING", "UNAVAILABLE", "UNKNOWN"}:
+        return "REST_UNAVAILABLE"
+    return "REST_UNAVAILABLE"
 
 
 @dataclass(frozen=True)
@@ -160,7 +210,21 @@ class CompletedRunFeatureCompiler:
         *,
         status: str = "AVAILABLE",
         reason: str | None = None,
+        evidence_quality: str = "VALID",
+        model_input_eligible: bool | None = None,
     ) -> dict[str, Any]:
+        if evidence_quality not in EVIDENCE_QUALITIES:
+            raise ValueError(f"Unsupported evidence quality: {evidence_quality}")
+        calculation_exists = value is not None
+        eligible = (
+            status == "AVAILABLE" and evidence_quality == "VALID" and calculation_exists
+            if model_input_eligible is None
+            else model_input_eligible
+        )
+        if eligible and (
+            status != "AVAILABLE" or evidence_quality != "VALID" or not calculation_exists
+        ):
+            raise ValueError("Only an available VALID calculation may be model-input eligible")
         semantic = {
             "feature_id": feature_id,
             "feature_set_version": FEATURE_SET_VERSION,
@@ -171,6 +235,9 @@ class CompletedRunFeatureCompiler:
             "observed_at_utc": source.observed_at_utc,
             "data_max_timestamp": source.data_max_timestamp,
             "availability_status": status,
+            "calculation_exists": calculation_exists,
+            "evidence_quality": evidence_quality,
+            "model_input_eligible": eligible,
             "not_applicable_reason": reason,
             "value": value,
             "units": units,
@@ -191,7 +258,16 @@ class CompletedRunFeatureCompiler:
         reason: str,
         *,
         not_applicable: bool = False,
+        not_calibrated: bool = False,
+        evidence_quality: str | None = None,
     ) -> dict[str, Any]:
+        status = (
+            "NOT_APPLICABLE"
+            if not_applicable
+            else "NOT_CALIBRATED"
+            if not_calibrated
+            else "NOT_AVAILABLE"
+        )
         return self._feature(
             feature_id,
             theme_id,
@@ -200,8 +276,11 @@ class CompletedRunFeatureCompiler:
             source,
             None,
             units,
-            status="NOT_APPLICABLE" if not_applicable else "NOT_AVAILABLE",
+            status=status,
             reason=reason,
+            evidence_quality=evidence_quality
+            or ("NOT_APPLICABLE" if not_applicable else "INCOMPLETE_SOURCE"),
+            model_input_eligible=False,
         )
 
     def compile(self) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
@@ -221,7 +300,7 @@ class CompletedRunFeatureCompiler:
 
         features.sort(key=lambda row: (row["theme_id"], POINT_ORDER.index(row["observation_point"]), row["feature_id"]))
         artifact = {
-            "schema_version": "mso-observation-features-v1",
+            "schema_version": "mso-observation-features-v2",
             "run_id": self.run["run_id"],
             "feature_set_version": FEATURE_SET_VERSION,
             "evidence_grade": "completed_run_point_in_time",
@@ -246,6 +325,17 @@ class CompletedRunFeatureCompiler:
             "original_run_mutated": False,
         }
         statuses = Counter(str(row["availability_status"]) for row in features)
+        evidence_qualities = Counter(str(row["evidence_quality"]) for row in features)
+        invalid_unit_intervals = [
+            row
+            for row in features
+            if row["units"] == "unit_interval"
+            and row["evidence_quality"] == "VALID"
+            and row["value"] is not None
+            and not 0.0 <= float(row["value"]) <= 1.0
+        ]
+        if invalid_unit_intervals:
+            raise ValueError("VALID unit_interval feature is outside [0,1]")
         decision = self.points.get("decision_snapshot", {})
         decision_rows = decision.get("symbols", [])
         observed_ages = [age for row in decision_rows if (age := _quote_age(row)) is not None]
@@ -255,11 +345,22 @@ class CompletedRunFeatureCompiler:
             if row.get("quote", {}).get("status") == "READY" and (age := _quote_age(row)) is not None
         ]
         quality = {
-            "schema_version": "mso-feature-quality-v1",
+            "schema_version": "mso-feature-quality-v2",
             "run_id": self.run["run_id"],
             "feature_set_version": FEATURE_SET_VERSION,
             "feature_count": len(features),
             "availability_counts": dict(sorted(statuses.items())),
+            "evidence_quality_counts": dict(sorted(evidence_qualities.items())),
+            "calculation_exists_count": sum(bool(row["calculation_exists"]) for row in features),
+            "model_input_eligible_count": sum(
+                bool(row["model_input_eligible"]) for row in features
+            ),
+            "stale_model_input_eligible_count": sum(
+                row["evidence_quality"] == "STALE_SOURCE"
+                and bool(row["model_input_eligible"])
+                for row in features
+            ),
+            "valid_unit_interval_violation_count": len(invalid_unit_intervals),
             "open_not_yet_defined_excluded_from_readiness": True,
             "decision_primary_quote_count": len(decision_rows),
             "decision_stale_quote_count": sum(row.get("quote", {}).get("status") == "STALE" for row in decision_rows),
@@ -283,6 +384,7 @@ class CompletedRunFeatureCompiler:
         source = self._source("open_snapshot", point)
         current = self.rows[point]
         opened = self.rows.get("open_snapshot", {})
+        is_open = point == "open_snapshot"
         etf_price = _source_price(current.get(etf))
         etf_open = _source_price(opened.get(etf))
         spy_price = _source_price(current.get("SPY"))
@@ -305,57 +407,338 @@ class CompletedRunFeatureCompiler:
         scope = f"{etf}+basket"
         out: list[dict[str, Any]] = []
 
-        def number(feature_id: str, value: float | None, units: str = "decimal_return", reason: str = "required_price_missing") -> None:
-            if value is None or not math.isfinite(value):
-                out.append(self._not_available(feature_id, theme_id, scope, point, source, units, reason))
-            else:
-                out.append(self._feature(feature_id, theme_id, scope, point, source, value, units))
+        def source_quality(symbols: Iterable[str], *dependency_points: str) -> str:
+            rows: list[dict[str, Any]] = []
+            for dependency_point in dependency_points or (point,):
+                point_rows = self.rows.get(dependency_point)
+                if point_rows is None:
+                    return "INCOMPLETE_SOURCE"
+                for symbol in symbols:
+                    row = point_rows.get(symbol)
+                    if row is None or row.get("observation_status") != "CAPTURED":
+                        return "INCOMPLETE_SOURCE"
+                    rows.append(row)
+            quote_statuses = {str(row.get("quote", {}).get("status")) for row in rows}
+            if "STALE" in quote_statuses:
+                return "STALE_SOURCE"
+            if not quote_statuses or not quote_statuses <= {"READY"}:
+                return "INCOMPLETE_SOURCE"
+            return "VALID"
 
-        number("etf_intraday_return", etf_return)
-        number("relative_to_spy_return", None if etf_return is None or spy_return is None else etf_return - spy_return)
-        number("relative_to_industry_return", None if etf_return is None or industry_return is None else etf_return - industry_return)
-        number("basket_mean_return", _mean(values) if values else None)
-        number("basket_median_return", median(values) if values else None)
-        number("constituent_positive_breadth", sum(value > 0 for value in values) / len(values) if values else None, "proportion")
-        number("constituent_negative_breadth", sum(value < 0 for value in values) / len(values) if values else None, "proportion")
-        number("residual_breadth", sum(value > (spy_return or 0.0) for value in values) / len(values) if values and spy_return is not None else None, "proportion")
+        def number(
+            feature_id: str,
+            value: float | None,
+            units: str = "decimal_return",
+            reason: str = "required_price_missing",
+            *,
+            evidence_quality: str = "VALID",
+            model_input_eligible: bool | None = None,
+        ) -> None:
+            if value is None or not math.isfinite(value):
+                out.append(
+                    self._not_available(
+                        feature_id,
+                        theme_id,
+                        scope,
+                        point,
+                        source,
+                        units,
+                        reason,
+                        evidence_quality="INCOMPLETE_SOURCE",
+                    )
+                )
+            else:
+                out.append(
+                    self._feature(
+                        feature_id,
+                        theme_id,
+                        scope,
+                        point,
+                        source,
+                        value,
+                        units,
+                        evidence_quality=evidence_quality,
+                        model_input_eligible=model_input_eligible,
+                    )
+                )
+
+        etf_quality = source_quality((etf,), "open_snapshot", point)
+        spy_quality = source_quality((etf, "SPY"), "open_snapshot", point)
+        industry_quality = source_quality((etf, industry), "open_snapshot", point)
+        basket_quality = source_quality(basket, "open_snapshot", point)
+        baseline_quality = "BASELINE_ONLY" if is_open else None
+
+        number(
+            "etf_intraday_return",
+            etf_return,
+            evidence_quality=baseline_quality or etf_quality,
+        )
+        number(
+            "relative_to_spy_return",
+            None if etf_return is None or spy_return is None else etf_return - spy_return,
+            evidence_quality=baseline_quality or spy_quality,
+        )
+        number(
+            "relative_to_industry_return",
+            None
+            if etf_return is None or industry_return is None
+            else etf_return - industry_return,
+            evidence_quality=baseline_quality or industry_quality,
+        )
+        number(
+            "basket_mean_return",
+            _mean(values) if values else None,
+            evidence_quality=baseline_quality or basket_quality,
+        )
+        number(
+            "basket_median_return",
+            median(values) if values else None,
+            evidence_quality=baseline_quality or basket_quality,
+        )
+
+        if is_open:
+            for feature_id in (
+                "constituent_positive_breadth",
+                "constituent_negative_breadth",
+                "residual_breadth",
+            ):
+                out.append(
+                    self._not_available(
+                        feature_id,
+                        theme_id,
+                        scope,
+                        point,
+                        source,
+                        "proportion",
+                        "open_baseline_has_no_path_information",
+                        not_applicable=True,
+                    )
+                )
+        else:
+            number(
+                "constituent_positive_breadth",
+                sum(value > 0 for value in values) / len(values) if values else None,
+                "proportion",
+                evidence_quality=basket_quality,
+            )
+            number(
+                "constituent_negative_breadth",
+                sum(value < 0 for value in values) / len(values) if values else None,
+                "proportion",
+                evidence_quality=basket_quality,
+            )
+            number(
+                "residual_breadth",
+                sum(value > spy_return for value in values) / len(values)
+                if values and spy_return is not None
+                else None,
+                "proportion",
+                evidence_quality=(
+                    "STALE_SOURCE"
+                    if "STALE_SOURCE" in {basket_quality, spy_quality}
+                    else "INCOMPLETE_SOURCE"
+                    if "INCOMPLETE_SOURCE" in {basket_quality, spy_quality}
+                    else "VALID"
+                ),
+            )
 
         minute_volumes = [
             float(current[symbol]["minute_bar"]["volume"])
             for symbol in basket
             if symbol in current and current[symbol].get("minute_bar", {}).get("status") == "READY"
         ]
-        if point == "open_snapshot" and not minute_volumes:
-            out.append(self._not_available("volume_breadth", theme_id, scope, point, source, "proportion", "open_minute_bar_not_yet_defined", not_applicable=True))
+        if is_open:
+            for feature_id in ("volume_coverage", "volume_breadth"):
+                out.append(
+                    self._not_available(
+                        feature_id,
+                        theme_id,
+                        scope,
+                        point,
+                        source,
+                        "proportion",
+                        "open_minute_bar_not_yet_defined",
+                        not_applicable=True,
+                    )
+                )
         else:
-            number("volume_breadth", sum(volume > 0 for volume in minute_volumes) / len(basket) if minute_volumes else None, "proportion", "minute_volume_missing")
+            coverage = len(minute_volumes) / len(basket) if basket else None
+            number(
+                "volume_coverage",
+                coverage,
+                "proportion",
+                "minute_volume_missing",
+                evidence_quality=(
+                    "VALID" if coverage == 1.0 else "INCOMPLETE_SOURCE"
+                ),
+            )
+            out.append(
+                self._not_available(
+                    "volume_breadth",
+                    theme_id,
+                    scope,
+                    point,
+                    source,
+                    "proportion",
+                    "historical_time_of_day_volume_calibration_unavailable",
+                    not_calibrated=True,
+                )
+            )
 
-        abs_total = sum(abs(value) for value in values)
-        number("single_name_concentration", max((abs(value) for value in values), default=0.0) / abs_total if abs_total else 0.0, "proportion")
-        ordered = sorted(values, reverse=True)
-        number("leader_rest_gap", ordered[0] - _mean(ordered[1:]) if len(ordered) > 1 else None)
-        agreement = None if etf_return is None or not values else (etf_return >= 0) == (_mean(values) >= 0)
-        if agreement is None:
-            out.append(self._not_available("etf_basket_agreement", theme_id, scope, point, source, "boolean", "required_returns_missing"))
+        if is_open:
+            units_by_feature = {
+                "single_name_concentration": "proportion",
+                "leader_rest_gap": "decimal_return",
+                "etf_basket_agreement": "boolean",
+                "return_dispersion": "decimal_return",
+            }
+            for feature_id, units in units_by_feature.items():
+                out.append(
+                    self._not_available(
+                        feature_id,
+                        theme_id,
+                        scope,
+                        point,
+                        source,
+                        units,
+                        "open_baseline_has_no_path_information",
+                        not_applicable=True,
+                    )
+                )
         else:
-            out.append(self._feature("etf_basket_agreement", theme_id, scope, point, source, agreement, "boolean"))
-        number("return_dispersion", pstdev(values) if len(values) > 1 else None, "decimal_return")
+            abs_total = sum(abs(value) for value in values)
+            number(
+                "single_name_concentration",
+                max((abs(value) for value in values), default=0.0) / abs_total
+                if abs_total
+                else None,
+                "proportion",
+                "constituent_move_total_is_zero",
+                evidence_quality=basket_quality,
+            )
+            ordered = sorted(values, reverse=True)
+            number(
+                "leader_rest_gap",
+                ordered[0] - _mean(ordered[1:]) if len(ordered) > 1 else None,
+                evidence_quality=basket_quality,
+            )
+            agreement = (
+                None
+                if etf_return is None or not values
+                else (etf_return >= 0) == (_mean(values) >= 0)
+            )
+            agreement_quality = (
+                "STALE_SOURCE"
+                if "STALE_SOURCE" in {etf_quality, basket_quality}
+                else "INCOMPLETE_SOURCE"
+                if "INCOMPLETE_SOURCE" in {etf_quality, basket_quality}
+                else "VALID"
+            )
+            if agreement is None:
+                out.append(
+                    self._not_available(
+                        "etf_basket_agreement",
+                        theme_id,
+                        scope,
+                        point,
+                        source,
+                        "boolean",
+                        "required_returns_missing",
+                    )
+                )
+            else:
+                out.append(
+                    self._feature(
+                        "etf_basket_agreement",
+                        theme_id,
+                        scope,
+                        point,
+                        source,
+                        agreement,
+                        "boolean",
+                        evidence_quality=agreement_quality,
+                    )
+                )
+            number(
+                "return_dispersion",
+                pstdev(values) if len(values) > 1 else None,
+                "decimal_return",
+                evidence_quality=basket_quality,
+            )
 
         etf_row = current.get(etf, {})
         vwap = etf_row.get("vwap", {})
         if vwap.get("status") == "NOT_YET_DEFINED":
-            out.append(self._not_available("vwap_distance", theme_id, etf, point, source, "decimal_return", "vwap_not_yet_defined_at_open", not_applicable=point == "open_snapshot"))
+            out.append(
+                self._not_available(
+                    "vwap_distance",
+                    theme_id,
+                    etf,
+                    point,
+                    source,
+                    "decimal_return",
+                    "vwap_not_yet_defined_at_open",
+                    not_applicable=is_open,
+                )
+            )
         else:
-            vwap_value = float(vwap["value"]) if vwap.get("status") == "READY" and vwap.get("value") else None
-            number("vwap_distance", change(etf_price, vwap_value), "decimal_return", "vwap_missing")
-        bar = etf_row.get("minute_bar", {})
-        if bar.get("status") == "NOT_YET_DEFINED":
-            out.append(self._not_available("range_position", theme_id, etf, point, source, "unit_interval", "minute_bar_not_yet_defined_at_open", not_applicable=point == "open_snapshot"))
+            vwap_value = (
+                float(vwap["value"])
+                if vwap.get("status") == "READY" and vwap.get("value")
+                else None
+            )
+            number(
+                "vwap_distance",
+                change(etf_price, vwap_value),
+                "decimal_return",
+                "vwap_missing",
+                evidence_quality=etf_quality,
+            )
+
+        session_range = etf_row.get("session_range", {})
+        if is_open:
+            out.append(
+                self._not_available(
+                    "range_position",
+                    theme_id,
+                    etf,
+                    point,
+                    source,
+                    "unit_interval",
+                    "session_range_not_yet_defined_at_open",
+                    not_applicable=True,
+                )
+            )
         else:
-            high = float(bar["high"]) if bar.get("high") is not None else None
-            low = float(bar["low"]) if bar.get("low") is not None else None
-            position = None if etf_price is None or high is None or low is None or high == low else (etf_price - low) / (high - low)
-            number("range_position", position, "unit_interval", "minute_range_missing_or_flat")
+            high = (
+                float(session_range["high"])
+                if session_range.get("status") == "READY"
+                and session_range.get("high") is not None
+                else None
+            )
+            low = (
+                float(session_range["low"])
+                if session_range.get("status") == "READY"
+                and session_range.get("low") is not None
+                else None
+            )
+            position = (
+                None
+                if etf_price is None
+                or high is None
+                or low is None
+                or high <= low
+                else (etf_price - low) / (high - low)
+            )
+            if position is not None and not 0.0 <= position <= 1.0:
+                raise ValueError("range_position calculation is outside [0,1]")
+            number(
+                "range_position",
+                position,
+                "unit_interval",
+                "cumulative_session_range_missing_or_flat",
+                evidence_quality=etf_quality,
+            )
 
         for feature_id, left, right, valid_point in (
             ("preclose_decision_confirmation", "preclose_snapshot", "decision_snapshot", "decision_snapshot"),
@@ -367,30 +750,117 @@ class CompletedRunFeatureCompiler:
             comparison_source = self._source("open_snapshot", left, right)
             left_return = change(_source_price(self.rows.get(left, {}).get(etf)), etf_open)
             right_return = change(_source_price(self.rows.get(right, {}).get(etf)), etf_open)
-            confirmed = None if left_return is None or right_return is None else (left_return >= 0) == (right_return >= 0)
+            confirmed = (
+                None
+                if left_return is None or right_return is None
+                else (left_return >= 0) == (right_return >= 0)
+            )
+            confirmation_quality = source_quality(
+                (etf,), "open_snapshot", left, right
+            )
             if confirmed is None:
-                out.append(self._not_available(feature_id, theme_id, etf, point, comparison_source, "boolean", "comparison_price_missing"))
+                out.append(
+                    self._not_available(
+                        feature_id,
+                        theme_id,
+                        etf,
+                        point,
+                        comparison_source,
+                        "boolean",
+                        "comparison_price_missing",
+                    )
+                )
             else:
-                out.append(self._feature(feature_id, theme_id, etf, point, comparison_source, confirmed, "boolean"))
+                out.append(
+                    self._feature(
+                        feature_id,
+                        theme_id,
+                        etf,
+                        point,
+                        comparison_source,
+                        confirmed,
+                        "boolean",
+                        evidence_quality=confirmation_quality,
+                    )
+                )
 
         quote = etf_row.get("quote", {})
         mid = quote.get("mid")
         spread = quote.get("quoted_spread")
-        number("spread_percent", float(spread) / float(mid) if spread is not None and mid not in (None, 0) else None, "decimal_fraction", "quote_spread_missing")
-        number("quote_freshness", _quote_age(etf_row), "seconds", "quote_timestamp_missing")
-        number("trade_freshness", _trade_age(etf_row), "seconds", "trade_timestamp_missing")
+        quote_quality = (
+            "STALE_SOURCE"
+            if quote.get("status") == "STALE"
+            else "VALID"
+            if quote.get("status") == "READY"
+            else "INCOMPLETE_SOURCE"
+        )
+        number(
+            "spread_percent",
+            float(spread) / float(mid)
+            if spread is not None and mid not in (None, 0)
+            else None,
+            "decimal_fraction",
+            "quote_spread_missing",
+            evidence_quality=quote_quality,
+        )
+        number(
+            "quote_freshness",
+            _quote_age(etf_row),
+            "seconds",
+            "quote_timestamp_missing",
+            evidence_quality="VALID",
+        )
+        number(
+            "trade_freshness",
+            _trade_age(etf_row),
+            "seconds",
+            "trade_timestamp_missing",
+            evidence_quality="VALID",
+        )
         payload = self.points[point]
-        number("event_time_dispersion", float(payload["event_time_dispersion_seconds"]) if payload.get("event_time_dispersion_seconds") is not None else None, "seconds", "event_time_dispersion_missing")
-        number("freeze_duration", float(payload["freeze_duration_seconds"]) if payload.get("freeze_duration_seconds") is not None else None, "seconds", "freeze_duration_missing")
+        number(
+            "event_time_dispersion",
+            float(payload["event_time_dispersion_seconds"])
+            if payload.get("event_time_dispersion_seconds") is not None
+            else None,
+            "seconds",
+            "event_time_dispersion_missing",
+        )
+        number(
+            "freeze_duration",
+            float(payload["freeze_duration_seconds"])
+            if payload.get("freeze_duration_seconds") is not None
+            else None,
+            "seconds",
+            "freeze_duration_missing",
+        )
         theme_rows = [current.get(etf), *(current.get(symbol) for symbol in basket)]
         ages = [age for row in theme_rows if (age := _quote_age(row)) is not None]
-        number("primary_feed_gap", max(ages) if ages else None, "seconds", "primary_quote_timestamp_missing")
+        number(
+            "primary_feed_gap",
+            max(ages) if ages else None,
+            "seconds",
+            "primary_quote_timestamp_missing",
+        )
         statuses = Counter(
-            str(row.get("rest_reconciliation", {}).get("quote_match_status", "UNKNOWN"))
+            _normalized_reconciliation_status(
+                row.get("rest_reconciliation", {}).get("quote_match_status")
+            )
             for row in theme_rows
             if row
         )
-        out.append(self._feature("rest_reconciliation_summary", theme_id, scope, point, source, dict(sorted(statuses.items())), "status_counts"))
+        out.append(
+            self._feature(
+                "rest_reconciliation_summary",
+                theme_id,
+                scope,
+                point,
+                source,
+                dict(sorted(statuses.items())),
+                "status_counts",
+                model_input_eligible=False,
+            )
+        )
         return out
 
 

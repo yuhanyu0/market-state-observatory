@@ -82,6 +82,8 @@ def _rest_symbol(symbol: str, event: datetime, *, bid: float = 100.0) -> SymbolC
         included_interval_end_utc=event.isoformat(),
         quote_age_seconds=0.1,
         rest_observed_at_utc=(event + timedelta(seconds=1)).isoformat(),
+        session_high=100.0,
+        session_low=99.0,
     )
 
 
@@ -183,6 +185,25 @@ def test_pit_observation_v3_schema_accepts_normalized_contract() -> None:
     validate_payload(payload, "private_observation_point", Path(__file__).resolve().parents[1])
 
 
+def test_session_range_explicitly_includes_frozen_primary_price() -> None:
+    scheduled = datetime(2026, 8, 17, 19, 45, tzinfo=UTC)
+    capture = PointCapture(
+        "decision_snapshot",
+        scheduled.isoformat(),
+        scheduled.isoformat(),
+        (_rest_symbol("SPY", scheduled),),
+        (),
+    )
+
+    payload = build_point_payload(capture, _freeze(["SPY"], scheduled), None)
+    session_range = payload["symbols"][0]["session_range"]
+
+    assert session_range["status"] == "READY"
+    assert session_range["source"] == "rest_sip_completed_bars_plus_primary_pit"
+    assert session_range["high"] == 100.01
+    assert session_range["low"] == 99.0
+
+
 def test_rest_disagreement_is_recorded_without_substitution() -> None:
     scheduled = datetime(2026, 8, 17, 19, 45, tzinfo=UTC)
     capture = PointCapture(
@@ -197,7 +218,37 @@ def test_rest_disagreement_is_recorded_without_substitution() -> None:
     row = payload["symbols"][0]
 
     assert row["quote"]["bid"] == 100.0
-    assert row["rest_reconciliation"]["quote_match_status"] == "DIFFERENT"
+    reconciliation = row["rest_reconciliation"]
+    assert reconciliation["quote_match_status"] == "MATERIAL_DIFFERENCE"
+    assert reconciliation["quote_price_difference"] == 1.0
+    assert reconciliation["quote_time_difference_seconds"] == 0.0
+    assert reconciliation["tolerance_version"] == "rest-reconciliation-v2"
+
+
+def test_rest_reconciliation_distinguishes_tolerance_and_asynchrony() -> None:
+    scheduled = datetime(2026, 8, 17, 19, 45, tzinfo=UTC)
+    within = _rest_symbol("SPY", scheduled, bid=100.005)
+    within.quote["ask"] = 100.025
+    asynchronous = _rest_symbol("QQQ", scheduled - timedelta(seconds=5), bid=99.0)
+    capture = PointCapture(
+        "decision_snapshot",
+        scheduled.isoformat(),
+        scheduled.isoformat(),
+        (within, asynchronous),
+        (),
+    )
+
+    payload = build_point_payload(capture, _freeze(["SPY", "QQQ"], scheduled), None)
+    rows = {row["symbol"]: row for row in payload["symbols"]}
+
+    assert rows["SPY"]["rest_reconciliation"]["quote_match_status"] == (
+        "MATCH_WITHIN_TOLERANCE"
+    )
+    assert rows["QQQ"]["rest_reconciliation"]["quote_match_status"] == "ASYNC_EXPECTED"
+    statuses = {
+        row["rest_reconciliation"]["quote_match_status"] for row in payload["symbols"]
+    }
+    assert "DIFFERENT" not in statuses
 
 
 def test_post_freeze_record_is_rejected_from_primary_pit() -> None:

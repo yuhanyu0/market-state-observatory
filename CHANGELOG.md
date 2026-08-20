@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0-rc2 - 2026-08-20
+
+- Separated feature calculation existence, evidence quality, and model-input eligibility with fail-closed stale-source propagation.
+- Replaced single-bar range position with cumulative-session range semantics and separated volume coverage from uncalibrated volume breadth.
+- Added incident-specific probes, descriptive/candidate/validated disagreement taxonomy, tolerance-aware REST reconciliation, and hardened Operator UX.
+- Kept the selected `v0.4.5` runtime, Scheduler, completed runs, authorization, positions, and orders unchanged.
+
 ## 0.5.0-rc1 - 2026-08-19
 
 - Added deterministic completed-run observation feature, provenance, quality, incident, report, and candidate-certificate sidecars.

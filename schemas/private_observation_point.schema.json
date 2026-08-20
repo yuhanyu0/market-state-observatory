@@ -30,7 +30,7 @@
         "type": "object",
         "required": [
           "symbol", "observation_status", "primary_pit_source", "quote",
-          "last_trade", "minute_bar", "vwap", "rest_reconciliation"
+          "last_trade", "minute_bar", "vwap", "session_range", "rest_reconciliation"
         ]
       }
     },

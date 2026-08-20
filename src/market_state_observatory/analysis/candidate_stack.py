@@ -44,7 +44,14 @@ def _config(name: str) -> tuple[dict[str, Any], str]:
 
 def _value(index: dict[tuple[str, str, str], dict[str, Any]], theme: str, point: str, feature: str) -> Any:
     row = index.get((theme, point, feature))
-    return row.get("value") if row and row.get("availability_status") == "AVAILABLE" else None
+    return (
+        row.get("value")
+        if row
+        and row.get("availability_status") == "AVAILABLE"
+        and row.get("evidence_quality") == "VALID"
+        and row.get("model_input_eligible") is True
+        else None
+    )
 
 
 def _candidate_state(score: float | None, negative: float, positive: float) -> str:
@@ -166,7 +173,8 @@ def build_transmission_candidate(features: dict[str, Any], theme_id: str) -> dic
         "return_dispersion",
     )
     inputs = {name: _value(index, theme_id, "decision_snapshot", name) for name in names}
-    missing = [name for name, value in inputs.items() if value is None]
+    required_names = tuple(name for name in names if name != "volume_breadth")
+    missing = [name for name in required_names if inputs[name] is None]
     blockers.extend(f"{name}_missing" for name in missing)
     input_ready = direction_ready and not missing
     state = "not_estimable"

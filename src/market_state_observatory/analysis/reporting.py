@@ -5,7 +5,7 @@ from html import escape
 from typing import Any
 
 from market_state_observatory.disagreement import detect_conflicts
-from market_state_observatory.next_probe import recommend_next_probe
+from market_state_observatory.next_probe import incident_next_probe, recommend_next_probe
 from market_state_observatory.observer_registry import ObserverRegistry
 
 from .candidate_stack import candidate_observer_estimates
@@ -49,6 +49,25 @@ def _theme_description(
     if not findings:
         findings.append("Observed structure did not meet a predeclared descriptive exception pattern.")
     return findings
+
+
+def _descriptive_structure_conflicts(
+    theme_id: str,
+    index: dict[tuple[str, str, str], dict[str, Any]],
+) -> list[dict[str, Any]]:
+    agreement = _available(
+        index, theme_id, "session_close_diagnostic", "etf_basket_agreement"
+    )
+    if agreement is False:
+        return [
+            {
+                "conflict_type": "ETF_BASKET_DIRECTION_DISAGREEMENT",
+                "evidence_level": "descriptive_structure",
+                "validated_observer_conflict": False,
+                "observation_point": "session_close_diagnostic",
+            }
+        ]
+    return []
 
 
 def _largest_contributors(compiler: CompletedRunFeatureCompiler, theme: dict[str, Any]) -> list[dict[str, Any]]:
@@ -152,6 +171,7 @@ def build_observation_report(
                 "constituent_positive_breadth",
                 "constituent_negative_breadth",
                 "residual_breadth",
+                "volume_coverage",
                 "volume_breadth",
                 "return_dispersion",
                 "single_name_concentration",
@@ -170,6 +190,7 @@ def build_observation_report(
             )
             conflicts = [row.to_dict() for row in detect_conflicts(estimates)]
             probe = recommend_next_probe(theme_id, estimates)
+        descriptive_conflicts = _descriptive_structure_conflicts(theme_id, index)
         themes.append(
             {
                 "theme_id": theme_id,
@@ -179,7 +200,9 @@ def build_observation_report(
                 "close_structure": metrics,
                 "largest_constituent_contributors": _largest_contributors(compiler, theme),
                 "descriptive_findings": _theme_description(theme_id, index),
-                "observer_disagreement": conflicts,
+                "descriptive_structure_conflicts": descriptive_conflicts,
+                "candidate_observer_conflicts": conflicts,
+                "validated_observer_conflicts": [],
                 "data_incident_exposure": {
                     "decision_quote_stale": freshness_failure,
                     "decision_observed_quote_age_max": incident_summary["observed_quote_age_max_by_point"].get("decision_snapshot"),
@@ -188,8 +211,23 @@ def build_observation_report(
                 "candidate_outputs": candidates,
             }
         )
+    latest_point = compiler.points.get("decision_snapshot") or compiler.run
+    probe_deadline = str(
+        latest_point.get("scheduled_at_utc")
+        or latest_point.get("created_at_utc")
+        or compiler.run["created_at_utc"]
+    )
+    run_probe = incident_next_probe(
+        "required_universe",
+        "STALE_PRIMARY_FEED"
+        if freshness_failure
+        else "MISSING_POINT"
+        if "decision_snapshot" not in compiler.points
+        else "EVENT_PROVENANCE_UNAVAILABLE",
+        probe_deadline,
+    )
     return {
-        "schema_version": "mso-observation-report-v1",
+        "schema_version": "mso-observation-report-v2",
         "run_id": compiler.run["run_id"],
         "trading_date": compiler.run["trading_date"],
         "release_version": compiler.run["release_version"],
@@ -217,7 +255,7 @@ def build_observation_report(
                 "Episode history is insufficient for a validated state.",
                 "Known-at corporate event context is unavailable.",
             ],
-            "F_next_useful_observation": "Acquire the next legal scheduled primary-feed observation; never reconstruct a missed point.",
+            "F_next_useful_observation": run_probe,
             "G_system_health": incident_summary,
             "H_authorization_boundary": {
                 **mode_authorization,
@@ -274,7 +312,13 @@ def report_markdown(report: dict[str, Any]) -> str:
             "",
             "## F. Next Useful Observation",
             "",
-            sections["F_next_useful_observation"],
+            f"Probe: `{sections['F_next_useful_observation']['probe_type']}`",
+            "",
+            sections["F_next_useful_observation"]["question"],
+            "",
+            *(f"- Acquire: {item}" for item in sections["F_next_useful_observation"]["acquire"]),
+            "",
+            "Past points cannot be reconstructed or backfilled.",
             "",
             "## G. System Health",
             "",

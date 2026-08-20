@@ -1,6 +1,6 @@
 # Market State Observatory
 
-> Development candidate: `v0.5.0-rc1` Observation-to-Decision Foundation. The active capture runtime remains frozen at `v0.4.5`.
+> Development candidate: `v0.5.0-rc2` Feature Semantics and Operator UX Hardening. The active capture runtime remains frozen at `v0.4.5`.
 
 **Auditable evidence-state infrastructure for incomplete market observers.**
 
@@ -119,7 +119,7 @@ python -m market_state_observatory build-daily-report `
   --mode OBSERVATION_ONLY
 ```
 
-`CANDIDATE_REPLAY` is retrospective and unvalidated. `MODEL_SHADOW` requires a separate promotion artifact, and paper/live execution remains unavailable. See [`OBSERVATION_TO_DECISION_FOUNDATION.md`](OBSERVATION_TO_DECISION_FOUNDATION.md).
+Every compiled feature separates calculation existence, evidence quality, and model-input eligibility. `CANDIDATE_REPLAY` is retrospective and unvalidated. `MODEL_SHADOW` requires a separate promotion artifact, and paper/live execution remains unavailable. See [`OBSERVATION_TO_DECISION_FOUNDATION.md`](OBSERVATION_TO_DECISION_FOUNDATION.md).
 
 ## Validation
 

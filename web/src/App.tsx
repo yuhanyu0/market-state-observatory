@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   Beaker,
   BookOpen,
-  Check,
   ChevronRight,
   Clipboard,
   Clock3,

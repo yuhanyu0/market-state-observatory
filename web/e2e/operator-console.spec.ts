@@ -9,8 +9,8 @@ let processHandle: ChildProcess;
 let operatorUrl: string;
 let runtimeRoot: string;
 
-test.beforeAll(async ({}, workerInfo) => {
-  const port = workerInfo.project.name === "mobile" ? 8878 : 8877;
+test.beforeAll(async ({ browserName: _browserName }, workerInfo) => {
+  const port = workerInfo.project.name === "mobile" ? 8878 : _browserName === "chromium" ? 8877 : 8879;
   operatorUrl = `http://127.0.0.1:${port}`;
   runtimeRoot = join(tmpdir(), `mso-v050-operator-${workerInfo.project.name}`);
   rmSync(runtimeRoot, { recursive: true, force: true });
@@ -44,9 +44,12 @@ test("private Operator Console pages remain factual and candidate-labeled", asyn
   await expect(page.getByRole("heading", { name: /Market State Observatory/ })).toBeVisible();
   await expect(page.getByText("127.0.0.1 only")).toBeVisible();
   await expect(page.getByText("Positions / orders")).toBeVisible();
+  const more = page.getByRole("button", { name: "More" });
+  if (await more.isVisible()) await more.click();
   await page.getByRole("button", { name: "Experiments" }).click();
   await expect(page.getByText("NOT CALIBRATED")).toBeVisible();
   await expect(page.getByText("MODEL_SHADOW_ONLY")).toBeVisible();
+  if (await more.isVisible()) await more.click();
   await page.getByRole("button", { name: "Promotion Gates" }).click();
   await expect(page.getByText("UNAVAILABLE")).toBeVisible();
 });

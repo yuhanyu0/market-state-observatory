@@ -34,6 +34,35 @@ class SidecarConflictError(RuntimeError):
     pass
 
 
+def _model_input_value(row: dict[str, Any]) -> Any:
+    return (
+        row.get("value")
+        if row.get("availability_status") == "AVAILABLE"
+        and row.get("evidence_quality") == "VALID"
+        and row.get("model_input_eligible") is True
+        else None
+    )
+
+
+def _descriptive_structure_conflicts(
+    features: dict[str, Any], theme_id: str
+) -> list[dict[str, Any]]:
+    index = feature_index(features)
+    agreement = index.get(
+        (theme_id, "session_close_diagnostic", "etf_basket_agreement")
+    )
+    if agreement and agreement.get("calculation_exists") and agreement.get("value") is False:
+        return [
+            {
+                "conflict_type": "ETF_BASKET_DIRECTION_DISAGREEMENT",
+                "evidence_level": "descriptive_structure",
+                "validated_observer_conflict": False,
+                "observation_point": "session_close_diagnostic",
+            }
+        ]
+    return []
+
+
 def _is_within(path: Path, parent: Path) -> bool:
     try:
         path.resolve().relative_to(parent.resolve())
@@ -75,13 +104,15 @@ def _candidate_bundle(
     breadth = index[(theme_id, "decision_snapshot", "constituent_positive_breadth")]
     confirmation = index[(theme_id, "decision_snapshot", "preclose_decision_confirmation")]
     history = []
-    if relative["availability_status"] == "AVAILABLE" and breadth["availability_status"] == "AVAILABLE":
+    relative_value = _model_input_value(relative)
+    breadth_value = _model_input_value(breadth)
+    if relative_value is not None and breadth_value is not None:
         history.append(
             EpisodeObservation(
                 as_of,
-                float(relative["value"]),
-                float(breadth["value"]),
-                bool(confirmation["value"]) if confirmation["availability_status"] == "AVAILABLE" else False,
+                float(relative_value),
+                float(breadth_value),
+                bool(_model_input_value(confirmation) or False),
             )
         )
     directions = build_direction_candidates(features, theme_id)
@@ -91,6 +122,7 @@ def _candidate_bundle(
     estimates = candidate_observer_estimates(directions, transmission, episodes, fragility)
     conflicts = [row.to_dict() for row in detect_conflicts(estimates)]
     probe = recommend_next_probe(theme_id, estimates)
+    descriptive_conflicts = _descriptive_structure_conflicts(features, theme_id)
     selected_direction = next(row for row in directions if row["arm"] == "D1_TRANSPARENT_MULTI_FEATURE")
     selected_episode = next(row for row in episodes if row["arm"] == "E0_INTERPRETABLE_STATE_MACHINE")
     data_blocked = not bool(selected_direction["data_ready"])
@@ -110,7 +142,9 @@ def _candidate_bundle(
         "fragility": fragility,
         "event_context": {"state": "unavailable", "reason": "known_at_event_provenance_missing"},
         "observer_agreement": {"status": "INSUFFICIENT_VALIDATED_OBSERVERS", "candidate_conflict_count": len(conflicts)},
-        "observer_conflicts": conflicts,
+        "descriptive_structure_conflicts": descriptive_conflicts,
+        "candidate_observer_conflicts": conflicts,
+        "validated_observer_conflicts": [],
         "uncertainty": 1.0 if data_blocked else 0.55,
         "invalidation": ["candidate output is not validated", "point-in-time input becomes unavailable"],
         "next_probe": probe,

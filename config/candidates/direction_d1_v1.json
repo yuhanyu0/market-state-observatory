@@ -1,7 +1,7 @@
 {
   "arm": "D1_TRANSPARENT_MULTI_FEATURE",
   "calibration_status": "NOT_CALIBRATED",
-  "feature_set_version": "observation-features-v1",
+  "feature_set_version": "observation-features-v2",
   "negative_threshold": -0.0015,
   "positive_threshold": 0.0015,
   "version": "direction-d1-v1",

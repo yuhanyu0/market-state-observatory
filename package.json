@@ -1,7 +1,7 @@
 {
   "name": "market-state-observatory-web",
   "private": true,
-  "version": "0.5.0-rc.1",
+  "version": "0.5.0-rc.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.49.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
@@ -30,6 +31,7 @@
     "eslint": "^9.17.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^16.5.0",
     "jsdom": "^25.0.1",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.18.2",

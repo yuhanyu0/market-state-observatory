@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/observation_report.schema.json",
-  "title": "ObservationReportV1",
+  "title": "ObservationReportV2",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "run_id", "trading_date", "release_version", "experiment_lane", "headline", "execution_mode", "evidence_grade", "sections"],
   "properties": {
-    "schema_version": {"const": "mso-observation-report-v1"},
+    "schema_version": {"const": "mso-observation-report-v2"},
     "run_id": {"type": "string"},
     "trading_date": {"type": "string", "format": "date"},
     "release_version": {"type": "string"},
@@ -24,7 +24,7 @@
         "C_descriptive_theme_structure": {"type": "object"},
         "D_candidate_inference_status": {"type": "object"},
         "E_unknown_blocked_claims": {"type": "array", "items": {"type": "string"}},
-        "F_next_useful_observation": {"type": "string"},
+        "F_next_useful_observation": {"type": "object"},
         "G_system_health": {"type": "object"},
         "H_authorization_boundary": {"type": "object"}
       }

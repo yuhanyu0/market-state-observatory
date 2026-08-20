@@ -74,6 +74,8 @@ class SymbolCapture:
     included_interval_end_utc: str | None
     quote_age_seconds: float | None
     rest_observed_at_utc: str
+    session_high: float | None = None
+    session_low: float | None = None
 
 
 @dataclass(frozen=True)
@@ -303,6 +305,12 @@ class AlpacaSIPAdapter:
                 for item in legal_bars
             )
             latest = legal_bars[-1] if legal_bars else None
+            session_high = (
+                max(float(item["h"]) for item in legal_bars) if legal_bars else None
+            )
+            session_low = (
+                min(float(item["l"]) for item in legal_bars) if legal_bars else None
+            )
             bar_status = "READY" if latest else ("NOT_YET_DEFINED" if at_exact_open else "MISSING")
             vwap = numerator / volume if volume > 0 else None
             vwap_status = "READY" if vwap is not None else (
@@ -344,6 +352,8 @@ class AlpacaSIPAdapter:
                     ),
                     quote_age_seconds=quote_age,
                     rest_observed_at_utc=quote_result.observed_at_utc,
+                    session_high=session_high,
+                    session_low=session_low,
                 )
             )
         return PointCapture(

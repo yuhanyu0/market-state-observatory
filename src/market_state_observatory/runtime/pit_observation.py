@@ -114,12 +114,67 @@ def _bar_field(
     }
 
 
-def _match_status(primary: dict[str, Any], rest: dict[str, Any] | None, keys: tuple[str, ...]) -> str:
+RECONCILIATION_TOLERANCE_VERSION = "rest-reconciliation-v2"
+RECONCILIATION_TIME_TOLERANCE_SECONDS = 2.0
+RECONCILIATION_PRICE_TOLERANCE_BPS = 1.0
+
+
+def _reconciliation_detail(
+    primary: dict[str, Any],
+    rest: dict[str, Any] | None,
+    keys: tuple[str, ...],
+) -> dict[str, Any]:
     if primary.get("status") != "READY":
-        return "PRIMARY_NOT_READY"
+        return {
+            "status": "PRIMARY_NOT_READY",
+            "price_difference": None,
+            "time_difference_seconds": None,
+        }
     if rest is None:
-        return "REST_MISSING"
-    return "MATCH" if all(primary.get(key) == rest.get(key) for key in keys) else "DIFFERENT"
+        return {
+            "status": "REST_UNAVAILABLE",
+            "price_difference": None,
+            "time_difference_seconds": None,
+        }
+    price_keys = tuple(key for key in keys if key != "volume")
+    if any(primary.get(key) is None or rest.get(key) is None for key in price_keys):
+        return {
+            "status": "REST_UNAVAILABLE",
+            "price_difference": None,
+            "time_difference_seconds": None,
+        }
+    differences = [abs(float(primary[key]) - float(rest[key])) for key in price_keys]
+    price_difference = max(differences, default=0.0)
+    reference = max(
+        [abs(float(primary[key])) for key in price_keys]
+        + [abs(float(rest[key])) for key in price_keys],
+        default=0.0,
+    )
+    price_tolerance = max(0.0001, reference * RECONCILIATION_PRICE_TOLERANCE_BPS / 10_000)
+    primary_time = primary.get("provider_event_time_utc")
+    rest_time = rest.get("event_time_utc")
+    time_difference = (
+        abs((parse_utc(str(primary_time)) - parse_utc(str(rest_time))).total_seconds())
+        if primary_time and rest_time
+        else None
+    )
+    if price_difference <= price_tolerance and (
+        time_difference is None
+        or time_difference <= RECONCILIATION_TIME_TOLERANCE_SECONDS
+    ):
+        status = "MATCH_WITHIN_TOLERANCE"
+    elif (
+        time_difference is not None
+        and time_difference > RECONCILIATION_TIME_TOLERANCE_SECONDS
+    ):
+        status = "ASYNC_EXPECTED"
+    else:
+        status = "MATERIAL_DIFFERENCE"
+    return {
+        "status": status,
+        "price_difference": price_difference,
+        "time_difference_seconds": time_difference,
+    }
 
 
 def _rest_reconciliation(
@@ -139,20 +194,69 @@ def _rest_reconciliation(
             "rest_quote_status": "UNAVAILABLE",
             "rest_trade_status": "UNAVAILABLE",
             "rest_bar_status": "UNAVAILABLE",
+            "tolerance_version": RECONCILIATION_TOLERANCE_VERSION,
+            "quote_price_difference": None,
+            "quote_time_difference_seconds": None,
+            "trade_price_difference": None,
+            "trade_time_difference_seconds": None,
+            "minute_bar_price_difference": None,
+            "minute_bar_time_difference_seconds": None,
         }
+    quote_detail = _reconciliation_detail(quote, rest.quote, ("bid", "ask"))
+    trade_detail = _reconciliation_detail(trade, rest.last_trade, ("price",))
+    bar_detail = _reconciliation_detail(
+        bar, rest.minute_bar, ("open", "high", "low", "close", "volume")
+    )
     return {
         "source": "rest_sip",
         "role": "backup_reconciliation_and_derived_features_only",
         "retrieved_at_utc": rest.rest_observed_at_utc,
-        "quote_match_status": _match_status(quote, rest.quote, ("bid", "ask")),
-        "trade_match_status": _match_status(trade, rest.last_trade, ("price",)),
-        "minute_bar_match_status": _match_status(
-            bar, rest.minute_bar, ("open", "high", "low", "close", "volume")
-        ),
+        "quote_match_status": quote_detail["status"],
+        "trade_match_status": trade_detail["status"],
+        "minute_bar_match_status": bar_detail["status"],
+        "quote_price_difference": quote_detail["price_difference"],
+        "quote_time_difference_seconds": quote_detail["time_difference_seconds"],
+        "trade_price_difference": trade_detail["price_difference"],
+        "trade_time_difference_seconds": trade_detail["time_difference_seconds"],
+        "minute_bar_price_difference": bar_detail["price_difference"],
+        "minute_bar_time_difference_seconds": bar_detail["time_difference_seconds"],
+        "tolerance_version": RECONCILIATION_TOLERANCE_VERSION,
         "rest_quote_status": rest.quote_status,
         "rest_trade_status": rest.trade_status,
         "rest_bar_status": rest.bar_status,
     }
+
+
+def _session_range_field(
+    rest: SymbolCapture | None,
+    quote: dict[str, Any],
+    trade: dict[str, Any],
+    observation_point: str,
+) -> dict[str, Any]:
+    base = {
+        "source": "rest_sip_completed_bars_plus_primary_pit",
+        "included_interval_start_utc": rest.included_interval_start_utc if rest else None,
+        "included_interval_end_utc": rest.included_interval_end_utc if rest else None,
+        "retrieved_at_utc": rest.rest_observed_at_utc if rest else None,
+    }
+    if observation_point == "open_snapshot":
+        return {"status": "NOT_YET_DEFINED", "high": None, "low": None, **base}
+    if rest is None or rest.session_high is None or rest.session_low is None:
+        return {"status": "MISSING", "high": None, "low": None, **base}
+    high = float(rest.session_high)
+    low = float(rest.session_low)
+    current_price = (
+        float(trade["price"])
+        if trade.get("status") == "READY" and trade.get("price") is not None
+        else float(quote["mid"])
+        if quote.get("status") in {"READY", "STALE"} and quote.get("mid") is not None
+        else None
+    )
+    if current_price is not None:
+        high = max(high, current_price)
+        low = min(low, current_price)
+    status = "READY" if high > low else "MISSING"
+    return {"status": status, "high": high, "low": low, **base}
 
 
 def build_point_payload(
@@ -200,6 +304,9 @@ def build_point_payload(
                     "included_interval_end_utc": rest.included_interval_end_utc if rest else None,
                     "retrieved_at_utc": rest.rest_observed_at_utc if rest else None,
                 },
+                "session_range": _session_range_field(
+                    rest, quote, trade, capture.observation_point
+                ),
                 "rest_reconciliation": _rest_reconciliation(quote, trade, bar, rest),
             }
         )

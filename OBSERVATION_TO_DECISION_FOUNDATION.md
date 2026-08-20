@@ -1,6 +1,6 @@
 # Observation-to-Decision Foundation
 
-Status: `v0.5.0-rc1` candidate on a non-production feature branch.
+Status: `v0.5.0-rc2` candidate on a non-production feature branch.
 
 This release candidate adds a private read-only analysis sidecar around completed immutable capture runs. It does not alter the active `v0.4.5` capture release, Scheduler action, universe, or completed run evidence.
 

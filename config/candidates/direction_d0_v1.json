@@ -1,7 +1,7 @@
 {
   "arm": "D0_SIMPLE_RELATIVE",
   "calibration_status": "NOT_CALIBRATED",
-  "feature_set_version": "observation-features-v1",
+  "feature_set_version": "observation-features-v2",
   "negative_threshold": -0.001,
   "positive_threshold": 0.001,
   "version": "direction-d0-v1"

@@ -21,12 +21,16 @@ from market_state_observatory.analysis.experiment_runner import (
     register_experiment,
     run_registered_replay,
 )
-from market_state_observatory.analysis.feature_compiler import CompletedRunFeatureCompiler
+from market_state_observatory.analysis.feature_compiler import (
+    CompletedRunFeatureCompiler,
+    feature_index,
+)
 from market_state_observatory.execution_modes import (
     AuthorizationError,
     ExecutionMode,
     authorize_mode,
 )
+from market_state_observatory.next_probe import INCIDENT_TYPES, incident_next_probe
 from market_state_observatory.observer_registry import ObserverRegistry
 from market_state_observatory.runtime.quality_engine import evaluate_run_quality
 from market_state_observatory.runtime.websocket_incidents import WebSocketIncidentLedger
@@ -53,6 +57,22 @@ def _copy_fixture(tmp_path: Path) -> Path:
 
 def _load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _make_decision_point_clean(run: Path) -> None:
+    point = run / "manifests" / "points" / "decision_snapshot.json"
+    payload = _load(point)
+    for row in payload["symbols"]:
+        row["quote"]["status"] = "READY"
+        row["quote"]["freshness_age_seconds"] = 1.0
+        price = float(row["last_trade"]["price"])
+        row["session_range"] = {
+            "status": "READY",
+            "source": "synthetic_test_point_in_time_range",
+            "high": price * 1.01,
+            "low": price * 0.99,
+        }
+    point.write_text(json.dumps(payload), encoding="utf-8")
 
 
 def test_execution_modes_fail_closed() -> None:
@@ -110,6 +130,8 @@ def test_818_acceptance_report_is_blocked_and_descriptive(tmp_path: Path) -> Non
     assert health["stream_chunk_count"] == 8
     assert quality["decision_primary_quote_count"] == 35
     assert quality["decision_stale_quote_count"] == 35
+    assert quality["stale_model_input_eligible_count"] == 0
+    assert quality["valid_unit_interval_violation_count"] == 0
     assert 141 <= quality["observed_quote_age_max"] <= 162
     assert report["headline"] == "NO DECISION / PRIMARY FEED FRESHNESS FAILURE"
     themes = {row["theme_id"]: row for row in report["sections"]["C_descriptive_theme_structure"]["themes"]}
@@ -129,17 +151,73 @@ def test_818_acceptance_report_is_blocked_and_descriptive(tmp_path: Path) -> Non
         assert candidate["episode"][0]["state"] == "not_estimable"
         assert candidate["certificate"]["decision_status"] == "DATA_BLOCKED_NO_DECISION"
 
+    assert themes["cloud_computing"]["descriptive_structure_conflicts"] == [
+        {
+            "conflict_type": "ETF_BASKET_DIRECTION_DISAGREEMENT",
+            "evidence_level": "descriptive_structure",
+            "validated_observer_conflict": False,
+            "observation_point": "session_close_diagnostic",
+        }
+    ]
+    assert themes["commercial_space"]["descriptive_structure_conflicts"]
+    assert all(not row["validated_observer_conflicts"] for row in themes.values())
 
-def test_open_not_yet_defined_is_not_applicable() -> None:
+    probe = report["sections"]["F_next_useful_observation"]
+    assert probe["probe_type"] == "STALE_PRIMARY_FEED"
+    assert probe["question"] == (
+        "Will the next preregistered decision snapshot restore fresh primary evidence "
+        "across the required universe?"
+    )
+    assert probe["acquire"] == [
+        "next legal 15:45 snapshot",
+        "connection-event ledger",
+        "first-message-after-reconnect",
+        "recovered-symbol coverage",
+    ]
+    assert probe["past_point_reconstruction_allowed"] is False
+
+
+def test_open_baseline_does_not_create_path_signals() -> None:
     features, _, quality = CompletedRunFeatureCompiler(FIXTURE).compile()
+    path_features = {
+        "etf_intraday_return",
+        "relative_to_spy_return",
+        "relative_to_industry_return",
+        "basket_mean_return",
+        "basket_median_return",
+    }
+    not_applicable_features = {
+        "constituent_positive_breadth",
+        "constituent_negative_breadth",
+        "residual_breadth",
+        "volume_coverage",
+        "volume_breadth",
+        "single_name_concentration",
+        "leader_rest_gap",
+        "etf_basket_agreement",
+        "return_dispersion",
+        "vwap_distance",
+        "range_position",
+    }
+    baseline_rows = [
+        row
+        for row in features["features"]
+        if row["observation_point"] == "open_snapshot"
+        and row["feature_id"] in path_features
+    ]
     open_rows = [
         row
         for row in features["features"]
         if row["observation_point"] == "open_snapshot"
-        and row["feature_id"] in {"vwap_distance", "range_position", "volume_breadth"}
+        and row["feature_id"] in not_applicable_features
     ]
-    assert len(open_rows) == 18
+    assert len(baseline_rows) == 30
+    assert all(row["evidence_quality"] == "BASELINE_ONLY" for row in baseline_rows)
+    assert all(row["model_input_eligible"] is False for row in baseline_rows)
+    assert len(open_rows) == 66
     assert all(row["availability_status"] == "NOT_APPLICABLE" for row in open_rows)
+    agreements = [row for row in open_rows if row["feature_id"] == "etf_basket_agreement"]
+    assert all(row["value"] is None and row["calculation_exists"] is False for row in agreements)
     assert quality["open_not_yet_defined_excluded_from_readiness"] is True
 
 
@@ -147,10 +225,113 @@ def test_feature_compiler_is_deterministic_and_timestamped() -> None:
     first = CompletedRunFeatureCompiler(FIXTURE).compile()[0]
     second = CompletedRunFeatureCompiler(FIXTURE).compile()[0]
     assert first == second
-    assert len(first["features"]) == 864
+    assert len(first["features"]) == 900
     for row in first["features"]:
         assert row["data_max_timestamp"] <= row["observed_at_utc"]
         assert len(row["calculation_sha256"]) == 64
+
+
+def test_stale_forensic_values_are_never_candidate_inputs() -> None:
+    features, _, quality = CompletedRunFeatureCompiler(FIXTURE).compile()
+    index = feature_index(features)
+    stale_dependencies = {
+        "relative_to_spy_return",
+        "relative_to_industry_return",
+        "etf_intraday_return",
+        "basket_mean_return",
+        "basket_median_return",
+        "constituent_positive_breadth",
+        "constituent_negative_breadth",
+        "residual_breadth",
+        "single_name_concentration",
+        "leader_rest_gap",
+        "etf_basket_agreement",
+        "return_dispersion",
+        "vwap_distance",
+        "preclose_decision_confirmation",
+    }
+    rows = [
+        row
+        for key, row in index.items()
+        if key[1] == "decision_snapshot" and key[2] in stale_dependencies
+    ]
+    assert rows
+    assert all(row["evidence_quality"] == "STALE_SOURCE" for row in rows)
+    assert all(row["calculation_exists"] is True for row in rows)
+    assert all(row["model_input_eligible"] is False for row in rows)
+    assert quality["stale_model_input_eligible_count"] == 0
+
+    directions = build_direction_candidates(features, "semiconductors")
+    assert all(not row["candidate_estimated"] for row in directions)
+    assert all(all(value is None for value in row["inputs"].values()) for row in directions)
+
+    close_confirmation = index[
+        ("semiconductors", "session_close_diagnostic", "decision_close_confirmation")
+    ]
+    assert close_confirmation["calculation_exists"] is True
+    assert close_confirmation["evidence_quality"] == "STALE_SOURCE"
+    assert close_confirmation["model_input_eligible"] is False
+
+
+def test_range_position_uses_strict_cumulative_session_range(tmp_path: Path) -> None:
+    run = _copy_fixture(tmp_path)
+    _make_decision_point_clean(run)
+    features, _, quality = CompletedRunFeatureCompiler(run).compile()
+    valid_ranges = [
+        row
+        for row in features["features"]
+        if row["feature_id"] == "range_position" and row["evidence_quality"] == "VALID"
+    ]
+    assert len(valid_ranges) == 6
+    assert all(0.0 <= float(row["value"]) <= 1.0 for row in valid_ranges)
+    assert quality["valid_unit_interval_violation_count"] == 0
+
+    point = run / "manifests" / "points" / "decision_snapshot.json"
+    payload = _load(point)
+    cibr = next(row for row in payload["symbols"] if row["symbol"] == "CIBR")
+    cibr["session_range"] = {"status": "READY", "high": 1.0, "low": 0.5}
+    point.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ValueError, match="range_position calculation is outside"):
+        CompletedRunFeatureCompiler(run).compile()
+
+
+def test_volume_coverage_and_volume_breadth_are_distinct() -> None:
+    features, _, _ = CompletedRunFeatureCompiler(FIXTURE).compile()
+    rows = features["features"]
+    coverage = [
+        row
+        for row in rows
+        if row["feature_id"] == "volume_coverage"
+        and row["observation_point"] != "open_snapshot"
+    ]
+    breadth = [
+        row
+        for row in rows
+        if row["feature_id"] == "volume_breadth"
+        and row["observation_point"] != "open_snapshot"
+    ]
+    assert len(coverage) == len(breadth) == 30
+    assert any(row["calculation_exists"] for row in coverage)
+    assert all(row["availability_status"] == "NOT_CALIBRATED" for row in breadth)
+    assert all(row["calculation_exists"] is False for row in breadth)
+    assert all(row["model_input_eligible"] is False for row in breadth)
+
+
+def test_all_incident_types_have_structured_non_backfill_probes() -> None:
+    assert {
+        "MISSING_POINT",
+        "STALE_PRIMARY_FEED",
+        "MEMBERSHIP_UNAVAILABLE",
+        "EVENT_PROVENANCE_UNAVAILABLE",
+        "INSUFFICIENT_HISTORY",
+    } == INCIDENT_TYPES
+    for incident_type in INCIDENT_TYPES:
+        probe = incident_next_probe(
+            "semiconductors", incident_type, "2026-08-18T19:45:00+00:00"
+        )
+        assert probe["probe_type"] == incident_type
+        assert probe["past_point_reconstruction_allowed"] is False
+        validate_payload(probe, "next_probe")
 
 
 def test_future_source_timestamp_is_rejected(tmp_path: Path) -> None:
@@ -175,12 +356,7 @@ def test_missing_decision_point_remains_descriptive(tmp_path: Path) -> None:
 
 def test_clean_decision_inputs_estimate_candidates_but_never_validate(tmp_path: Path) -> None:
     run = _copy_fixture(tmp_path)
-    point = run / "manifests" / "points" / "decision_snapshot.json"
-    payload = _load(point)
-    for row in payload["symbols"]:
-        row["quote"]["status"] = "READY"
-        row["quote"]["freshness_age_seconds"] = 1.0
-    point.write_text(json.dumps(payload), encoding="utf-8")
+    _make_decision_point_clean(run)
     features = CompletedRunFeatureCompiler(run).compile()[0]
     directions = build_direction_candidates(features, "cybersecurity")
     transmission = build_transmission_candidate(features, "cybersecurity")
@@ -188,7 +364,9 @@ def test_clean_decision_inputs_estimate_candidates_but_never_validate(tmp_path: 
     assert all(row["candidate_estimated"] for row in directions)
     assert all(row["validated_model"] is False and row["decision_eligible"] is False for row in directions)
     assert transmission["transmission_input_readiness"] is True
+    assert transmission["candidate_estimated"] is True
     assert transmission["validated_transmission_state"] is None
+    assert transmission["decision_eligible"] is False
 
 
 def test_episode_minimum_history_and_state_transition() -> None:
