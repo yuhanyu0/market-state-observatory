@@ -1,0 +1,30 @@
+{
+  "schema_version": "mso-model-disposition-v1",
+  "registry_version": "MODEL_DISPOSITION_V1",
+  "frozen_at_utc": "2026-08-21T20:30:00+00:00",
+  "frozen_parent_commit": "b91308d70d318567697dd4019648d47dc81c61de",
+  "historical_validation_commit": "451a347342181a96349279515dc6dbad382303f3",
+  "historical_validation_report_sha256": "b7b128da7aeebc2c6d2d5d0e8d714ccbc53ab4e458739f64abe22838924e823f",
+  "historical_model_comparison_sha256": "9c42878d6b46723d6b78f40a8882154d18f8972757030960b261977d2c83354a",
+  "historical_file_manifest_sha256": "4557d50897e8dda1ccded5bbb8a3dda54ea061bc7fa805b41b67473353be0648",
+  "research_outputs_embedded_in_production": false,
+  "retired_models_may_reactivate_from_config": false,
+  "models": {
+    "D0_H2_SIMPLE_RELATIVE": {"disposition": "RETIRED_NEGATIVE_CONTROL", "production_activation_allowed": false},
+    "D1_H2_DAILY_RECONSTRUCTED": {"disposition": "RETIRED_STANDALONE_SIGNAL", "production_activation_allowed": false},
+    "D2_H2_PROBABILISTIC": {"disposition": "RETIRED_CALIBRATION_FAILURE", "production_activation_allowed": false},
+    "HISTORICAL_TRANSPARENT_BASELINE": {"disposition": "RETIRED", "production_activation_allowed": false},
+    "D0_PIT": {"disposition": "BASELINE_CONTROL_ONLY", "production_activation_allowed": false},
+    "D1_PIT_FULL": {"disposition": "AWAITING_PROSPECTIVE_LABELS", "production_activation_allowed": false},
+    "T0_PIT": {"disposition": "AWAITING_PROSPECTIVE_LABELS", "production_activation_allowed": false},
+    "E0": {"disposition": "DESCRIPTIVE_ONLY", "production_activation_allowed": false},
+    "E1": {"disposition": "AWAITING_MINIMUM_HISTORY", "production_activation_allowed": false},
+    "THEME_RADAR": {"disposition": "UNSIGNED_ATTENTION_ONLY", "production_activation_allowed": false},
+    "PLAYBOOK": {"disposition": "AWAITING_T_E_EVIDENCE", "production_activation_allowed": false}
+  },
+  "prospective_unvalidated": true,
+  "decision_eligible": false,
+  "counterfactual_only": true,
+  "paper_positions": 0,
+  "real_orders": 0
+}

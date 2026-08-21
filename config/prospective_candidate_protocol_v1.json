@@ -1,0 +1,90 @@
+{
+  "schema_version": "mso-prospective-candidate-protocol-v1",
+  "version": "prospective-candidate-protocol-v1",
+  "frozen_at_utc": "2026-08-21T20:30:00+00:00",
+  "execution_mode": "PROSPECTIVE_CANDIDATE_SHADOW",
+  "arms": [
+    "B0_ZERO",
+    "B1_THEME_ETF_5D_MOMENTUM",
+    "B2_SPY_RELATIVE_MOMENTUM",
+    "D0_PIT_CONTROL",
+    "D1_PIT_CORE",
+    "D1_PIT_FULL",
+    "T0_PIT",
+    "D1_PIT_CORE_PLUS_T",
+    "D1_PIT_CORE_PLUS_THEME_RADAR_ATTENTION",
+    "D1_PIT_CORE_PLUS_T_PLUS_E0"
+  ],
+  "d1_core_features": [
+    "relative_to_spy_return",
+    "relative_to_industry_return",
+    "basket_median_return",
+    "constituent_positive_breadth",
+    "vwap_distance",
+    "preclose_decision_confirmation"
+  ],
+  "d1_full_optional_features": ["range_position", "volume_breadth"],
+  "d1_core_weights": {
+    "relative_to_spy_return": 0.35,
+    "relative_to_industry_return": 0.2,
+    "basket_median_return": 0.2,
+    "constituent_positive_breadth_centered": 0.001,
+    "vwap_distance": 0.25,
+    "preclose_decision_confirmation": 0.0005
+  },
+  "negative_threshold": -0.0015,
+  "positive_threshold": 0.0015,
+  "theme_radar_role": "unsigned_attention_only",
+  "vehicles": {
+    "Theme_ETF": true,
+    "Theme_Basket": false,
+    "individual_torque": false,
+    "C2": false
+  },
+  "preclose": {
+    "candidate_schedule_et": "15:46:00",
+    "execution_quote_schedule_et": "15:47:00",
+    "decision_snapshot_et": "15:45:00",
+    "maximum_decision_quote_age_seconds": 60,
+    "maximum_execution_quote_age_seconds": 60,
+    "execution_quote_must_follow_candidate": true,
+    "provider_endpoint": "https://data.alpaca.markets/v2",
+    "feed": "sip"
+  },
+  "postclose": {
+    "source_task": "MSO-Daily-Report",
+    "source_time_et": "16:15:00",
+    "earliest_entry": "next_trading_day_open"
+  },
+  "horizons": [
+    "preclose_quote_to_close",
+    "preclose_quote_to_next_open",
+    "preclose_quote_to_next_close",
+    "postclose_signal_next_open_to_next_close",
+    "next_open_to_3d_close",
+    "next_open_to_5d_close"
+  ],
+  "execution_price_contract": {
+    "long_entry": "post_candidate_sip_ask",
+    "long_exit": "future_sip_bid",
+    "short_entry": "post_candidate_sip_bid",
+    "short_cover": "future_sip_ask",
+    "gross_diagnostic": "mid_to_mid",
+    "fixed_cost_bps": [0, 5, 10, 15, 25, 50],
+    "mid_is_executable_claim": false
+  },
+  "gates": {
+    "count_unit": "distinct_valid_trading_date",
+    "theme_rows_inflate_sample_count": false,
+    "10": "operational_coverage_only",
+    "20": "early_failure_pruning_only_no_positive_promotion",
+    "40": "first_paired_ablation",
+    "60": "final_research_disposition_review"
+  },
+  "H2_MODEL_MINING_CLOSED": true,
+  "prospective_unvalidated": true,
+  "decision_eligible": false,
+  "counterfactual_only": true,
+  "paper_positions": 0,
+  "real_orders": 0
+}

@@ -170,10 +170,11 @@ try {
 
     Remove-Item -LiteralPath (Join-Path $TestRoot 'tree.json') -Force
     Remove-Item -LiteralPath (Join-Path $TestRoot 'launcher.json') -Force
+    $crashTaskName = "MSO-Lifecycle-Crash-$([Guid]::NewGuid().ToString('N').Substring(0,10))"
     $crashArguments = ConvertTo-WindowsCommandLine @(
         '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $PSCommandPath,
         '-PythonExecutable', $PythonExecutable, '-Mode', 'CrashLauncher', '-TestRoot', $TestRoot,
-        '-TaskName', 'MSO-Daily-Rehearsal'
+        '-TaskName', $crashTaskName
     )
     $crashLauncher = Start-Process -FilePath $windowsPowerShell -ArgumentList $crashArguments `
         -WorkingDirectory $root -WindowStyle Hidden -PassThru
@@ -200,7 +201,7 @@ try {
     $ownership = New-MsoProcessOwnershipRecord -RuntimeRoot $TestRoot `
         -OwnershipId ([Guid]::NewGuid().ToString('N')) -RuntimePid $owned.ProcessId `
         -JobName $owned.JobName -ReleaseVersion 'old-release' -ReleaseRoot $TestRoot `
-        -ReleasePython $PythonExecutable -Mode rehearsal -SchedulerTaskName 'MSO-Daily-Rehearsal'
+        -ReleasePython $PythonExecutable -Mode rehearsal -SchedulerTaskName $crashTaskName
     $owned.Resume()
     $selectionIdentityLive = Test-MsoProcessIdentity -Record $ownership.Record
     Write-Output "SELECTION_TEST_IDENTITY_LIVE=$selectionIdentityLive"
@@ -211,7 +212,7 @@ try {
     }
     Assert-True $selectionIdentityLive 'selection test process identity'
     $selectionRejected = $false
-    try { Assert-MsoReleaseSelectionSafe -RuntimeRoot $TestRoot }
+    try { Assert-MsoReleaseSelectionSafe -RuntimeRoot $TestRoot -TaskNames @() }
     catch {
         Write-Output "RELEASE_SELECTION_REJECTION_MESSAGE=$($_.Exception.Message)"
         $selectionRejected = $_.Exception.Message -match 'live MSO-owned process'
@@ -222,7 +223,7 @@ try {
     Assert-True (Wait-MsoCondition { -not (Test-PidAlive ([int]$ownership.Record.runtime_pid)) }) `
         'owned selection process stop'
     Set-MsoOwnershipExit -Path $ownership.Path -Status 'EXITED' -ExitCode 0
-    Assert-MsoReleaseSelectionSafe -RuntimeRoot $TestRoot
+    Assert-MsoReleaseSelectionSafe -RuntimeRoot $TestRoot -TaskNames @()
     Write-Output 'RELEASE_SELECTION_AFTER_CLEAN_STOP=PASS'
     Assert-True (Test-PidAlive $unrelated.Id) 'unrelated Python survival'
     Write-Output "UNRELATED_PYTHON_PID=$($unrelated.Id)"

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/prospective_signal_ledger.schema.json",
+  "title": "ProspectiveSignalLedgerRecordV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "signal_record_id", "candidate_id", "signal_date", "lane", "generated_at_utc", "candidate_signal_sha256", "candidate_manifest_sha256", "source_run_id", "source_snapshot_sha256", "candidate_status", "valid_trading_date", "official_strategy_evidence", "prospective_unvalidated", "decision_eligible", "counterfactual_only", "paper_positions", "real_orders"],
+  "properties": {
+    "schema_version": {"const": "mso-prospective-signal-ledger-v1"},
+    "signal_record_id": {"type": "string"}, "candidate_id": {"type": "string"},
+    "signal_date": {"type": "string", "format": "date"}, "lane": {"enum": ["preclose", "postclose"]},
+    "generated_at_utc": {"type": "string", "format": "date-time"},
+    "candidate_signal_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "candidate_manifest_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "source_run_id": {"type": "string"}, "source_snapshot_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "candidate_status": {"enum": ["FROZEN", "BLOCKED"]}, "valid_trading_date": {"type": "boolean"},
+    "official_strategy_evidence": {"type": "boolean"},
+    "prospective_unvalidated": {"const": true}, "decision_eligible": {"const": false}, "counterfactual_only": {"const": true},
+    "paper_positions": {"const": 0}, "real_orders": {"const": 0}
+  }
+}

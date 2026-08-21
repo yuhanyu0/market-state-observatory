@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/prospective_execution_quote.schema.json",
+  "title": "ProspectiveExecutionQuoteV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "candidate_id", "candidate_signal_sha256", "captured_at_utc", "endpoint", "feed", "status", "blocking_reasons", "quotes", "raw_response_sha256", "broker_order_object", "prospective_unvalidated", "decision_eligible", "counterfactual_only", "paper_positions", "real_orders"],
+  "properties": {
+    "schema_version": {"const": "mso-prospective-execution-quote-v1"}, "candidate_id": {"type": "string"},
+    "candidate_signal_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "captured_at_utc": {"type": "string", "format": "date-time"},
+    "endpoint": {"const": "https://data.alpaca.markets/v2"}, "feed": {"const": "sip"}, "status": {"enum": ["EXECUTION_QUOTE_READY", "BLOCKED"]},
+    "blocking_reasons": {"type": "array", "items": {"type": "string"}}, "quotes": {"type": "array", "items": {"type": "object"}},
+    "raw_response_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "broker_order_object": {"type": "null"},
+    "prospective_unvalidated": {"const": true}, "decision_eligible": {"const": false}, "counterfactual_only": {"const": true},
+    "paper_positions": {"const": 0}, "real_orders": {"const": 0}
+  }
+}

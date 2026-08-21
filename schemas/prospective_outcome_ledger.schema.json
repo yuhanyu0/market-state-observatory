@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/prospective_outcome_ledger.schema.json",
+  "title": "ProspectiveOutcomeLedgerRecordV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "outcome_record_id", "candidate_id", "arm", "horizon", "signal_date", "theme_id", "ticker", "predicted_sign", "entry", "exit", "returns", "label_event_time", "label_observed_at", "provider_source", "source_run", "source_snapshot_sha256", "settled_at", "settlement_run_id", "settlement_version", "status", "official_strategy_evidence", "prospective_unvalidated", "decision_eligible", "counterfactual_only", "paper_positions", "real_orders"],
+  "properties": {
+    "schema_version": {"const": "mso-prospective-outcome-ledger-v1"}, "outcome_record_id": {"type": "string"}, "candidate_id": {"type": "string"}, "arm": {"type": "string"},
+    "horizon": {"enum": ["preclose_quote_to_close", "preclose_quote_to_next_open", "preclose_quote_to_next_close", "postclose_signal_next_open_to_next_close", "next_open_to_3d_close", "next_open_to_5d_close"]},
+    "signal_date": {"type": "string", "format": "date"}, "theme_id": {"type": "string"}, "ticker": {"type": "string"}, "predicted_sign": {"enum": [-1, 1]},
+    "entry": {"type": "object"}, "exit": {"type": "object"}, "returns": {"type": "object"},
+    "label_event_time": {"type": "string", "format": "date-time"}, "label_observed_at": {"type": "string", "format": "date-time"},
+    "provider_source": {"type": "string"}, "source_run": {"type": "string"}, "source_snapshot_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "settled_at": {"type": "string", "format": "date-time"}, "settlement_run_id": {"type": "string"}, "settlement_version": {"const": "prospective-outcome-settlement-v1"},
+    "status": {"const": "SETTLED"}, "official_strategy_evidence": {"type": "boolean"},
+    "prospective_unvalidated": {"const": true}, "decision_eligible": {"const": false}, "counterfactual_only": {"const": true},
+    "paper_positions": {"const": 0}, "real_orders": {"const": 0}
+  }
+}

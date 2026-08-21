@@ -12,6 +12,7 @@ RUNTIME_CHILDREN = (
     "observations",
     "data_shadow",
     "model_shadow",
+    "prospective_candidate_shadow",
     "logs",
     "locks",
     "public_staging",
@@ -36,6 +37,7 @@ class RuntimePaths:
     observations: Path
     data_shadow: Path
     model_shadow: Path
+    prospective_candidate_shadow: Path
     logs: Path
     locks: Path
     public_staging: Path

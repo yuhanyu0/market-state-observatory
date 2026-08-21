@@ -54,6 +54,26 @@ test("private Operator Console pages remain factual and candidate-labeled", asyn
   await expect(page.getByText("UNAVAILABLE")).toBeVisible();
 });
 
+test("prospective candidate and outcome pages are reachable and non-promotional", async ({ page }) => {
+  await page.goto(operatorUrl);
+  const expectedHeadings = new Map([
+    ["Candidate Shadow", "Prospective Candidate Shadow"],
+    ["Pending Outcomes", "Pending Outcomes"],
+    ["Settled Outcomes", "Settled Outcomes"],
+    ["Accuracy", "Candidate Accuracy"],
+    ["Timing", "Timing Evidence"],
+    ["Model Graveyard", "Model Graveyard"],
+  ]);
+  for (const [pageName, heading] of expectedHeadings) {
+    const button = page.getByRole("button", { name: pageName, exact: true });
+    if (!(await button.isVisible())) await page.getByRole("button", { name: "More" }).click();
+    await button.click();
+    await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
+  }
+  await expect(page.getByText("MODEL SHADOW DISABLED").first()).toBeVisible();
+  await expect(page.getByText("BLOCKED").first()).toBeVisible();
+});
+
 test("private Operator Console has no serious accessibility violations", async ({ page }) => {
   await page.goto(operatorUrl);
   await expect(page.getByText("Latest completed evidence")).toBeVisible();

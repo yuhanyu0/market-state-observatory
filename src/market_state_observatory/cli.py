@@ -134,7 +134,11 @@ def build_parser() -> argparse.ArgumentParser:
     daily_report.add_argument("--output", type=Path, required=True)
     daily_report.add_argument(
         "--mode",
-        choices=[ExecutionMode.OBSERVATION_ONLY.value, ExecutionMode.CANDIDATE_REPLAY.value],
+        choices=[
+            ExecutionMode.OBSERVATION_ONLY.value,
+            ExecutionMode.CANDIDATE_REPLAY.value,
+            ExecutionMode.PROSPECTIVE_CANDIDATE_SHADOW.value,
+        ],
         default=ExecutionMode.OBSERVATION_ONLY.value,
     )
 

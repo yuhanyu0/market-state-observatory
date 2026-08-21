@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "market-state-observatory"
-version = "0.5.0rc2"
+version = "0.5.1rc1"
 description = "Auditable evidence-state infrastructure for point-in-time market research"
 readme = "README.md"
 requires-python = ">=3.11"

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/prospective_settlement_manifest.schema.json",
+  "title": "ProspectiveSettlementManifestV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "settlement_run_id", "settled_at_utc", "settlement_version", "appended_outcome_ids", "already_settled_outcome_ids", "pending", "signal_ledger_sha256", "outcome_ledger_sha256", "source_runs_mutated", "backfill_used", "prospective_unvalidated", "decision_eligible", "counterfactual_only", "paper_positions", "real_orders"],
+  "properties": {
+    "schema_version": {"const": "mso-prospective-settlement-manifest-v1"}, "settlement_run_id": {"type": "string"}, "settled_at_utc": {"type": "string", "format": "date-time"},
+    "settlement_version": {"const": "prospective-outcome-settlement-v1"}, "appended_outcome_ids": {"type": "array", "items": {"type": "string"}},
+    "already_settled_outcome_ids": {"type": "array", "items": {"type": "string"}}, "pending": {"type": "array", "items": {"type": "object"}},
+    "signal_ledger_sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}, "outcome_ledger_sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+    "source_runs_mutated": {"const": false}, "backfill_used": {"const": false},
+    "prospective_unvalidated": {"const": true}, "decision_eligible": {"const": false}, "counterfactual_only": {"const": true},
+    "paper_positions": {"const": 0}, "real_orders": {"const": 0}
+  }
+}

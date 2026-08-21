@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.1-rc1 - 2026-08-21
+
+- Added an irreversible model-disposition registry and the isolated `PROSPECTIVE_CANDIDATE_SHADOW` execution mode.
+- Added immutable preclose/postclose candidate signals, post-candidate SIP execution quotes, append-only outcome ledgers, and idempotent settlement.
+- Added Theme ETF ask-to-bid and bid-to-ask execution contracts, distinct-date 10/20/40/60 gates, and private candidate/outcome/accuracy UI pages.
+- Closed H2 model mining after the frozen 3d/5d final diagnostic found no robust after-cost cross-theme result.
+- Kept the selected v0.4.5 runtime, installed tasks, immutable runs, Formal/Model Shadow authorization, positions, and orders unchanged.
+
 ## 0.5.0-rc2 - 2026-08-20
 
 - Separated feature calculation existence, evidence quality, and model-input eligibility with fail-closed stale-source propagation.

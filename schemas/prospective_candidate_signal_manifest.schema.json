@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/prospective_candidate_signal_manifest.schema.json",
+  "title": "ProspectiveCandidateSignalManifestV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "candidate_id", "candidate_signal_sha256", "protocol_relative_path", "protocol_sha256", "model_disposition_sha256", "source_artifacts", "excluded_post_signal_sources", "immutable", "prospective_unvalidated", "decision_eligible", "counterfactual_only", "paper_positions", "real_orders"],
+  "properties": {
+    "schema_version": {"const": "mso-prospective-candidate-signal-manifest-v1"},
+    "candidate_id": {"type": "string"},
+    "candidate_signal_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "protocol_relative_path": {"type": "string"},
+    "protocol_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "model_disposition_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "source_artifacts": {"type": "array", "items": {"type": "object", "required": ["relative_path", "sha256"], "properties": {"relative_path": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}, "additionalProperties": false}},
+    "excluded_post_signal_sources": {"type": "array", "items": {"type": "string"}},
+    "immutable": {"const": true},
+    "prospective_unvalidated": {"const": true},
+    "decision_eligible": {"const": false},
+    "counterfactual_only": {"const": true},
+    "paper_positions": {"const": 0},
+    "real_orders": {"const": 0}
+  }
+}

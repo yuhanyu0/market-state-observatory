@@ -1,0 +1,22 @@
+{
+  "schema_version": "mso-h2-final-diagnostic-v1",
+  "version": "h2-final-diagnostic-v1",
+  "frozen_at_utc": "2026-08-21T20:30:00+00:00",
+  "evidence_lane": "H2_HISTORICAL_RECONSTRUCTED_DAILY",
+  "ranking_feature": "relative_momentum_5d",
+  "d1_role": "veto_only_not_standalone_signal",
+  "d1_positive_veto_threshold": 0.0,
+  "d1_negative_veto_threshold": 0.0,
+  "threshold_origin": "frozen_a_priori_not_full_sample_selected",
+  "portfolios": ["top1_bottom1", "top2_bottom2", "top_half_bottom_half"],
+  "horizons": ["next_open_to_3d_close", "next_open_to_5d_close"],
+  "cost_grid_bps": [0, 5, 10, 15, 25, 50],
+  "purge": 1,
+  "embargo": 1,
+  "random_date_split": false,
+  "current_constituent_lookback": false,
+  "H2_MODEL_MINING_CLOSED": true,
+  "decision_eligible": false,
+  "paper_positions": 0,
+  "real_orders": 0
+}

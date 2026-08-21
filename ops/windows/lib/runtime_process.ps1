@@ -236,8 +236,11 @@ function Assert-MsoRuntimeStartSafe {
 
 function Assert-MsoReleaseSelectionSafe {
     [CmdletBinding()]
-    param([Parameter(Mandatory = $true)][string]$RuntimeRoot)
-    foreach ($taskName in @('MSO-Daily-Rehearsal', 'MSO-Daily-Formal')) {
+    param(
+        [Parameter(Mandatory = $true)][string]$RuntimeRoot,
+        [AllowEmptyCollection()][string[]]$TaskNames = @('MSO-Daily-Rehearsal', 'MSO-Daily-Formal')
+    )
+    foreach ($taskName in $TaskNames) {
         $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
         if ($task -and [string]$task.State -ne 'Disabled') {
             throw "RELEASE_SELECTION_REJECTED: task is active task=$taskName state=$($task.State)."

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuhanyu0.github.io/market-state-observatory/schemas/model_disposition_v1.schema.json",
+  "title": "ModelDispositionRegistryV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "registry_version", "frozen_at_utc", "frozen_parent_commit", "historical_validation_commit", "research_outputs_embedded_in_production", "retired_models_may_reactivate_from_config", "models", "prospective_unvalidated", "decision_eligible", "counterfactual_only", "paper_positions", "real_orders"],
+  "properties": {
+    "schema_version": {"const": "mso-model-disposition-v1"},
+    "registry_version": {"const": "MODEL_DISPOSITION_V1"},
+    "frozen_at_utc": {"type": "string", "format": "date-time"},
+    "frozen_parent_commit": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+    "historical_validation_commit": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+    "historical_validation_report_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "historical_model_comparison_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "historical_file_manifest_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "research_outputs_embedded_in_production": {"const": false},
+    "retired_models_may_reactivate_from_config": {"const": false},
+    "models": {"type": "object", "additionalProperties": {"type": "object", "additionalProperties": false, "required": ["disposition", "production_activation_allowed"], "properties": {"disposition": {"type": "string"}, "production_activation_allowed": {"const": false}}}},
+    "prospective_unvalidated": {"const": true},
+    "decision_eligible": {"const": false},
+    "counterfactual_only": {"const": true},
+    "paper_positions": {"const": 0},
+    "real_orders": {"const": 0}
+  }
+}

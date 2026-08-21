@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["mode", "may_read_completed_runs", "may_run_candidates", "may_run_validated_models", "may_emit_actions", "paper_positions_allowed", "real_orders_allowed", "evidence_grade", "promotion_sha256"],
   "properties": {
-    "mode": {"enum": ["OBSERVATION_ONLY", "CANDIDATE_REPLAY", "MODEL_SHADOW"]},
+    "mode": {"enum": ["OBSERVATION_ONLY", "CANDIDATE_REPLAY", "PROSPECTIVE_CANDIDATE_SHADOW", "MODEL_SHADOW"]},
     "may_read_completed_runs": {"type": "boolean"},
     "may_run_candidates": {"type": "boolean"},
     "may_run_validated_models": {"type": "boolean"},

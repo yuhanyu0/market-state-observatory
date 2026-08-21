@@ -1,6 +1,6 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
-    [ValidateSet('OBSERVATION_ONLY', 'CANDIDATE_REPLAY')][string]$Mode = 'OBSERVATION_ONLY',
+    [ValidateSet('OBSERVATION_ONLY', 'CANDIDATE_REPLAY', 'PROSPECTIVE_CANDIDATE_SHADOW')][string]$Mode = 'OBSERVATION_ONLY',
     [string]$RunDirectory,
     [string]$OutputDirectory,
     [int]$ActiveRuntimeWaitSeconds = 120
@@ -59,6 +59,7 @@ $runRoot = $runFile.Directory.FullName
 $qualityPath = Join-Path $runRoot 'quality\DATA_QUALITY.json'
 if (-not (Test-Path -LiteralPath $qualityPath -PathType Leaf)) { throw 'DAILY_REPORT_BLOCKED: DATA_QUALITY.json is required.' }
 $run = Get-Content -LiteralPath $runFile.FullName -Raw | ConvertFrom-Json
+$qualityPayload = Get-Content -LiteralPath $qualityPath -Raw | ConvertFrom-Json
 $python = Join-Path $repository 'venv\Scripts\python.exe'
 if (-not (Test-Path -LiteralPath $python -PathType Leaf)) {
     $python = Join-Path $repository '.venv\Scripts\python.exe'
@@ -102,6 +103,31 @@ foreach ($name in @('APCA_API_KEY_ID', 'APCA_API_SECRET_KEY', 'ALPACA_DATA_FEED'
 try {
     & $python -I -m market_state_observatory.analysis.daily_report --run $runRoot --output $destination --mode $Mode
     if ($LASTEXITCODE -ne 0) { throw "DAILY_REPORT_FAILED: analysis process exited $LASTEXITCODE" }
+    if ($Mode -eq 'PROSPECTIVE_CANDIDATE_SHADOW') {
+        $candidateRoot = Join-Path $runtimeRoot 'prospective_candidate_shadow'
+        $ledgerRoot = Join-Path $candidateRoot "ledgers\$($run.experiment_lane)"
+        & $python -I -m market_state_observatory.analysis.prospective_candidate freeze `
+            --run $runRoot --analysis $destination --lane postclose `
+            --candidate-root $candidateRoot --ledger-root $ledgerRoot `
+            --history-run-root (Join-Path $runtimeRoot 'observations') `
+            --history-run-root (Join-Path $runtimeRoot 'data_shadow')
+        if ($LASTEXITCODE -ne 0) { throw "POSTCLOSE_CANDIDATE_FAILED: candidate process exited $LASTEXITCODE" }
+        $closePoint = @($qualityPayload.timeline | Where-Object { $_.name -eq 'session_close_diagnostic' }) | Select-Object -First 1
+        $stableSettlementTime = if ($closePoint -and $closePoint.evidence_at) {
+            ([DateTimeOffset]::Parse([string]$closePoint.evidence_at)).AddMinutes(15).ToUniversalTime().ToString('o')
+        } else {
+            ([DateTimeOffset]::Parse("$($run.trading_date)T16:15:00-04:00")).ToUniversalTime().ToString('o')
+        }
+        & $python -I -m market_state_observatory.analysis.prospective_settlement `
+            --candidate-root $candidateRoot `
+            --run-root (Join-Path $runtimeRoot 'observations') `
+            --run-root (Join-Path $runtimeRoot 'data_shadow') `
+            --ledger-root $ledgerRoot `
+            --settlement-root (Join-Path $candidateRoot 'settlements') `
+            --settlement-run-id "daily-report-$($run.run_id)" `
+            --settled-at-utc $stableSettlementTime
+        if ($LASTEXITCODE -ne 0) { throw "OUTCOME_SETTLEMENT_FAILED: settlement process exited $LASTEXITCODE" }
+    }
 }
 finally {
     foreach ($name in $savedCredentials.Keys) {

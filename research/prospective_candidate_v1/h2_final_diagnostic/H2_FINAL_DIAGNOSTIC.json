@@ -1,0 +1,61 @@
+{
+  "H2_MODEL_MINING_CLOSED": true,
+  "clear_robust_after_cost_cross_theme_result": false,
+  "d1_role": "veto_only_not_standalone_signal",
+  "decision_eligible": false,
+  "input_audit": {
+    "current_constituent_lookback": false,
+    "dates": 3654,
+    "raw_unadjusted": true,
+    "records": 18703,
+    "themes": 6
+  },
+  "interpretation": "No clear robust after-cost cross-theme result. H2 model mining is closed.",
+  "paper_positions": 0,
+  "primary_10bps_top1_bottom1": [
+    {
+      "H2_MODEL_MINING_CLOSED": true,
+      "bootstrap_ci_high": 0.00019919851616108375,
+      "bootstrap_ci_low": -0.0018787514413402785,
+      "cost_bps_per_active_leg": 10,
+      "dates": 3486,
+      "decision_eligible": false,
+      "evidence_lane": "H2_HISTORICAL_RECONSTRUCTED_DAILY",
+      "horizon": "next_open_to_3d_close",
+      "mean_cross_sectional_spearman": 0.003688222276862552,
+      "mean_negative_leg_return": -0.0002835855909342626,
+      "mean_net_long_short_spread": -0.0008601824380962652,
+      "mean_positive_leg_return": 0.0004483601235781012,
+      "median_net_long_short_spread": 0.0,
+      "negative_leg_coverage": 0.8370625358577166,
+      "paper_positions": 0,
+      "portfolio": "top1_bottom1",
+      "positive_leg_coverage": 0.1878944348823867,
+      "real_orders": 0
+    },
+    {
+      "H2_MODEL_MINING_CLOSED": true,
+      "bootstrap_ci_high": 3.633371672360909e-05,
+      "bootstrap_ci_low": -0.0027996209626451737,
+      "cost_bps_per_active_leg": 10,
+      "dates": 3486,
+      "decision_eligible": false,
+      "evidence_lane": "H2_HISTORICAL_RECONSTRUCTED_DAILY",
+      "horizon": "next_open_to_5d_close",
+      "mean_cross_sectional_spearman": 0.005309005915001555,
+      "mean_negative_leg_return": -0.0012045712252087722,
+      "mean_net_long_short_spread": -0.001347791074927963,
+      "mean_positive_leg_return": 0.0008817371210209133,
+      "median_net_long_short_spread": 0.0,
+      "negative_leg_coverage": 0.8370625358577166,
+      "paper_positions": 0,
+      "portfolio": "top1_bottom1",
+      "positive_leg_coverage": 0.1878944348823867,
+      "real_orders": 0
+    }
+  ],
+  "real_orders": 0,
+  "retrospective_unvalidated": true,
+  "schema_version": "mso-h2-final-diagnostic-report-v1",
+  "status": "COMPLETE"
+}

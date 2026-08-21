@@ -11,6 +11,7 @@ from typing import Any
 class ExecutionMode(StrEnum):
     OBSERVATION_ONLY = "OBSERVATION_ONLY"
     CANDIDATE_REPLAY = "CANDIDATE_REPLAY"
+    PROSPECTIVE_CANDIDATE_SHADOW = "PROSPECTIVE_CANDIDATE_SHADOW"
     MODEL_SHADOW = "MODEL_SHADOW"
     PAPER_LIVE = "PAPER_LIVE"
 
@@ -81,6 +82,17 @@ def authorize_mode(
             False,
             False,
             "retrospective_unvalidated",
+        )
+    if selected is ExecutionMode.PROSPECTIVE_CANDIDATE_SHADOW:
+        return ModeAuthorization(
+            selected,
+            True,
+            True,
+            False,
+            False,
+            False,
+            False,
+            "prospective_unvalidated",
         )
     if selected is ExecutionMode.MODEL_SHADOW:
         _, digest = _load_model_shadow_promotion(promotion_artifact)

@@ -1,6 +1,6 @@
 # Market State Observatory
 
-> Development candidate: `v0.5.0-rc2` Feature Semantics and Operator UX Hardening. The active capture runtime remains frozen at `v0.4.5`.
+> Development candidate: `v0.5.1-rc1` Prospective Candidate and Outcome Engine. The active capture runtime remains frozen at `v0.4.5`.
 
 **Auditable evidence-state infrastructure for incomplete market observers.**
 
@@ -55,6 +55,12 @@ It is infrastructure evidence, not strategy evidence.
 
 Formal Data Shadow has not started. Model Shadow has not started. Paper
 positions and real orders are both zero.
+
+The v0.5.1 candidate release can freeze counterfactual Theme ETF candidates
+before their outcomes and settle later SIP labels without changing source runs.
+It is not active, cannot emit broker order objects, and does not authorize Model
+Shadow. The optional 15:46 preclose task exists only as a reviewed `-WhatIf`
+preview until it is separately installed.
 
 ## Development
 

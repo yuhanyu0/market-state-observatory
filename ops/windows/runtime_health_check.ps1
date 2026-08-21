@@ -5,7 +5,8 @@ $ErrorActionPreference = 'Stop'
 $runtimeRoot = Join-Path $env:LOCALAPPDATA 'MarketStateObservatoryRuntime'
 $required = @(
     'secrets', 'raw', 'observations', 'data_shadow', 'model_shadow', 'logs', 'locks',
-    'public_staging', 'backups', 'label_ledger', 'alerts', 'releases', 'operator', 'promotion'
+    'public_staging', 'backups', 'label_ledger', 'alerts', 'releases', 'operator', 'promotion',
+    'prospective_candidate_shadow'
 )
 $missing = @($required | Where-Object { -not (Test-Path -LiteralPath (Join-Path $runtimeRoot $_) -PathType Container) })
 $configPath = Join-Path $runtimeRoot 'runtime_paths.json'

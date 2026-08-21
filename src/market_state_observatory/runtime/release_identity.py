@@ -106,6 +106,12 @@ def load_release_manifest(*, required: bool) -> dict[str, Any] | None:
         "candidate_config_sha256": root / "config" / "candidates",
         "experiment_protocol_sha256": root / "config" / "experiment_protocol_v1.json",
         "daily_report_launcher_sha256": root / "run_daily_report.ps1",
+        "prospective_candidate_protocol_sha256": root
+        / "config"
+        / "prospective_candidate_protocol_v1.json",
+        "model_disposition_sha256": root / "frozen" / "MODEL_DISPOSITION_V1.json",
+        "preclose_candidate_launcher_sha256": root
+        / "run_preclose_candidate_shadow.ps1",
     }
     checks.update({field: path for field, path in optional_checks.items() if field in payload})
     for field, path in checks.items():
@@ -217,6 +223,12 @@ def build_release_manifest(
         "candidate_config_sha256": release / "config" / "candidates",
         "experiment_protocol_sha256": release / "config" / "experiment_protocol_v1.json",
         "daily_report_launcher_sha256": release / "run_daily_report.ps1",
+        "prospective_candidate_protocol_sha256": release
+        / "config"
+        / "prospective_candidate_protocol_v1.json",
+        "model_disposition_sha256": release / "frozen" / "MODEL_DISPOSITION_V1.json",
+        "preclose_candidate_launcher_sha256": release
+        / "run_preclose_candidate_shadow.ps1",
     }
     for field, path in optional_release_evidence.items():
         if path.exists():
